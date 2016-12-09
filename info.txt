@@ -1,0 +1,46 @@
+
+Latest releases listed here: https://root.cern.ch/
+Using release 6.08/02 - 2016-12-02: https://root.cern.ch/content/release-60802
+
+#########################
+## Setting up ROOT / TMVA
+#########################
+
+Log into lxplus
+DON'T do cmsenv before installing ROOT
+mkdir /afs/cern.ch/work/a/abrinke1/public/ROOT/
+cd /afs/cern.ch/work/a/abrinke1/public/ROOT/
+git clone http://root.cern.ch/git/root.git
+cd root/
+git checkout -b v6-08-02 v6-08-02
+cd ..
+exec /bin/bash
+source /afs/cern.ch/sw/lcg/app/releases/ROOT-externals/ROOT-latest/x86_64-slc6-gcc49-opt/setup.sh
+cmake root
+make -j 6  (If that doesn't work, try "make" or "cmake --build".  This step takes a long time.)
+exit
+
+####################
+## Using ROOT / TMVA
+####################
+
+Info in /afs/cern.ch/work/a/abrinke1/public/ROOT/root/tmva/doc/README
+
+Log into lxplus
+exec /bin/bash
+source /afs/cern.ch/sw/lcg/app/releases/ROOT-externals/ROOT-latest/x86_64-slc6-gcc49-opt/setup.sh
+source /afs/cern.ch/work/a/abrinke1/public/ROOT/bin/thisroot.sh
+mkdir TMVA
+mkdir TMVA/EMTFPtAssign2017
+cp /afs/cern.ch/work/a/abrinke1/public/ROOT/root/tutorials/tmva/TMVARegression.C TMVA/EMTFPtAssign2017/
+cd TMVA/EMTFPtAssign2017/
+cp TMVARegression.C PtRegression_AWB_v0.C
+
+#######################
+## Creating gitHub repo
+#######################
+
+git init
+git add <various files>
+git commit -m "Initial code for 2017 pT LUT training"
+
