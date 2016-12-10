@@ -41,6 +41,10 @@ cp TMVARegression.C PtRegression_AWB_v0.C
 #######################
 
 git init
+git remote add abrinke1 git@github.com:abrinke1
 git add <various files>
 git commit -m "Initial code for 2017 pT LUT training"
-
+## Create repository "EMTFPtAssign2017" on gitHub.com
+git remote add origin git@github.com:abrinke1/EMTFPtAssign2017
+git pull origin master
+git push origin master
