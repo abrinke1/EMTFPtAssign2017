@@ -51,11 +51,14 @@
 // // Class with NTuple branch definitions
 // #include "interface/PtLutInputBranchesClass.hh"
 
+// const int MAX_EVT =   1000000;
+// const int REPORT_EVT =  10000;
 const int MAX_EVT =   10000;
 const int REPORT_EVT = 1000;
 
 const double PI = 3.14159265359;
-const double PT_SCALE = (1. / 1.25); // EMTF pT was scaled up by ~1.25 in 2016 (for 4-hit tracks, mode 15)
+const double PT_SCALE = 1.;
+// const double PT_SCALE = (1. / 1.25); // EMTF pT was scaled up by ~1.25 in 2016 (for 4-hit tracks, mode 15)
 const double BIT = 0.000001; // Tiny value or offset
 
 using namespace TMVA;
@@ -102,11 +105,19 @@ void PtRegression_AWB_v0( TString myMethodList = "" )
    Use["SVM"]             = 0;
    //
    // Boosted Decision Trees
-   Use["BDT"]                 = 0;
-   Use["BDTG_default"]        = 1;
-   Use["BDTG_Carnes_AbsDev"]  = 0;
-   Use["BDTG_Carnes_Huber"]   = 0;
-   Use["BDTG_Carnes_LeastSq"] = 0;
+   Use["BDT"]                     = 0;
+
+   Use["BDTG_default"]            = 1;
+   Use["BDTG_default_20k_trees"]  = 1;
+   Use["BDTG_default_5_deep"]     = 1;
+
+   Use["BDTG_LeastSq"]            = 1;
+   Use["BDTG_LeastSq_20k_trees"]  = 1;
+   Use["BDTG_LeastSq_5_deep"]     = 1;
+
+   Use["BDTG_Carnes_AbsDev"]  = 1;
+   Use["BDTG_Carnes_Huber"]   = 1;
+   Use["BDTG_Carnes_LeastSq"] = 1;
    // ---------------------------------------------------------------
 
    std::cout << std::endl;
@@ -135,7 +146,7 @@ void PtRegression_AWB_v0( TString myMethodList = "" )
    // Here the preparation phase begins
 
    // Create a new root output file
-   TString outfileName( "PtRegression_AWB_v0_16_12_09.root" );
+   TString outfileName( "PtRegression_AWB_v0_17_01_05_no_wgt_inv_pt_orig_deriv_vars_10k.root" );
    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
 
    // Create the factory object. Later you can choose the methods
@@ -200,20 +211,20 @@ void PtRegression_AWB_v0( TString myMethodList = "" )
    in_vars.push_back( MVA_var( "dPhi_12",   "#phi(2) - #phi(1)", "deg", 'F', -88 ) ); 
    in_vars.push_back( MVA_var( "dPhi_23",   "#phi(3) - #phi(2)", "deg", 'F', -88 ) ); 
    in_vars.push_back( MVA_var( "dPhi_34",   "#phi(4) - #phi(3)", "deg", 'F', -88 ) );
-   // in_vars.push_back( MVA_var( "dPhi_13",   "#phi(3) - #phi(1)", "deg", 'F', -88 ) );
-   // in_vars.push_back( MVA_var( "dPhi_14",   "#phi(4) - #phi(1)", "deg", 'F', -88 ) );
-   // in_vars.push_back( MVA_var( "dPhi_24",   "#phi(4) - #phi(2)", "deg", 'F', -88 ) );
+   in_vars.push_back( MVA_var( "dPhi_13",   "#phi(3) - #phi(1)", "deg", 'F', -88 ) );
+   in_vars.push_back( MVA_var( "dPhi_14",   "#phi(4) - #phi(1)", "deg", 'F', -88 ) );
+   in_vars.push_back( MVA_var( "dPhi_24",   "#phi(4) - #phi(2)", "deg", 'F', -88 ) );
 
    // in_vars.push_back( MVA_var( "bend_1",    "St 1 LCT bending",  "int", 'I', -88 ) );
    // in_vars.push_back( MVA_var( "bend_2",    "St 2 LCT bending",  "int", 'I', -88 ) );
    // in_vars.push_back( MVA_var( "bend_3",    "St 3 LCT bending",  "int", 'I', -88 ) );
    // in_vars.push_back( MVA_var( "bend_4",    "St 4 LCT bending",  "int", 'I', -88 ) );
 
-   // in_vars.push_back( MVA_var( "dPhiSum4",  "#Sigmad#phi (6)",   "deg", 'F', -88 ) );
-   // in_vars.push_back( MVA_var( "dPhiSum4A", "#Sigma|d#phi| (6)", "deg", 'F', -88 ) );
-   // in_vars.push_back( MVA_var( "dPhiSum3",  "#Sigmad#phi (3)",   "deg", 'F', -88 ) );
-   // in_vars.push_back( MVA_var( "dPhiSum3A", "#Sigma|d#phi| (3)", "deg", 'F', -88 ) );
-   // in_vars.push_back( MVA_var( "outSt",     "Outlier station",   "int", 'I', -88 ) );
+   in_vars.push_back( MVA_var( "dPhiSum4",  "#Sigmad#phi (6)",   "deg", 'F', -88 ) );
+   in_vars.push_back( MVA_var( "dPhiSum4A", "#Sigma|d#phi| (6)", "deg", 'F', -88 ) );
+   in_vars.push_back( MVA_var( "dPhiSum3",  "#Sigmad#phi (3)",   "deg", 'F', -88 ) );
+   in_vars.push_back( MVA_var( "dPhiSum3A", "#Sigma|d#phi| (3)", "deg", 'F', -88 ) );
+   in_vars.push_back( MVA_var( "outSt",     "Outlier station",   "int", 'I', -88 ) );
 
    ////////////////////////////////////////////////////////////
    //  Target variable: true muon pT, or 1/pT, or log2(pT)  ///
@@ -233,6 +244,8 @@ void PtRegression_AWB_v0( TString myMethodList = "" )
    spec_vars.push_back( MVA_var( "inv_EMTF_pt",  "1 / EMTF p_{T}",          "GeV^{-1}", 'F', -77 ) );
    spec_vars.push_back( MVA_var( "log2_GEN_pt",  "log_{2}(GEN muon p_{T})", "GeV",      'F', -77 ) );
    spec_vars.push_back( MVA_var( "log2_EMTF_pt", "log_{2}(EMTF p_{T})",     "GeV",      'F', -77 ) );
+   spec_vars.push_back( MVA_var( "GEN_eta",      "GEN #eta",                "",         'F', -77 ) );
+   spec_vars.push_back( MVA_var( "EMTF_eta",     "EMTF #eta",               "",         'F', -77 ) );
    for (UInt_t i = 0; i < targ_vars.size(); i++)
      for (UInt_t j = 0; j < spec_vars.size(); j++)
        if (spec_vars.at(j).name == targ_vars.at(i).name)
@@ -282,8 +295,8 @@ void PtRegression_AWB_v0( TString myMethodList = "" )
        Double_t mu_pt  = (muon_br->GetLeaf("pt"))->GetValue(iMu);
        Double_t mu_eta = (muon_br->GetLeaf("eta"))->GetValue(iMu);
        Double_t mu_phi = (muon_br->GetLeaf("phi"))->GetValue(iMu);
-       if ( fabs( mu_eta ) < 1.25 ) continue;
-       if ( fabs( mu_eta ) > 2.35 ) continue;
+       if ( fabs( mu_eta ) < 1.10 ) continue;
+       if ( fabs( mu_eta ) > 2.50 ) continue;
        // if ( mu_pt < 10 ) continue;
        // std::cout << "Muon " << iMu+1 << " has pt = " << mu_pt << ", eta = " << mu_eta << ", phi = " << mu_phi << std::endl;
        
@@ -425,9 +438,14 @@ void PtRegression_AWB_v0( TString myMethodList = "" )
 	     var_vals.at(iVar) = log2(mu_pt);
 	   if ( vName == "log2_EMTF_pt" )
 	     var_vals.at(iVar) = log2(trk_pt);
+	   if ( vName == "GEN_eta" )
+	     var_vals.at(iVar) = mu_eta;
+	   if ( vName == "EMTF_eta" )
+	     var_vals.at(iVar) = trk_eta;
 
 	 } // End loop: for (UInt_t iVar = 0; iVar < all_vars.size(); iVar++)
 
+	 // Unweighted distribution: flat in eta and 1/pT
 	 Double_t evt_weight = 1.0;
 	 // // Weight by 1/pT so overall distribution is (1/pT)^2
 	 // Double_t evt_weight = 1. / mu_pt;
@@ -577,25 +595,60 @@ void PtRegression_AWB_v0( TString myMethodList = "" )
 
    // Boosted Decision Trees
    if (Use["BDT"])
-     factory->BookMethod( dataloader,  TMVA::Types::kBDT, "BDT",
-                           "!H:!V:NTrees=100:MinNodeSize=1.0%:BoostType=AdaBoostR2:SeparationType=RegressionVariance:nCuts=20:PruneMethod=CostComplexity:PruneStrength=30" );
+     factory->BookMethod( dataloader,  TMVA::Types::kBDT, "BDT", (string)
+			  "!H:!V:NTrees=100:MinNodeSize=1.0%:BoostType=AdaBoostR2:SeparationType=RegressionVariance"+
+			  ":nCuts=20:PruneMethod=CostComplexity:PruneStrength=30" );
 
-     // Default TMVA settings ... error with MaxDepth? - AWB 07.12.16
+   // Default TMVA settings
    if (Use["BDTG_default"])
-     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_default",
- 			  "!H:!V:NTrees=2000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=3:MaxDepth=4" );
-   // A. Carnes option #1
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_default", (string)
+			  "!H:!V:NTrees=2000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:"+
+			  "BaggedSampleFraction=0.5:nCuts=20:MaxDepth=3" );
+   if (Use["BDTG_default_20k_trees"])
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_default_20k_trees", (string)
+ 			  "!H:!V:NTrees=20000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:"+
+			  "BaggedSampleFraction=0.5:nCuts=20:MaxDepth=3" );
+   if (Use["BDTG_default_5_deep"])
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_default_5_deep", (string)
+ 			  "!H:!V:NTrees=2000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:"+
+			  "BaggedSampleFraction=0.5:nCuts=20:MaxDepth=5" );
+
+   // Default TMVA settings with LeastSquares loss function
+   if (Use["BDTG_LeastSq"])
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_LeastSq", (string)
+			  "!H:!V:NTrees=2000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:"+
+			  "BaggedSampleFraction=0.5:nCuts=20:MaxDepth=3:"+
+			  "RegressionLossFunctionBDTG=LeastSquares");
+   if (Use["BDTG_LeastSq_20k_trees"])
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_LeastSq_20k_trees", (string)
+ 			  "!H:!V:NTrees=20000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:"+
+			  "BaggedSampleFraction=0.5:nCuts=20:MaxDepth=3:"+
+			  "RegressionLossFunctionBDTG=LeastSquares");
+   if (Use["BDTG_LeastSq_5_deep"])
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_LeastSq_5_deep", (string)
+ 			  "!H:!V:NTrees=2000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:"+
+			  "BaggedSampleFraction=0.5:nCuts=20:MaxDepth=5:"+
+			  "RegressionLossFunctionBDTG=LeastSquares");
+
+   // Factory settings from Andrew Carnes ... what do they do? - AWB 04.01.17
    if (Use["BDTG_Carnes_AbsDev"])
-     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_Carnes_AbsDev",
- 			  "!H:!V:NTrees=64::BoostType=Grad:Shrinkage=0.3:nCuts=99999:MaxDepth=4:MinNodeSize=0.001:NegWeightTreatment=IgnoreNegWeightsInTraining:PruneMethod=NoPruning:RegressionLossFunctionBDTG=AbsoluteDeviation" );
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_Carnes_AbsDev", (string)
+ 			  "!H:!V:NTrees=64::BoostType=Grad:Shrinkage=0.3:nCuts=99999:MaxDepth=4:MinNodeSize=0.001:"+
+			  "NegWeightTreatment=IgnoreNegWeightsInTraining:PruneMethod=NoPruning:"+
+			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
 
    if (Use["BDTG_Carnes_Huber"])
-     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_Carnes_Huber",
- 			  "!H:!V:NTrees=64::BoostType=Grad:Shrinkage=0.3:nCuts=99999:MaxDepth=4:MinNodeSize=0.001:NegWeightTreatment=IgnoreNegWeightsInTraining:PruneMethod=NoPruning:RegressionLossFunctionBDTG=Huber" );
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_Carnes_Huber", (string)
+ 			  "!H:!V:NTrees=64::BoostType=Grad:Shrinkage=0.3:nCuts=99999:MaxDepth=4:MinNodeSize=0.001:"+
+			  "NegWeightTreatment=IgnoreNegWeightsInTraining:PruneMethod=NoPruning:"+
+			  "RegressionLossFunctionBDTG=Huber" );
 
    if (Use["BDTG_Carnes_LeastSq"])
-     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_Carnes_LeastSq",
- 			  "!H:!V:NTrees=64::BoostType=Grad:Shrinkage=0.3:nCuts=99999:MaxDepth=4:MinNodeSize=0.001:NegWeightTreatment=IgnoreNegWeightsInTraining:PruneMethod=NoPruning:RegressionLossFunctionBDTG=LeastSquares" );
+     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG_Carnes_LeastSq", (string)
+ 			  "!H:!V:NTrees=64::BoostType=Grad:Shrinkage=0.3:nCuts=99999:MaxDepth=4:MinNodeSize=0.001:"+
+			  "NegWeightTreatment=IgnoreNegWeightsInTraining:PruneMethod=NoPruning:"+
+			  "RegressionLossFunctionBDTG=LeastSquares" );
+
 
    // --------------------------------------------------------------------------------------------------
 
