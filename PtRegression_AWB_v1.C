@@ -32,15 +32,23 @@
 // // Class with NTuple branch definitions
 // #include "interface/PtLutInputBranchesClass.hh"
 
-const int MAX_EVT =    200000;
+const int MAX_EVT =   1000000;
 const int REPORT_EVT =  10000;
-// const int MAX_EVT =   10000;
-// const int REPORT_EVT = 1000;
+// const int MAX_EVT =   100000;
+// const int REPORT_EVT = 10000;
 
 const double PI = 3.14159265359;
 const double PT_SCALE = 1.;
 // const double PT_SCALE = (1. / 1.25); // EMTF pT was scaled up by ~1.25 in 2016 (for 4-hit tracks, mode 15)
 const double BIT = 0.000001; // Tiny value or offset
+
+const double PTMIN  =    1.; // Minimum GEN pT
+const double PTMAX  = 1000.; // Maximum GEN pT
+const double ETAMIN =   1.0; // Minimum GEN |eta|
+const double ETAMAX =   2.5; // Maximum GEN |eta|
+
+const std::vector<int> MODES = {15};
+
 
 using namespace TMVA;
 
@@ -79,7 +87,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    Use["BDTG_default"]            = 0;
 
    Use["BDTG_AWB"]                = 1;
-   Use["BDTG_AWB_lite"]           = 1;
+   Use["BDTG_AWB_lite"]           = 0;
 
    Use["BDTG_AWB_64_trees"]       = 0;
    Use["BDTG_AWB_250_trees"]      = 0;
@@ -122,8 +130,11 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    // Here the preparation phase begins
 
    // Create a new root output file
-   TString outfileName( "PtRegression_AWB_v1_17_01_23.root" );
-   TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
+   TString out_dir = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017";
+   // out_dir = ".";
+   TString out_file_name;
+   out_file_name.Form( "%s/PtRegression_AWB_v1_17_01_24_bends.root", out_dir.Data() );
+   TFile* out_file = TFile::Open( out_file_name, "RECREATE" );
 
    // Read training and test data (see TMVAClassification for reading ASCII files)
    // load the signal and background event samples from ROOT trees
@@ -131,11 +142,11 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    TString store = "root://eoscms.cern.ch//store/user/abrinke1/EMTF/Emulator/ntuples";
    TString in_dir = "SingleMu_Pt1To1000_FlatRandomOneOverPt/EMTF_MuGun/170113_165434/0000";
    std::vector<TString> in_file_names;
-   TString file_name;
+   TString in_file_name;
    for (int i = 1; i < 99; i++) {
-     file_name.Form("%s/%s/EMTF_MC_NTuple_SingleMu_noRPC_%d.root", store.Data(), in_dir.Data(), i);
-     std::cout << "Adding file " << file_name.Data() << std::endl;
-     in_file_names.push_back(file_name.Data());
+     in_file_name.Form("%s/%s/EMTF_MC_NTuple_SingleMu_noRPC_%d.root", store.Data(), in_dir.Data(), i);
+     std::cout << "Adding file " << in_file_name.Data() << std::endl;
+     in_file_names.push_back(in_file_name.Data());
      if (i*100000 > MAX_EVT) break; // ~100k events per file
    }
 
@@ -165,7 +176,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    TString fact_set = "!V:!Silent:Color:DrawProgressBar:AnalysisType=Regression";
    std::vector<TString> var_names; // Holds names of variables for a given factory and permutation
    std::vector<Double_t> var_vals; // Holds values of variables for a given factory and permutation
-   TMVA::Factory* nullF = new TMVA::Factory("NULL", outputFile, fact_set); // Placeholder factory
+   TMVA::Factory* nullF = new TMVA::Factory("NULL", out_file, fact_set); // Placeholder factory
    TMVA::DataLoader* nullL = new TMVA::DataLoader("NULL");                 // Placeholder loader
 
    // Tuple is defined by the factory and dataloader,  followed by a name, 
@@ -174,39 +185,90 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    // 0xf the 1st 4, 0xff the 1st 8, 0xa the 2nd and 4th, 0xf1 the 1st and 5th-8th, etc.
    std::vector< std::tuple<TMVA::Factory*, TMVA::DataLoader*, TString, std::vector<TString>, std::vector<Double_t>, int, int> > factories;
 
-   // Original set of training variables
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x2", 
-   					 var_names, var_vals, 0x0000011d, 0x2) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x4", 
-   					 var_names, var_vals, 0x0000011d, 0x4) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x2_invPt", 
-   					 var_names, var_vals, 0x0000011d, 0x2) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x4_invPt", 
-   					 var_names, var_vals, 0x0000011d, 0x4) );
+   // // Original set of training variables
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x2", 
+   // 					 var_names, var_vals, 0x0000011d, 0x2) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x4", 
+   // 					 var_names, var_vals, 0x0000011d, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x2_invPt", 
+   // 					 var_names, var_vals, 0x0000011d, 0x2) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x4_invPt", 
+   // 					 var_names, var_vals, 0x0000011d, 0x4) );
    
-   // Original set of training variables + combinations
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01fd_0x2", 
-   					 var_names, var_vals, 0x001f01fd, 0x2) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01fd_0x4", 
-   					 var_names, var_vals, 0x001f01fd, 0x4) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01fd_0x2_invPt", 
-   					 var_names, var_vals, 0x001f01fd, 0x2) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01fd_0x4_invPt", 
-   					 var_names, var_vals, 0x001f01fd, 0x4) );
+   // // Original set of training variables + combinations
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01fd_0x2", 
+   // 					 var_names, var_vals, 0x001f01fd, 0x2) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01fd_0x4", 
+   // 					 var_names, var_vals, 0x001f01fd, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01fd_0x2_invPt", 
+   // 					 var_names, var_vals, 0x001f01fd, 0x2) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01fd_0x4_invPt", 
+   // 					 var_names, var_vals, 0x001f01fd, 0x4) );
 
-   // Original set of training variables + combinations + St 1 ring, FR bits, bending
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x2", 
-   					 var_names, var_vals, 0x001fffff, 0x2) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x4", 
-   					 var_names, var_vals, 0x001fffff, 0x4) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x2_invPt", 
-   					 var_names, var_vals, 0x001fffff, 0x2) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x4_invPt", 
-   					 var_names, var_vals, 0x001fffff, 0x4) );
+   // // Original set of training variables + combinations + St 1 ring, FR bits, bending
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x2", 
+   // 					 var_names, var_vals, 0x001fffff, 0x2) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x4", 
+   // 					 var_names, var_vals, 0x001fffff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x2_invPt", 
+   // 					 var_names, var_vals, 0x001fffff, 0x2) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x4_invPt", 
+   // 					 var_names, var_vals, 0x001fffff, 0x4) );
+
+   // // Various sets of variables
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x00000004_0x4_invPt",  // dPhi12
+   // 					 var_names, var_vals, 0x00000004, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x00000005_0x4_invPt",  // dPhi12, theta
+   // 					 var_names, var_vals, 0x00000005, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000000d_0x4_invPt",  // dPhi12, 23, theta 
+   // 					 var_names, var_vals, 0x0000000d, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x00000085_0x4_invPt",  // dPhi12, 24, theta
+   // 					 var_names, var_vals, 0x00000085, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000001d_0x4_invPt",  // dPhi12, 23, 34, theta 
+   // 					 var_names, var_vals, 0x0000001d, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f00fd_0x4_invPt",  // dPhi12, 23, 34, theta, combs
+   // 					 var_names, var_vals, 0x001f00fd, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f0ffd_0x4_invPt",  // dPhi12, 23, 34, theta, combs, FRs
+   // 					 var_names, var_vals, 0x001f0ffd, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f0fff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, FRs, St1 ring
+   // 					 var_names, var_vals, 0x001f0fff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001fffff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, FRs, St1 ring, bends
+   // 					 var_names, var_vals, 0x001fffff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x8fff0fff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, FRs, St1 ring, dThetas
+   // 					 var_names, var_vals, 0x8fff0fff, 0x4) );
+
+   // // FRs
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f00ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring
+   // 					 var_names, var_vals, 0x001f00ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1
+   // 					 var_names, var_vals, 0x001f01ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f03ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1/2
+   // 					 var_names, var_vals, 0x001f03ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f05ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1/3
+   // 					 var_names, var_vals, 0x001f05ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f09ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1/4
+   // 					 var_names, var_vals, 0x001f09ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f0fff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, all FRs
+   // 					 var_names, var_vals, 0x001f0fff, 0x4) );
+
+   // Bends
+   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1
+   					 var_names, var_vals, 0x001f01ff, 0x4) );
+   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f11ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1
+   					 var_names, var_vals, 0x001f11ff, 0x4) );
+   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f31ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/2
+   					 var_names, var_vals, 0x001f31ff, 0x4) );
+   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f51ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/3
+   					 var_names, var_vals, 0x001f51ff, 0x4) );
+   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f91ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/3
+   					 var_names, var_vals, 0x001f91ff, 0x4) );
+   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001ff1ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, all bends
+   					 var_names, var_vals, 0x001ff1ff, 0x4) );
+
 
    // Initialize factories and dataloaders
    for (UInt_t iFact = 0; iFact < factories.size(); iFact++) {
-     std::get<0>(factories.at(iFact)) = new TMVA::Factory( std::get<2>(factories.at(iFact)), outputFile, fact_set );
+     std::get<0>(factories.at(iFact)) = new TMVA::Factory( std::get<2>(factories.at(iFact)), out_file, fact_set );
      std::get<1>(factories.at(iFact)) = new TMVA::DataLoader( std::get<2>(factories.at(iFact)) );
    }
 
@@ -221,41 +283,45 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    ///  Input variables: used in BDT to estimate the pT  ///
    /////////////////////////////////////////////////////////
    
-   in_vars.push_back( MVA_var( "theta",     "Track #theta",      "deg", 'F', -88 ) ); // 0x0000 0001  * 2016 variable
-   in_vars.push_back( MVA_var( "St1_ring",  "St 1 LCT ring",     "int", 'I', -88 ) ); // 0x0000 0002  
-   in_vars.push_back( MVA_var( "dPhi_12",   "#phi(2) - #phi(1)", "deg", 'F', -88 ) ); // 0x0000 0004  * 2016 variable
-   in_vars.push_back( MVA_var( "dPhi_23",   "#phi(3) - #phi(2)", "deg", 'F', -88 ) ); // 0x0000 0008  * 2016 variable
+   in_vars.push_back( MVA_var( "theta",     "Track #theta",        "int", 'I', -88 ) ); // 0x0000 0001  * 2016 variable
+   in_vars.push_back( MVA_var( "St1_ring",  "St 1 LCT ring",       "int", 'I', -88 ) ); // 0x0000 0002  
+   in_vars.push_back( MVA_var( "dPhi_12",   "#phi(2) - #phi(1)",   "int", 'I', -88 ) ); // 0x0000 0004  * 2016 variable
+   in_vars.push_back( MVA_var( "dPhi_23",   "#phi(3) - #phi(2)",   "int", 'I', -88 ) ); // 0x0000 0008  * 2016 variable
 
-   in_vars.push_back( MVA_var( "dPhi_34",   "#phi(4) - #phi(3)", "deg", 'F', -88 ) ); // 0x0000 0010  * 2016 variable
-   in_vars.push_back( MVA_var( "dPhi_13",   "#phi(3) - #phi(1)", "deg", 'F', -88 ) ); // 0x0000 0020  * Derivable from 2016 var
-   in_vars.push_back( MVA_var( "dPhi_14",   "#phi(4) - #phi(1)", "deg", 'F', -88 ) ); // 0x0000 0040  * Derivable from 2016 var
-   in_vars.push_back( MVA_var( "dPhi_24",   "#phi(4) - #phi(2)", "deg", 'F', -88 ) ); // 0x0000 0080  * Derivable from 2016 var
+   in_vars.push_back( MVA_var( "dPhi_34",   "#phi(4) - #phi(3)",   "int", 'I', -88 ) ); // 0x0000 0010  * 2016 variable
+   in_vars.push_back( MVA_var( "dPhi_13",   "#phi(3) - #phi(1)",   "int", 'I', -88 ) ); // 0x0000 0020  * Derivable from 2016 var
+   in_vars.push_back( MVA_var( "dPhi_14",   "#phi(4) - #phi(1)",   "int", 'I', -88 ) ); // 0x0000 0040  * Derivable from 2016 var
+   in_vars.push_back( MVA_var( "dPhi_24",   "#phi(4) - #phi(2)",   "int", 'I', -88 ) ); // 0x0000 0080  * Derivable from 2016 var
 
-   in_vars.push_back( MVA_var( "FR_1",      "St 1 LCT F/R",      "int", 'I', -88 ) ); // 0x0000 0100  * 2016 variable
-   in_vars.push_back( MVA_var( "FR_2",      "St 2 LCT F/R",      "int", 'I', -88 ) ); // 0x0000 0200
-   in_vars.push_back( MVA_var( "FR_3",      "St 3 LCT F/R",      "int", 'I', -88 ) ); // 0x0000 0400
-   in_vars.push_back( MVA_var( "FR_4",      "St 4 LCT F/R",      "int", 'I', -88 ) ); // 0x0000 0800
+   in_vars.push_back( MVA_var( "FR_1",      "St 1 LCT F/R",        "int", 'I', -88 ) ); // 0x0000 0100  * 2016 variable
+   in_vars.push_back( MVA_var( "FR_2",      "St 2 LCT F/R",        "int", 'I', -88 ) ); // 0x0000 0200
+   in_vars.push_back( MVA_var( "FR_3",      "St 3 LCT F/R",        "int", 'I', -88 ) ); // 0x0000 0400
+   in_vars.push_back( MVA_var( "FR_4",      "St 4 LCT F/R",        "int", 'I', -88 ) ); // 0x0000 0800
 
-   in_vars.push_back( MVA_var( "bend_1",    "St 1 LCT bending",  "int", 'I', -88 ) ); // 0x0000 1000
-   in_vars.push_back( MVA_var( "bend_2",    "St 2 LCT bending",  "int", 'I', -88 ) ); // 0x0000 2000
-   in_vars.push_back( MVA_var( "bend_3",    "St 3 LCT bending",  "int", 'I', -88 ) ); // 0x0000 4000
-   in_vars.push_back( MVA_var( "bend_4",    "St 4 LCT bending",  "int", 'I', -88 ) ); // 0x0000 8000
+   in_vars.push_back( MVA_var( "bend_1",    "St 1 LCT bending",    "int", 'I', -88 ) ); // 0x0000 1000
+   in_vars.push_back( MVA_var( "bend_2",    "St 2 LCT bending",    "int", 'I', -88 ) ); // 0x0000 2000
+   in_vars.push_back( MVA_var( "bend_3",    "St 3 LCT bending",    "int", 'I', -88 ) ); // 0x0000 4000
+   in_vars.push_back( MVA_var( "bend_4",    "St 4 LCT bending",    "int", 'I', -88 ) ); // 0x0000 8000
 
-   in_vars.push_back( MVA_var( "dPhiSum4",  "#Sigmad#phi (6)",   "deg", 'F', -88 ) ); // 0x0001 0000  * Derivable from 2016 var
-   in_vars.push_back( MVA_var( "dPhiSum4A", "#Sigma|d#phi| (6)", "deg", 'F', -88 ) ); // 0x0002 0000  * Derivable from 2016 var
-   in_vars.push_back( MVA_var( "dPhiSum3",  "#Sigmad#phi (3)",   "deg", 'F', -88 ) ); // 0x0004 0000  * Derivable from 2016 var
-   in_vars.push_back( MVA_var( "dPhiSum3A", "#Sigma|d#phi| (3)", "deg", 'F', -88 ) ); // 0x0008 0000  * Derivable from 2016 var
+   in_vars.push_back( MVA_var( "dPhiSum4",  "#Sigmad#phi (6)",     "int", 'I', -88 ) ); // 0x0001 0000  * Derivable from 2016 var
+   in_vars.push_back( MVA_var( "dPhiSum4A", "#Sigma|d#phi| (6)",   "int", 'I', -88 ) ); // 0x0002 0000  * Derivable from 2016 var
+   in_vars.push_back( MVA_var( "dPhiSum3",  "#Sigmad#phi (3)",     "int", 'I', -88 ) ); // 0x0004 0000  * Derivable from 2016 var
+   in_vars.push_back( MVA_var( "dPhiSum3A", "#Sigma|d#phi| (3)",   "int", 'I', -88 ) ); // 0x0008 0000  * Derivable from 2016 var
    
-   in_vars.push_back( MVA_var( "outStPhi",  "#phi outlier St",   "int", 'I', -88 ) ); // 0x0010 0000  * Derivable from 2016 var
-   // // Not yet computed - AWB 23.01.17
-   // in_vars.push_back( MVA_var( "outStTh",   "#theta outlier St", "int", 'I', -88 ) ); // 0x0020 0000
-   // in_vars.push_back( MVA_var( "dThMax4",   "Max d#theta (6)",   "deg", 'F', -88 ) ); // 0x0040 0000
-   // in_vars.push_back( MVA_var( "dThMax3",   "Max d#theta (3)",   "deg", 'F', -88 ) ); // 0x0080 0000
+   in_vars.push_back( MVA_var( "outStPhi",  "#phi outlier St",     "int", 'I', -88 ) ); // 0x0010 0000  * Derivable from 2016 var
+   in_vars.push_back( MVA_var( "outStTh",   "#theta outlier St",   "int", 'I', -88 ) ); // 0x0020 0000
+   in_vars.push_back( MVA_var( "dThMax4",   "Max d#theta (6)",     "int", 'I', -88 ) ); // 0x0040 0000
+   in_vars.push_back( MVA_var( "dThMax3",   "Max d#theta (3)",     "int", 'I', -88 ) ); // 0x0080 0000
 
-   // in_vars.push_back( MVA_var( "dThSum4",   "#Sigmad#phi (6)",   "deg", 'F', -88 ) ); // 0x0100 0000
-   // in_vars.push_back( MVA_var( "dThSum4A",  "#Sigma|d#phi| (6)", "deg", 'F', -88 ) ); // 0x0200 0000
-   // in_vars.push_back( MVA_var( "dThSum3",   "#Sigmad#phi (3)",   "deg", 'F', -88 ) ); // 0x0400 0000
-   // in_vars.push_back( MVA_var( "dThSum3A",  "#Sigma|d#phi| (3)", "deg", 'F', -88 ) ); // 0x0800 0000
+   in_vars.push_back( MVA_var( "dThSum4",   "#Sigmad#theta (6)",   "int", 'I', -88 ) ); // 0x0100 0000
+   in_vars.push_back( MVA_var( "dThSum4A",  "#Sigma|d#theta| (6)", "int", 'I', -88 ) ); // 0x0200 0000
+   in_vars.push_back( MVA_var( "dThSum3",   "#Sigmad#theta (3)",   "int", 'I', -88 ) ); // 0x0400 0000
+   in_vars.push_back( MVA_var( "dThSum3A",  "#Sigma|d#theta| (3)", "int", 'I', -88 ) ); // 0x0800 0000
+
+   in_vars.push_back( MVA_var( "dTh_12",  "#theta(2) - #theta(1)", "int", 'I', -88 ) ); // 0x1000 0000
+   in_vars.push_back( MVA_var( "dTh_23",  "#theta(3) - #theta(2)", "int", 'I', -88 ) ); // 0x2000 0000
+   in_vars.push_back( MVA_var( "dTh_34",  "#theta(4) - #theta(3)", "int", 'I', -88 ) ); // 0x3000 0000
+
 
    ////////////////////////////////////////////////////////////
    //  Target variable: true muon pT, or 1/pT, or log2(pT)  ///
@@ -357,50 +423,57 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 	 Double_t mu_eta = (muon_br->GetLeaf("eta"))->GetValue(iMu);
 	 Double_t mu_phi = (muon_br->GetLeaf("phi"))->GetValue(iMu);
 	 Int_t mu_charge = (muon_br->GetLeaf("charge"))->GetValue(iMu);
-	 if ( fabs( mu_eta ) < 1.10 ) continue;
-	 if ( fabs( mu_eta ) > 2.50 ) continue;
-	 // if ( mu_pt < 10 ) continue;
+	 if ( mu_pt < PTMIN ) continue;
+	 if ( mu_pt > PTMAX ) continue;
+	 if ( fabs( mu_eta ) < ETAMIN ) continue;
+	 if ( fabs( mu_eta ) > ETAMAX ) continue;
 	 // std::cout << "Muon " << iMu+1 << " has pt = " << mu_pt << ", eta = " << mu_eta << ", phi = " << mu_phi << std::endl;
 	 
 	 for (UInt_t iTrk = 0; iTrk < nTracks; iTrk++) {
 	   Double_t trk_pt    = (track_br->GetLeaf("pt"))->GetValue(iTrk);
 	   Double_t trk_eta   = (track_br->GetLeaf("eta"))->GetValue(iTrk);
 	   trk_pt *= PT_SCALE;
-	   Double_t trk_theta = (track_br->GetLeaf("theta"))->GetValue(iTrk);
+	   Int_t trk_theta    = (track_br->GetLeaf("theta_int"))->GetValue(iTrk);
 	   Double_t trk_phi   = (track_br->GetLeaf("phi"))->GetValue(iTrk);
 	   Int_t trk_charge   = (track_br->GetLeaf("charge"))->GetValue(iTrk);
 	   Int_t trk_mode     = (track_br->GetLeaf("mode"))->GetValue(iTrk);
-	   if ( trk_mode != 15 ) continue;
+
 	   if ( ( mu_eta > 0 ) != ( trk_eta > 0 ) ) continue;
+	   Bool_t goodMode = false;
+	   for (UInt_t iMode = 0; iMode < MODES.size(); iMode++)
+	     if (trk_mode == MODES.at(iMode))
+	       goodMode = true;
+	   if (not goodMode) continue;
 	   // std::cout << "  * Track " << iTrk+1 << " has pt = " << trk_pt << ", eta = " << trk_eta 
 	   // 	   << ", phi = " << mu_phi << ", mode = " << trk_mode << std::endl;
 	   
 	   Int_t st1_ring = ((int) (track_br->GetLeaf("hit_ring"))->GetValue(4*iTrk + 0)) % 3; // Ring 4 --> Ring 1 (ME1/1a)
 
-	   Double_t phi1 = (track_br->GetLeaf("hit_phi"))->GetValue(4*iTrk + 0);
-	   Double_t phi2 = (track_br->GetLeaf("hit_phi"))->GetValue(4*iTrk + 1);
-	   Double_t phi3 = (track_br->GetLeaf("hit_phi"))->GetValue(4*iTrk + 2);
-	   Double_t phi4 = (track_br->GetLeaf("hit_phi"))->GetValue(4*iTrk + 3);
+	   Int_t phi1 = (track_br->GetLeaf("hit_phi_int"))->GetValue(4*iTrk + 0);
+	   Int_t phi2 = (track_br->GetLeaf("hit_phi_int"))->GetValue(4*iTrk + 1);
+	   Int_t phi3 = (track_br->GetLeaf("hit_phi_int"))->GetValue(4*iTrk + 2);
+	   Int_t phi4 = (track_br->GetLeaf("hit_phi_int"))->GetValue(4*iTrk + 3);
 	   // std::cout << "  * Hits have phi = " << phi1 << ", " << phi2 << ", " << phi3 << ", " << phi4 << std::endl;
 	   
-	   Double_t dPhi12 = acos( cos( (phi2 - phi1)*(PI/180.) ) );
-	   dPhi12 *= ( sin( (phi2 - phi1)*(PI/180.) ) / max( BIT, abs( sin( (phi2 - phi1)*(PI/180.) ) ) ) );
-	   dPhi12 *= (180./PI);
-	   Double_t dPhi13 = acos( cos( (phi3 - phi1)*(PI/180.) ) );
-	   dPhi13 *= ( sin( (phi3 - phi1)*(PI/180.) ) / max( BIT, abs( sin( (phi3 - phi1)*(PI/180.) ) ) ) );
-	   dPhi13 *= (180./PI);
-	   Double_t dPhi14 = acos( cos( (phi4 - phi1)*(PI/180.) ) );
-	   dPhi14 *= ( sin( (phi4 - phi1)*(PI/180.) ) / max( BIT, abs( sin( (phi4 - phi1)*(PI/180.) ) ) ) );
-	   dPhi14 *= (180./PI);
-	   Double_t dPhi23 = acos( cos( (phi3 - phi2)*(PI/180.) ) );
-	   dPhi23 *= ( sin( (phi3 - phi2)*(PI/180.) ) / max( BIT, abs( sin( (phi3 - phi2)*(PI/180.) ) ) ) );
-	   dPhi23 *= (180./PI);
-	   Double_t dPhi24 = acos( cos( (phi4 - phi2)*(PI/180.) ) );
-	   dPhi24 *= ( sin( (phi4 - phi2)*(PI/180.) ) / max( BIT, abs( sin( (phi4 - phi2)*(PI/180.) ) ) ) );
-	   dPhi24 *= (180./PI);
-	   Double_t dPhi34 = acos( cos( (phi4 - phi3)*(PI/180.) ) );
-	   dPhi34 *= ( sin( (phi4 - phi3)*(PI/180.) ) / max( BIT, abs( sin( (phi4 - phi3)*(PI/180.) ) ) ) );
-	   dPhi34 *= (180./PI);
+	   Int_t th1 = (track_br->GetLeaf("hit_theta_int"))->GetValue(4*iTrk + 0);
+	   Int_t th2 = (track_br->GetLeaf("hit_theta_int"))->GetValue(4*iTrk + 1);
+	   Int_t th3 = (track_br->GetLeaf("hit_theta_int"))->GetValue(4*iTrk + 2);
+	   Int_t th4 = (track_br->GetLeaf("hit_theta_int"))->GetValue(4*iTrk + 3);
+	   // std::cout << "  * Hits have theta = " << th1 << ", " << th2 << ", " << th3 << ", " << th4 << std::endl;
+	   
+	   Int_t dPhi12 = phi2 - phi1;
+	   Int_t dPhi13 = phi3 - phi1;
+	   Int_t dPhi14 = phi4 - phi1;
+	   Int_t dPhi23 = phi3 - phi2;
+	   Int_t dPhi24 = phi4 - phi2;
+	   Int_t dPhi34 = phi4 - phi3;
+
+	   Int_t dTh12 = th2 - th1;
+	   Int_t dTh13 = th3 - th1;
+	   Int_t dTh14 = th4 - th1;
+	   Int_t dTh23 = th3 - th2;
+	   Int_t dTh24 = th4 - th2;
+	   Int_t dTh34 = th4 - th3;
 	   
 	   // Define all dPhi values relative to dPhi12
 	   Int_t dPhi12_sign = ( (dPhi12 < 0) ? -1. : 1. );
@@ -409,36 +482,72 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 	   dPhi23 *= dPhi12_sign;
 	   dPhi24 *= dPhi12_sign;
 	   dPhi34 *= dPhi12_sign;
-	   dPhi12  = fabs(dPhi12);
+	   dPhi12  = abs(dPhi12);
 	   
-	   Double_t dPhi_sum_4  = dPhi12 + dPhi13 + dPhi14 + dPhi23 + dPhi24 + dPhi34;
-	   Double_t dPhi_sum_4A = fabs(dPhi12) + fabs(dPhi13) + fabs(dPhi14) + fabs(dPhi23) + fabs(dPhi24) + fabs(dPhi34);
-	   Double_t dev_st1 = fabs(dPhi12) + fabs(dPhi13) + fabs(dPhi14);
-	   Double_t dev_st2 = fabs(dPhi12) + fabs(dPhi23) + fabs(dPhi24);
-	   Double_t dev_st3 = fabs(dPhi13) + fabs(dPhi23) + fabs(dPhi34);
-	   Double_t dev_st4 = fabs(dPhi14) + fabs(dPhi24) + fabs(dPhi34);
+	   Int_t dPhi_sum_4  = dPhi12 + dPhi13 + dPhi14 + dPhi23 + dPhi24 + dPhi34;
+	   Int_t dPhi_sum_4A = abs(dPhi12) + abs(dPhi13) + abs(dPhi14) + abs(dPhi23) + abs(dPhi24) + abs(dPhi34);
+	   Int_t pDev_st1 = abs(dPhi12) + abs(dPhi13) + abs(dPhi14);
+	   Int_t pDev_st2 = abs(dPhi12) + abs(dPhi23) + abs(dPhi24);
+	   Int_t pDev_st3 = abs(dPhi13) + abs(dPhi23) + abs(dPhi34);
+	   Int_t pDev_st4 = abs(dPhi14) + abs(dPhi24) + abs(dPhi34);
+	   
+	   Int_t dTh_sum_4  = dTh12 + dTh13 + dTh14 + dTh23 + dTh24 + dTh34;
+	   Int_t dTh_sum_4A = abs(dTh12) + abs(dTh13) + abs(dTh14) + abs(dTh23) + abs(dTh24) + abs(dTh34);
+	   Int_t tDev_st1 = abs(dTh12) + abs(dTh13) + abs(dTh14);
+	   Int_t tDev_st2 = abs(dTh12) + abs(dTh23) + abs(dTh24);
+	   Int_t tDev_st3 = abs(dTh13) + abs(dTh23) + abs(dTh34);
+	   Int_t tDev_st4 = abs(dTh14) + abs(dTh24) + abs(dTh34);
 	   
 	   Int_t out_st_phi = -88;
-	   if      (dev_st4 > dev_st3 && dev_st4 > dev_st2 && dev_st4 > dev_st1)  out_st_phi = 4;
-	   else if (dev_st3 > dev_st4 && dev_st3 > dev_st2 && dev_st3 > dev_st1)  out_st_phi = 3;
-	   else if (dev_st2 > dev_st4 && dev_st2 > dev_st3 && dev_st2 > dev_st1)  out_st_phi = 2;
-	   else if (dev_st1 > dev_st4 && dev_st1 > dev_st3 && dev_st1 > dev_st2)  out_st_phi = 1;
-	   else                                                                   out_st_phi = 0;
+	   if      (pDev_st4 > pDev_st3 && pDev_st4 > pDev_st2 && pDev_st4 > pDev_st1)  out_st_phi = 4;
+	   else if (pDev_st3 > pDev_st4 && pDev_st3 > pDev_st2 && pDev_st3 > pDev_st1)  out_st_phi = 3;
+	   else if (pDev_st2 > pDev_st4 && pDev_st2 > pDev_st3 && pDev_st2 > pDev_st1)  out_st_phi = 2;
+	   else if (pDev_st1 > pDev_st4 && pDev_st1 > pDev_st3 && pDev_st1 > pDev_st2)  out_st_phi = 1;
+	   else                                                                         out_st_phi = 0;
 	   
-	   Double_t dPhi_sum_3  = -88;
-	   Double_t dPhi_sum_3A = -88;
+	   Int_t out_st_th = -88;
+	   if      (tDev_st4 > tDev_st3 && tDev_st4 > tDev_st2 && tDev_st4 > tDev_st1)  out_st_th = 4;
+	   else if (tDev_st3 > tDev_st4 && tDev_st3 > tDev_st2 && tDev_st3 > tDev_st1)  out_st_th = 3;
+	   else if (tDev_st2 > tDev_st4 && tDev_st2 > tDev_st3 && tDev_st2 > tDev_st1)  out_st_th = 2;
+	   else if (tDev_st1 > tDev_st4 && tDev_st1 > tDev_st3 && tDev_st1 > tDev_st2)  out_st_th = 1;
+	   else                                                                         out_st_th = 0;
+	   
+ 	   Int_t dPhi_sum_3  = -88;
+	   Int_t dPhi_sum_3A = -88;
 	   if      (out_st_phi == 4) {
 	     dPhi_sum_3  = dPhi12 + dPhi13 + dPhi23;
-	     dPhi_sum_3A = fabs(dPhi12) + fabs(dPhi13) + fabs(dPhi23);
+	     dPhi_sum_3A = abs(dPhi12) + abs(dPhi13) + abs(dPhi23);
 	   } else if (out_st_phi == 3) {
 	     dPhi_sum_3  = dPhi12 + dPhi14 + dPhi24;
-	     dPhi_sum_3A = fabs(dPhi12) + fabs(dPhi14) + fabs(dPhi24);
+	     dPhi_sum_3A = abs(dPhi12) + abs(dPhi14) + abs(dPhi24);
 	   } else if (out_st_phi == 2) {
 	     dPhi_sum_3  = dPhi13 + dPhi14 + dPhi34;
-	     dPhi_sum_3A = fabs(dPhi13) + fabs(dPhi14) + fabs(dPhi34);
+	     dPhi_sum_3A = abs(dPhi13) + abs(dPhi14) + abs(dPhi34);
 	   } else {
 	     dPhi_sum_3  = dPhi23 + dPhi24 + dPhi34;
-	     dPhi_sum_3A = fabs(dPhi23) + fabs(dPhi24) + fabs(dPhi34);
+	     dPhi_sum_3A = abs(dPhi23) + abs(dPhi24) + abs(dPhi34);
+	   }
+
+	   Int_t dTh_max_4 = MaxOfSix( dTh12, dTh13, dTh14, dTh23, dTh24, dTh34 );
+	   Int_t dTh_max_3  = -88;
+ 	   Int_t dTh_sum_3  = -88;
+	   Int_t dTh_sum_3A = -88;
+	   if      (out_st_th == 4) {
+	     dTh_sum_3  = dTh12 + dTh13 + dTh23;
+	     dTh_sum_3A = abs(dTh12) + abs(dTh13) + abs(dTh23);
+	     dTh_max_3  = MaxOfThree(dTh12, dTh13, dTh23);
+	   } else if (out_st_th == 3) {
+	     dTh_sum_3  = dTh12 + dTh14 + dTh24;
+	     dTh_sum_3A = abs(dTh12) + abs(dTh14) + abs(dTh24);
+	     dTh_max_3	 = MaxOfThree(dTh12, dTh14, dTh24);
+	   } else if (out_st_th == 2) {
+	     dTh_sum_3  = dTh13 + dTh14 + dTh34;
+	     dTh_sum_3A = abs(dTh13) + abs(dTh14) + abs(dTh34);
+	     dTh_max_3	 = MaxOfThree(dTh13, dTh14, dTh34);
+	   } else {
+	     dTh_sum_3  = dTh23 + dTh24 + dTh34;
+	     dTh_sum_3A = abs(dTh23) + abs(dTh24) + abs(dTh34);
+	     dTh_max_3	 = MaxOfThree(dTh23, dTh24, dTh34);
 	   }
 	   
 	   Int_t FR1 = (track_br->GetLeaf("hit_FR"))->GetValue(4*iTrk + 0);
@@ -459,7 +568,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 	     // Set vars equal to default vector of variables for this factory
 	     var_names = std::get<3>(factories.at(iFact));
 	     var_vals = std::get<4>(factories.at(iFact));
-	     
+
 	     // Fill all variables
 	     for (UInt_t iVar = 0; iVar < var_names.size(); iVar++) {
 	       TString vName = var_names.at(iVar);
@@ -469,7 +578,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 	       /////////////////////////
 	       
 	       if ( vName == "theta" )
-		 var_vals.at(iVar) = fabs(trk_theta);
+		 var_vals.at(iVar) = abs(trk_theta);
 	       if ( vName == "St1_ring" )
 		 var_vals.at(iVar) = st1_ring;
 	       if ( vName == "dPhi_12" )
@@ -513,9 +622,33 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 		 var_vals.at(iVar) = dPhi_sum_3;
 	       if ( vName == "dPhiSum3A" )
 		 var_vals.at(iVar) = dPhi_sum_3A;
+
 	       if ( vName == "outStPhi" )
 		 var_vals.at(iVar) = out_st_phi;
-	       
+	       if ( vName == "outStTh" )
+		 var_vals.at(iVar) = out_st_th;
+	       if ( vName == "dThMax4" )
+		 var_vals.at(iVar) = dTh_max_4;
+	       if ( vName == "dThMax3" )
+		 var_vals.at(iVar) = dTh_max_3;
+
+	       if ( vName == "dThSum4" )
+		 var_vals.at(iVar) = dTh_sum_4;
+	       if ( vName == "dThSum4A" )
+		 var_vals.at(iVar) = dTh_sum_4A;
+	       if ( vName == "dThSum3" )
+		 var_vals.at(iVar) = dTh_sum_3;
+	       if ( vName == "dThSum3A" )
+		 var_vals.at(iVar) = dTh_sum_3A;
+
+	       if ( vName == "dTh_12" )
+		 var_vals.at(iVar) = dTh12;
+	       if ( vName == "dTh_23" )
+		 var_vals.at(iVar) = dTh23;
+	       if ( vName == "dTh_34" )
+		 var_vals.at(iVar) = dTh34;
+
+
 	       
 	       ////////////////////////////////////////
 	       ///  Target and spectator variables  ///
@@ -691,7 +824,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
      if (Use["BDTG_AWB"]) // Optimized settings
        // Actually, would prefer NTrees=400 and MinNodeSize=0.001 ... but causing "all events went to the same branch" issue
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB", (string)
-			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.01:"+
+			  "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
 
      if (Use["BDTG_AWB_lite"]) // Fast, simple BDT
@@ -770,16 +903,16 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    } // End loop: for (UInt_t iFact = 0; iFact < factories.size(); iFact++)
    
    // Save the output
-   outputFile->Close();
+   out_file->Close();
 
-   std::cout << "==> Wrote root file: " << outputFile->GetName() << std::endl;
+   std::cout << "==> Wrote root file: " << out_file->GetName() << std::endl;
    std::cout << "==> TMVARegression is done!" << std::endl;
 
    // delete factory;
    // delete dataloader;
 
    // Launch the GUI for the root macros
-   if (!gROOT->IsBatch()) TMVA::TMVARegGui( outfileName );
+   if (!gROOT->IsBatch()) TMVA::TMVARegGui( out_file_name );
 }
 
 

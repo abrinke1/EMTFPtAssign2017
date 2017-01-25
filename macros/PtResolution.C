@@ -23,7 +23,7 @@
 #include "../src/MacroHelper.C"         // Helpful common functions (GetMedian, GetResScore, etc.)
 
 
-const int    PRTEVT  =      10000;  // When processing file, print every X events
+const int    PRTEVT  =     100000;  // When processing file, print every X events
 const int    MAXEVT  =         -1;  // Maximum number of events to process
 const int     NBINS  =       1600;  // Number of bins in log2(TRG pT / GEN pT) plot
 const int     XMIN   =         -8;  // Minimum log2(TRG pT / GEN pT) value in plot
@@ -55,9 +55,12 @@ void PtResolution() {
   TChain* ch_tmp(0);
 
   // List of input files
-  TString in_dir = "/afs/cern.ch/user/a/abrinke1/TMVA/EMTFPtAssign2017/";
+  // TString in_dir = "/afs/cern.ch/user/a/abrinke1/TMVA/EMTFPtAssign2017/";
+  TString in_dir = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017/";
   std::vector<TString> in_file_names;
-  in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_23.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_23_400_trees_0p002_node.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_24_vars.root");
+  in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_24_bends.root");
 
   // Open all input files
   for (int i = 0; i < in_file_names.size(); i++) {
@@ -72,18 +75,49 @@ void PtResolution() {
   // Tuple for factory directories: directory name, target pT, train chain, test chain
   // Target trigger pT: "inv" for 1/pT, "log2" for log2(pT), "" for pT
   std::vector<std::tuple<TString, TString, TChain*, TChain*>> facts;
+
+  // // Training options (target pT, weighting, number of variables)
   // facts.push_back( std::make_tuple("f_0x0000011d_0x2"      , "inv",  ch_tmp, ch_tmp) );
   // facts.push_back( std::make_tuple("f_0x0000011d_0x4"      , "log2", ch_tmp, ch_tmp) );
   // facts.push_back( std::make_tuple("f_0x001f01fd_0x2"      , "inv",  ch_tmp, ch_tmp) );
   // facts.push_back( std::make_tuple("f_0x001f01fd_0x4"      , "log2", ch_tmp, ch_tmp) );
   // facts.push_back( std::make_tuple("f_0x001fffff_0x2"      , "inv",  ch_tmp, ch_tmp) );
   // facts.push_back( std::make_tuple("f_0x001fffff_0x4"      , "log2", ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x0000011d_0x2_invPt", "inv",  ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x0000011d_0x4_invPt", "log2", ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001f01fd_0x2_invPt", "inv",  ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001f01fd_0x4_invPt", "log2", ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001fffff_0x2_invPt", "inv",  ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001fffff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x0000011d_0x2_invPt", "inv",  ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x0000011d_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f01fd_0x2_invPt", "inv",  ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f01fd_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001fffff_0x2_invPt", "inv",  ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001fffff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+
+  // // Different sets of variables
+  // facts.push_back( std::make_tuple("f_0x00000004_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x00000005_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x0000000d_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x00000085_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x0000001d_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f00fd_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f0ffd_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f0fff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001fffff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x8fff0fff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+
+  // // Different FR combinations
+  // facts.push_back( std::make_tuple("f_0x001f00ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f03ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f05ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f09ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f0fff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+
+  // Different bend combinations
+  facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  facts.push_back( std::make_tuple("f_0x001f11ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  facts.push_back( std::make_tuple("f_0x001f31ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  facts.push_back( std::make_tuple("f_0x001f51ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  facts.push_back( std::make_tuple("f_0x001f91ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  facts.push_back( std::make_tuple("f_0x001ff1ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+
 
   // Add trees from the input files to the TChain
   for (int iFt = 0; iFt < facts.size(); iFt++) {
@@ -95,7 +129,9 @@ void PtResolution() {
     }
   }
 
-  TString out_file_name = "plots/PtResolution_AWB_v1_17_01_23.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_23_400_trees_0p002_node.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_24_vars_best.root";
+  TString out_file_name = "plots/PtResolution_AWB_v1_17_01_24_bends.root";
   TFile *out_file = new TFile(out_file_name, "recreate");
 
 
@@ -131,20 +167,26 @@ void PtResolution() {
   std::vector<std::tuple<TString, float, float, TString>> eta_bins;
   
   pt_bins.push_back( std::make_tuple("all",      1.,   1000., "    ALL    ") );
-  pt_bins.push_back( std::make_tuple("1_8",      1.,      8., "[  1,    8]") );
-  pt_bins.push_back( std::make_tuple("8_30",     8.,     30., "[  8,   30]") );
-  // pt_bins.push_back( std::make_tuple("1_4",      1.,      4., "[  1,    4]") );
-  // pt_bins.push_back( std::make_tuple("4_8",      4.,      8., "[  4,    8]") );
-  // pt_bins.push_back( std::make_tuple("8_15",     8.,     15., "[  8,   15]") );
-  // pt_bins.push_back( std::make_tuple("15_30",   15.,     30., "[ 15,   30]") );
-  pt_bins.push_back( std::make_tuple("30_120",   30.,   120., "[ 30,  120]") );
-  pt_bins.push_back( std::make_tuple("120_1000", 120., 1000., "[120, 1000]") );
+
+  // pt_bins.push_back( std::make_tuple("1_8",      1.,      8., "[  1,    8]") );
+  // pt_bins.push_back( std::make_tuple("8_30",     8.,     30., "[  8,   30]") );
+  // pt_bins.push_back( std::make_tuple("30_120",   30.,   120., "[ 30,  120]") );
+  // pt_bins.push_back( std::make_tuple("120_1000", 120., 1000., "[120, 1000]") );
+
+  pt_bins.push_back( std::make_tuple("1_4",        1.,    4., "[  1,    4]") );
+  pt_bins.push_back( std::make_tuple("4_8",        4.,    8., "[  4,    8]") );
+  pt_bins.push_back( std::make_tuple("8_15",       8.,   15., "[  8,   15]") );
+  pt_bins.push_back( std::make_tuple("15_30",     15.,   30., "[ 15,   30]") );
+  pt_bins.push_back( std::make_tuple("30_60",     30.,   60., "[ 30,   60]") );
+  pt_bins.push_back( std::make_tuple("60_120",    60.,  120., "[ 60,  120]") );
+  pt_bins.push_back( std::make_tuple("120_250",  120.,  250., "[120,  250]") );
+  pt_bins.push_back( std::make_tuple("250_1000", 250., 1000., "[250, 1000]") );
 
   eta_bins.push_back( std::make_tuple("all",       1.2,  2.4 , "     ALL    ") );
-  // eta_bins.push_back( std::make_tuple("1p2_1p55",  1.2,  1.55, "[1.2 , 1.55]") );
-  // eta_bins.push_back( std::make_tuple("1p55_1p85", 1.55, 1.85, "[1.55, 1.85]") );
-  // eta_bins.push_back( std::make_tuple("1p85_2p1",  1.85, 2.1 , "[1.85, 2.1 ]") );
-  // eta_bins.push_back( std::make_tuple("2p1_2p4",   2.1,  2.4 , "[2.1 , 2.4 ]") );
+  eta_bins.push_back( std::make_tuple("1p2_1p55",  1.2,  1.55, "[1.2 , 1.55]") );
+  eta_bins.push_back( std::make_tuple("1p55_1p85", 1.55, 1.85, "[1.55, 1.85]") );
+  eta_bins.push_back( std::make_tuple("1p85_2p1",  1.85, 2.1 , "[1.85, 2.1 ]") );
+  eta_bins.push_back( std::make_tuple("2p1_2p4",   2.1,  2.4 , "[2.1 , 2.4 ]") );
 
   // 1D resolution plots
   std::vector< std::vector< std::vector< std::vector< std::pair<TH1D*, TH1D*> > > > > h_res;
