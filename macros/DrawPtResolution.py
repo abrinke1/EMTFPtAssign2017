@@ -69,23 +69,26 @@ def main():
 
     Facts = OrderedDict()
 
-    # # Facts['f_0x0000011d_0x2'      ] = []
-    # # Facts['f_0x0000011d_0x4'      ] = []
-    # # Facts['f_0x001f01fd_0x2'      ] = []
-    # # Facts['f_0x001f01fd_0x4'      ] = []
-    # # Facts['f_0x001fffff_0x2'      ] = []
-    # # Facts['f_0x001fffff_0x4'      ] = []
-    # # Facts['f_0x0000011d_0x2_invPt'] = []
-    # Facts['f_0x0000011d_0x4_invPt'] = []
-    # # Facts['f_0x001f01fd_0x2_invPt'] = []
-    # Facts['f_0x001f01fd_0x4_invPt'] = []
-    # # Facts['f_0x001fffff_0x2_invPt'] = []
-    # Facts['f_0x001fffff_0x4_invPt'] = []
+    # Facts['f_0x001f01fd_0x2'] = ['d#phi12/23/34 + comb, #theta, FR1']
+    Facts['f_0x001f01ff_0x4_invPt'] = ['log_{2}p_{T}, 1/p_{T} wgt / EMTF vars + comb + St1 ring']
 
-    # # Facts['f_0x00000004_0x4_invPt'] = ['d#phi12']
-    # # Facts['f_0x00000005_0x4_invPt'] = ['d#phi12, #theta']
-    # # Facts['f_0x0000000d_0x4_invPt'] = ['d#phi12/23, #theta']
-    # # Facts['f_0x00000085_0x4_invPt'] = ['d#phi12/24, #theta']
+    # # Facts['f_0x0000011d_0x2'      ] = ['1/p_{T} /  EMTF vars']
+    # # Facts['f_0x0000011d_0x4'      ] = ['log_{2}p_{T}, EMTF vars']
+    # Facts['f_0x001f01fd_0x2'      ] = ['1/p_{T} /  EMTF vars + comb']
+    # Facts['f_0x001f01fd_0x4'      ] = ['log_{2}p_{T}, EMTF vars + comb']
+    # # Facts['f_0x001fffff_0x2'      ] = ['1/p_{T} /  EMTF vars + comb + more']
+    # # Facts['f_0x001fffff_0x4'      ] = ['log_{2}p_{T}, EMTF vars + comb + more']
+    # # Facts['f_0x0000011d_0x2_invPt'] = ['1/p_{T} /  1/p_{T} wgt / EMTF vars']
+    # # Facts['f_0x0000011d_0x4_invPt'] = ['log_{2}p_{T}, 1/p_{T} wgt / EMTF vars']
+    # # Facts['f_0x001f01fd_0x2_invPt'] = ['1/p_{T} /  1/p_{T} wgt / EMTF vars + comb']
+    # Facts['f_0x001f01fd_0x4_invPt'] = ['log_{2}p_{T}, 1/p_{T} wgt / EMTF vars + comb']
+    # Facts['f_0x001fffff_0x2_invPt'] = ['1/p_{T} /  EMTF 1/p_{T} wgt / vars + comb + more']
+    # # Facts['f_0x001fffff_0x4_invPt'] = ['log_{2}p_{T}, 1/p_{T} wgt / EMTF vars + comb + more']
+
+    # Facts['f_0x00000004_0x4_invPt'] = ['d#phi12']
+    # Facts['f_0x00000005_0x4_invPt'] = ['d#phi12, #theta']
+    # Facts['f_0x0000000d_0x4_invPt'] = ['d#phi12/23, #theta']
+    # Facts['f_0x00000085_0x4_invPt'] = ['d#phi12/24, #theta']
     # Facts['f_0x0000001d_0x4_invPt'] = ['d#phi12/23/34, #theta']
     # Facts['f_0x001f00fd_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta']
     # Facts['f_0x001f0ffd_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, FRs']
@@ -108,14 +111,10 @@ def main():
     Facts['f_0x001ff1ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, all bends']
 
 
-
-
     MVAs = OrderedDict()
-    MVAs['EMTF_pt']                = []
+    MVAs['EMTF_pt']                = ['EMTF']
 
-    MVAs['BDTG_AWB']               = []
-    # MVAs['BDTG_AWB_lite']          = []
-
+    MVAs['BDTG_AWB']               = ['BDT AWB']
 
 
 #############
@@ -183,11 +182,13 @@ def DrawRes(in_file, out_dir, colors, iWgt, weight,
             nFM += 1
             h_res.SetLineColor(colors[nFM % len(colors)])
             if (iMVA == firstMVA):
-                l_res.AddEntry(h_res, iMVA )
+                l_res.AddEntry(h_res, MVAs[iMVA][0] )
             elif len(MVAs) < 3:
                 l_res.AddEntry(h_res, Facts[iFact][0] )
+            elif len(Facts) < 2:
+                l_res.AddEntry(h_res, MVAs[iMVA][0] )
             else:
-                l_res.AddEntry(h_res, Facts[iFact][0]+' '+iMVA )
+                l_res.AddEntry(h_res, Facts[iFact][0]+' / '+MVAs[iMVA][0] )
             
             if ( iFact == firstFact and iMVA == firstMVA ): 
                 h_res.SetLineWidth(3)
@@ -267,11 +268,13 @@ def DrawResRatio(in_file, out_dir, colors, iWgt, weight,
             nFM += 1
             h_res_m.SetLineColor(colors[nFM % len(colors)])
             if (iMVA == firstMVA):
-                l_res_rat.AddEntry(h_res_m, iMVA )
+                l_res_rat.AddEntry(h_res_m, MVAs[iMVA][0] )
             elif len(MVAs) < 3:
                 l_res_rat.AddEntry(h_res_m, Facts[iFact][0] )
+            elif len(Facts) < 2:
+                l_res_rat.AddEntry(h_res_m, MVAs[iMVA][0] )
             else:
-                l_res_rat.AddEntry(h_res_m, Facts[iFact][0]+' '+iMVA )
+                l_res_rat.AddEntry(h_res_m, Facts[iFact][0]+' / '+MVAs[iMVA][0] )
 
             h_res_m.SetLineWidth(2)
             s_res_rat.Add(h_res_m)
@@ -331,13 +334,24 @@ def DrawRatioGraph(in_file, out_dir, pt_str, Facts, MVAs):
     
 
     # t_str = (h_res.GetTitle()).replace('EMTF (test) ','')
+    used_facts = []
+    used_MVAs = []
     for iBin in range(1, h_rat_tr.GetXaxis().GetNbins()+1):
         for iFact in Facts.keys():
-            if len(MVAs) < 3:
-                if iFact in h_rat_tr.GetXaxis().GetBinLabel(iBin):
-                    h_rat_tr.GetXaxis().SetBinLabel( iBin, Facts[iFact][0] )
-            else:
-                h_rat_tr.GetXaxis().SetBinLabel( iBin, (h_rat_tr.GetXaxis().GetBinLabel(iBin)).replace(iFact, Facts[iFact][0]+' / ') )
+            if iFact in used_facts: continue
+            for iMVA in MVAs.keys():
+                if iMVA in used_MVAs: continue
+                if len(MVAs) < 3:
+                    if iFact in h_rat_tr.GetXaxis().GetBinLabel(iBin):
+                        h_rat_tr.GetXaxis().SetBinLabel( iBin, Facts[iFact][0] )
+                        used_facts.append(iFact)
+                elif len(Facts) < 2:
+                    if iMVA in h_rat_tr.GetXaxis().GetBinLabel(iBin):
+                        h_rat_tr.GetXaxis().SetBinLabel( iBin, MVAs[iMVA][0] )
+                        used_MVAs.append(iMVA)
+                else:
+                    h_rat_tr.GetXaxis().SetBinLabel( iBin, (h_rat_tr.GetXaxis().GetBinLabel(iBin)).replace(iFact, Facts[iFact][0]+' / ') )
+                    h_rat_tr.GetXaxis().SetBinLabel( iBin, (h_rat_tr.GetXaxis().GetBinLabel(iBin)).replace(MVA, MVAs[iMVA][0]) )
     
     y_min = min( min(h_rat_tr.GetY()) - max(h_rat_tr.GetEY()), min(h_rat_te.GetY()) - max(h_rat_te.GetEY()) )
     y_max = max( max(h_rat_tr.GetY()) + max(h_rat_tr.GetEY()), max(h_rat_te.GetY()) + max(h_rat_te.GetEY()) )
@@ -360,8 +374,8 @@ def DrawRatioGraph(in_file, out_dir, pt_str, Facts, MVAs):
     # hgrid->GetYaxis()->SetLabelOffset(999.);
     # hgrid->GetXaxis()->SetLabelOffset(999.);
     
-    ROOT.gStyle.SetTitleAlign(13)
-    ROOT.gStyle.SetTitleX(c_rat.GetLeftMargin())
+    ROOT.gStyle.SetTitleAlign(23)
+    ROOT.gStyle.SetTitleX(0.5*(1 + c_rat.GetLeftMargin() - c_rat.GetRightMargin()))
     h_rat_tr.Draw('APsame')
     h_rat_te.Draw('Psame')
     h_grid.Draw('same') ## Adjust y axis ranges?

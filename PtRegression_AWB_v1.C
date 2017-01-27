@@ -89,10 +89,13 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    Use["BDTG_AWB"]                = 1;
    Use["BDTG_AWB_lite"]           = 0;
 
-   Use["BDTG_AWB_64_trees"]       = 0;
-   Use["BDTG_AWB_250_trees"]      = 0;
-   Use["BDTG_AWB_1000_trees"]     = 0;
+   Use["BDTG_AWB_50_trees"]       = 0;
+   Use["BDTG_AWB_100_trees"]      = 0;
+   Use["BDTG_AWB_200_trees"]      = 0;
+   Use["BDTG_AWB_400_trees"]      = 0;
+   Use["BDTG_AWB_800_trees"]      = 0;
 
+   Use["BDTG_AWB_3_deep"]         = 0;
    Use["BDTG_AWB_4_deep"]         = 0;
    Use["BDTG_AWB_5_deep"]         = 0;
    Use["BDTG_AWB_6_deep"]         = 0;
@@ -133,7 +136,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    TString out_dir = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017";
    // out_dir = ".";
    TString out_file_name;
-   out_file_name.Form( "%s/PtRegression_AWB_v1_17_01_24_bends.root", out_dir.Data() );
+   out_file_name.Form( "%s/PtRegression_AWB_v1_17_01_26_mode_15_opt.root", out_dir.Data() );
    TFile* out_file = TFile::Open( out_file_name, "RECREATE" );
 
    // Read training and test data (see TMVAClassification for reading ASCII files)
@@ -159,6 +162,8 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
      }
    }
 
+   std::cout << "Here" << std::endl;
+
    // Add trees from the input files to the TChain
    // Have to use TChain for both SetBranchAddress and GetEntry to work
    std::vector<TChain*> in_chains;
@@ -168,6 +173,8 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
      tmp_chain->Add( in_file_names.at(i) );
      in_chains.push_back(tmp_chain);
    }
+
+   std::cout << "Here" << std::endl;
 
    //////////////////////////////////////////////////////////////////////////
    ///  Factories: Use different sets of variables, target, weights, etc. ///
@@ -184,6 +191,10 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    // Each hex bit represents four variables, e.g. 0x1 would select only the 1st variable, 
    // 0xf the 1st 4, 0xff the 1st 8, 0xa the 2nd and 4th, 0xf1 the 1st and 5th-8th, etc.
    std::vector< std::tuple<TMVA::Factory*, TMVA::DataLoader*, TString, std::vector<TString>, std::vector<Double_t>, int, int> > factories;
+
+   // Optimized mode 15 - AWB 26.01.17
+   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, FR1, St1 ring
+   					 var_names, var_vals, 0x001f01ff, 0x4) );
 
    // // Original set of training variables
    // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x2", 
@@ -251,20 +262,22 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f0fff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, all FRs
    // 					 var_names, var_vals, 0x001f0fff, 0x4) );
 
-   // Bends
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1
-   					 var_names, var_vals, 0x001f01ff, 0x4) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f11ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1
-   					 var_names, var_vals, 0x001f11ff, 0x4) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f31ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/2
-   					 var_names, var_vals, 0x001f31ff, 0x4) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f51ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/3
-   					 var_names, var_vals, 0x001f51ff, 0x4) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f91ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/3
-   					 var_names, var_vals, 0x001f91ff, 0x4) );
-   factories.push_back( std::make_tuple( nullF, nullL, "f_0x001ff1ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, all bends
-   					 var_names, var_vals, 0x001ff1ff, 0x4) );
+   // // Bends
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f01ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1
+   // 					 var_names, var_vals, 0x001f01ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f11ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1
+   // 					 var_names, var_vals, 0x001f11ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f31ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/2
+   // 					 var_names, var_vals, 0x001f31ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f51ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/3
+   // 					 var_names, var_vals, 0x001f51ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001f91ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, bend 1/3
+   // 					 var_names, var_vals, 0x001f91ff, 0x4) );
+   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001ff1ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, all bends
+   // 					 var_names, var_vals, 0x001ff1ff, 0x4) );
 
+
+   std::cout << "Here" << std::endl;
 
    // Initialize factories and dataloaders
    for (UInt_t iFact = 0; iFact < factories.size(); iFact++) {
@@ -353,6 +366,8 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    all_vars.insert( all_vars.end(), in_vars.begin(), in_vars.end() );
    all_vars.insert( all_vars.end(), targ_vars.begin(), targ_vars.end() );
    all_vars.insert( all_vars.end(), spec_vars.begin(), spec_vars.end() );
+
+   std::cout << "Here" << std::endl;
 
    // Fill each factory with the correct set of variables
    for (UInt_t iFact = 0; iFact < factories.size(); iFact++) {
@@ -832,30 +847,42 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 			  "!H:!V:NTrees=40::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=3:MinNodeSize=0.01:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
 
-     if (Use["BDTG_AWB_64_trees"])
-       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_64_trees", (string)
-			  "!H:!V:NTrees=64::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.001:"+
+     if (Use["BDTG_AWB_50_trees"])
+       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_50_trees", (string)
+			  "!H:!V:NTrees=50::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=3:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
-     if (Use["BDTG_AWB_250_trees"])
-       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_250_trees", (string)
-			  "!H:!V:NTrees=250::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.001:"+
+     if (Use["BDTG_AWB_100_trees"])
+       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_100_trees", (string)
+			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=3:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
-     if (Use["BDTG_AWB_1000_trees"])
-       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_1000_trees", (string)
-			  "!H:!V:NTrees=1000::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.001:"+
+     if (Use["BDTG_AWB_200_trees"])
+       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_200_trees", (string)
+			  "!H:!V:NTrees=200::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=3:MinNodeSize=0.001:"+
+			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
+     if (Use["BDTG_AWB_400_trees"])
+       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_400_trees", (string)
+			  "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=3:MinNodeSize=0.001:"+
+			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
+     if (Use["BDTG_AWB_800_trees"])
+       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_800_trees", (string)
+			  "!H:!V:NTrees=800::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=3:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
      
+     if (Use["BDTG_AWB_3_deep"])
+       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_3_deep", (string)
+			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=4:MinNodeSize=0.001:"+
+			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
      if (Use["BDTG_AWB_4_deep"])
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_4_deep", (string)
-			  "!H:!V:NTrees=128::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=4:MinNodeSize=0.001:"+
+			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=4:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
      if (Use["BDTG_AWB_5_deep"])
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_5_deep", (string)
-			  "!H:!V:NTrees=128::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.001:"+
+			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
      if (Use["BDTG_AWB_6_deep"])
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_6_deep", (string)
-			  "!H:!V:NTrees=128::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=6:MinNodeSize=0.001:"+
+			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=6:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
      
      // Default TMVA settings with LeastSquares loss function
