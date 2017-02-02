@@ -32,10 +32,12 @@
 // // Class with NTuple branch definitions
 // #include "interface/PtLutInputBranchesClass.hh"
 
-const int MAX_EVT =   1000000;
-const int REPORT_EVT =  10000;
-// const int MAX_EVT =   100000;
-// const int REPORT_EVT = 10000;
+const int MAX_EVT    =  5000000; // Maximum number of MuGun events to process
+const int MAX_TR     =   500000; // Maximum number of MuGun training events
+const int REPORT_EVT =   100000;
+// const int MAX_EVT    = 100000;
+// const int MAX_TR     =  10000;
+// const int REPORT_EVT =   1000;
 
 const double PI = 3.14159265359;
 const double PT_SCALE = 1.;
@@ -46,6 +48,8 @@ const double PTMIN  =    1.; // Minimum GEN pT
 const double PTMAX  = 1000.; // Maximum GEN pT
 const double ETAMIN =   1.0; // Minimum GEN |eta|
 const double ETAMAX =   2.5; // Maximum GEN |eta|
+
+const bool CLEAN_HI_PT = true;
 
 const std::vector<int> MODES = {15};
 
@@ -111,10 +115,11 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    std::cout << "==> Start PtRegression_AWB_v1" << std::endl;
 
    // Select methods (don't look at this code - not of interest)
+   std::vector<TString> mlist;
    if (myMethodList != "") {
       for (std::map<std::string,int>::iterator it = Use.begin(); it != Use.end(); it++) it->second = 0;
 
-      std::vector<TString> mlist = gTools().SplitString( myMethodList, ',' );
+      mlist = gTools().SplitString( myMethodList, ',' );
       for (UInt_t i=0; i<mlist.size(); i++) {
          std::string regMethod(mlist[i]);
 
@@ -136,16 +141,30 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    TString out_dir = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017";
    // out_dir = ".";
    TString out_file_name;
-   out_file_name.Form( "%s/PtRegression_AWB_v1_17_01_26_mode_15_opt.root", out_dir.Data() );
+   out_file_name.Form( "%s/PtRegression_AWB_v1_17_02_02_mode_15_opt_clean.root", out_dir.Data() );
    TFile* out_file = TFile::Open( out_file_name, "RECREATE" );
 
    // Read training and test data (see TMVAClassification for reading ASCII files)
    // load the signal and background event samples from ROOT trees
    TFile *input(0);
    TString store = "root://eoscms.cern.ch//store/user/abrinke1/EMTF/Emulator/ntuples";
-   TString in_dir = "SingleMu_Pt1To1000_FlatRandomOneOverPt/EMTF_MuGun/170113_165434/0000";
+
    std::vector<TString> in_file_names;
    TString in_file_name;
+
+   TString in_dirs[4] = { "ZeroBiasIsolatedBunch0/Slim/170130_224405/0000",
+			  "ZeroBiasIsolatedBunch1/Slim/170130_175144/0000",
+			  "ZeroBiasIsolatedBunch4/Slim/170130_175005/0000",
+			  "ZeroBiasIsolatedBunch5/Slim/170130_174947/0000" };
+   for (int i = 0; i < 4; i++) {
+     for (int j = 1; j < 50; j++) {
+       in_file_name.Form("%s/%s/tuple_%d.root", store.Data(), in_dirs[i].Data(), j);
+       std::cout << "Adding file " << in_file_name.Data() << std::endl;
+       in_file_names.push_back(in_file_name.Data());
+     }
+   }
+
+   TString in_dir = "SingleMu_Pt1To1000_FlatRandomOneOverPt/EMTF_MuGun/170113_165434/0000";
    for (int i = 1; i < 99; i++) {
      in_file_name.Form("%s/%s/EMTF_MC_NTuple_SingleMu_noRPC_%d.root", store.Data(), in_dir.Data(), i);
      std::cout << "Adding file " << in_file_name.Data() << std::endl;
@@ -153,16 +172,17 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
      if (i*100000 > MAX_EVT) break; // ~100k events per file
    }
 
+
    for (UInt_t i = 0; i < in_file_names.size(); i++) {
      if ( !gSystem->AccessPathName(in_file_names.at(i)) )
        input = TFile::Open( in_file_names.at(i) ); // check if file in local directory exists
      if (!input) {
        std::cout << "ERROR: could not open data file " << in_file_names.at(i) << std::endl;
-       exit(1);
+       in_file_names.erase( in_file_names.begin()+i );
+       i -= 1;
+       // exit(1);
      }
    }
-
-   std::cout << "Here" << std::endl;
 
    // Add trees from the input files to the TChain
    // Have to use TChain for both SetBranchAddress and GetEntry to work
@@ -173,8 +193,6 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
      tmp_chain->Add( in_file_names.at(i) );
      in_chains.push_back(tmp_chain);
    }
-
-   std::cout << "Here" << std::endl;
 
    //////////////////////////////////////////////////////////////////////////
    ///  Factories: Use different sets of variables, target, weights, etc. ///
@@ -197,8 +215,8 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    					 var_names, var_vals, 0x001f01ff, 0x4) );
 
    // // Original set of training variables
-   // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x2", 
-   // 					 var_names, var_vals, 0x0000011d, 0x2) );
+   factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x2", 
+   					 var_names, var_vals, 0x0000011d, 0x2) );
    // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x4", 
    // 					 var_names, var_vals, 0x0000011d, 0x4) );
    // factories.push_back( std::make_tuple( nullF, nullL, "f_0x0000011d_0x2_invPt", 
@@ -276,8 +294,6 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    // factories.push_back( std::make_tuple( nullF, nullL, "f_0x001ff1ff_0x4_invPt",  // dPhi12, 23, 34, theta, combs, St1 ring, FR1, all bends
    // 					 var_names, var_vals, 0x001ff1ff, 0x4) );
 
-
-   std::cout << "Here" << std::endl;
 
    // Initialize factories and dataloaders
    for (UInt_t iFact = 0; iFact < factories.size(); iFact++) {
@@ -367,7 +383,6 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
    all_vars.insert( all_vars.end(), targ_vars.begin(), targ_vars.end() );
    all_vars.insert( all_vars.end(), spec_vars.begin(), spec_vars.end() );
 
-   std::cout << "Here" << std::endl;
 
    // Fill each factory with the correct set of variables
    for (UInt_t iFact = 0; iFact < factories.size(); iFact++) {
@@ -411,6 +426,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 
    std::cout << "\n******* About to loop over chains *******" << std::endl;
    UInt_t iEvt = 0;
+   UInt_t iEvtZB = 0;
    UInt_t nTrain = 0;
    UInt_t nTest  = 0;
    for (int iCh = 0; iCh < in_chains.size(); iCh++) {
@@ -425,23 +441,41 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
      
      for (UInt_t jEvt = 0; jEvt < in_chain->GetEntries(); jEvt++) {
        if (iEvt > MAX_EVT) break;
-       if ( (iEvt % REPORT_EVT) == 0 )
-	 std::cout << "Looking at event " << iEvt << std::endl;
+       // if ( (iEvt % REPORT_EVT) == 0 )
+       // 	 std::cout << "Looking at event " << iEvt << std::endl;
        in_chain->GetEntry(jEvt);
        
        UInt_t nMuons  = (muon_br->GetLeaf("nMuons"))->GetValue();
        UInt_t nTracks = (track_br->GetLeaf("nTracks"))->GetValue();
+       Bool_t isMC    = (nMuons > 0);
+       if (not isMC)  // Process ZeroBias anyway
+	 nMuons = nTracks;
        // std::cout << "There are " << nMuons << " GEN muons and " << nTracks << " EMTF tracks\n" << std::endl;
        
+       if ( ( (iEvt % REPORT_EVT) == 0 && isMC) || (iEvtZB % 100000) == 0 )
+	 std::cout << "Looking at event " << iEvt << " (" << iEvtZB << ")" << std::endl;
+       
        for (UInt_t iMu = 0; iMu < nMuons; iMu++) {
-	 Double_t mu_pt  = (muon_br->GetLeaf("pt"))->GetValue(iMu);
-	 Double_t mu_eta = (muon_br->GetLeaf("eta"))->GetValue(iMu);
-	 Double_t mu_phi = (muon_br->GetLeaf("phi"))->GetValue(iMu);
-	 Int_t mu_charge = (muon_br->GetLeaf("charge"))->GetValue(iMu);
-	 if ( mu_pt < PTMIN ) continue;
-	 if ( mu_pt > PTMAX ) continue;
-	 if ( fabs( mu_eta ) < ETAMIN ) continue;
-	 if ( fabs( mu_eta ) > ETAMAX ) continue;
+	 Double_t mu_pt ;
+	 Double_t mu_eta;
+	 Double_t mu_phi;
+	 Int_t mu_charge;
+	 if (isMC) {
+	   mu_pt     = (muon_br->GetLeaf("pt"))->GetValue(iMu);
+	   mu_eta    = (muon_br->GetLeaf("eta"))->GetValue(iMu);
+	   mu_phi    = (muon_br->GetLeaf("phi"))->GetValue(iMu);
+	   mu_charge = (muon_br->GetLeaf("charge"))->GetValue(iMu);
+	 } else {
+	   mu_pt     = 999.;
+	   mu_eta    = -99.;
+	   mu_phi    = -99.;
+	   mu_charge = -99;
+	 }
+
+	 if ( mu_pt < PTMIN && isMC ) continue;
+	 if ( mu_pt > PTMAX && isMC ) continue;
+	 if ( fabs( mu_eta ) < ETAMIN && isMC ) continue;
+	 if ( fabs( mu_eta ) > ETAMAX && isMC ) continue;
 	 // std::cout << "Muon " << iMu+1 << " has pt = " << mu_pt << ", eta = " << mu_eta << ", phi = " << mu_phi << std::endl;
 	 
 	 for (UInt_t iTrk = 0; iTrk < nTracks; iTrk++) {
@@ -453,7 +487,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 	   Int_t trk_charge   = (track_br->GetLeaf("charge"))->GetValue(iTrk);
 	   Int_t trk_mode     = (track_br->GetLeaf("mode"))->GetValue(iTrk);
 
-	   if ( ( mu_eta > 0 ) != ( trk_eta > 0 ) ) continue;
+	   if ( ( mu_eta > 0 ) != ( trk_eta > 0 ) && isMC ) continue;
 	   Bool_t goodMode = false;
 	   for (UInt_t iMode = 0; iMode < MODES.size(); iMode++)
 	     if (trk_mode == MODES.at(iMode))
@@ -542,6 +576,9 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 	     dPhi_sum_3  = dPhi23 + dPhi24 + dPhi34;
 	     dPhi_sum_3A = abs(dPhi23) + abs(dPhi24) + abs(dPhi34);
 	   }
+
+	   if (isMC && CLEAN_HI_PT && log2(mu_pt) > 6 && 1.0*log2(mu_pt)*dPhi_sum_3A > 140.)
+	     continue;
 
 	   Int_t dTh_max_4 = MaxOfSix( dTh12, dTh13, dTh14, dTh23, dTh24, dTh34 );
 	   Int_t dTh_max_3  = -88;
@@ -699,7 +736,7 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 	       evt_weight = 1. / mu_pt;
 	     
 	     // Load values into event
-	     if ( (iEvt % 2) == 0 ) {
+	     if ( (iEvt % 2) == 0 && isMC && nTrain < (MAX_TR - (iFact == 0)) ) {
 	       std::get<1>(factories.at(iFact))->AddTrainingEvent( "Regression", var_vals, evt_weight );
 	       if (iFact == 0) nTrain += 1;
 	     }
@@ -712,7 +749,8 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
 	   
 	 } // End loop: for (UInt_t iTrk = 0; iTrk < nTracks; iTrk++)
        } // End loop: for (UInt_t iMu = 0; iMu < nMuons; iMu++)
-       iEvt += 1;
+       if (isMC) iEvt += 1;
+       else iEvtZB += 1;
      } // End loop: for (UInt_t jEvt = 0; jEvt < in_chain->GetEntries(); jEvt++)
    } // End loop: for (int iCh = 0; iCh < in_chains.size(); iCh++) {
 
@@ -922,9 +960,40 @@ void PtRegression_AWB_v1 ( TString myMethodList = "" ) {
      // Evaluate all MVAs using the set of test events
      factX->TestAllMethods();
      
-     // Evaluate and compare performance of all configured MVAs
-     factX->EvaluateAllMethods();
+     // // Evaluate and compare performance of all configured MVAs
+     // factX->EvaluateAllMethods();
+
+     // Instead of "EvaluateAllMethods()", just write out the training and testing trees
+     // Skip unnecessary evaluatioh histograms, which take time on large datasets 
+     // Code gleaned from original "EvaluateAllMethods()" function in tmva/tmva/src/Factory.cxx - AWB 31.01.17
+     if ( factX->fMethodsMap.empty() )
+       std::cout << "factX->fMethodsMap is empty" << std::endl;
      
+     std::map<TString, std::vector<IMethod*>*>::iterator itrMap;
+     for (itrMap = factX->fMethodsMap.begin(); itrMap != factX->fMethodsMap.end(); itrMap++) {
+       
+       std::vector<IMethod*> *methods = itrMap->second;
+       std::list<TString> datasets;
+       Int_t nmeth_used[2] = {int(mlist.size()), 1};
+       
+       for (Int_t k = 0; k < 2; k++) {
+     	 for (Int_t i = 0; i < nmeth_used[k]; i++) {
+     	   MethodBase* theMethod = dynamic_cast<MethodBase*>((*methods)[i]);
+     	   if (theMethod == 0) {
+     	     std::cout << "For k = " << k << ", i = " << i << ", no valid method" << std::endl;
+     	     continue;
+     	   }
+     	   TDirectory* RootBaseDir = (TDirectory*) out_file;
+     	   RootBaseDir->cd( std::get<2>(factories.at(iFact)) );
+     	   if ( std::find( datasets.begin(), datasets.end(), std::get<2>(factories.at(iFact)) ) == datasets.end() ) {
+     	     theMethod->Data()->GetTree(Types::kTesting)->Write( "", TObject::kOverwrite );
+     	     theMethod->Data()->GetTree(Types::kTraining)->Write( "", TObject::kOverwrite );
+     	     datasets.push_back( std::get<2>(factories.at(iFact)) );
+     	   }
+     	 } // End loop: for (Int_t i = 0; i < nmeth_used[k]; i++)
+       } // End loop: for (Int_t k = 0; k < 2; k++)
+     } // End loop: for (itrMap = factX->fMethodsMap.begin(); itrMap != factX->fMethodsMap.end(); itrMap++) 
+
      // --------------------------------------------------------------
      
    } // End loop: for (UInt_t iFact = 0; iFact < factories.size(); iFact++)

@@ -60,7 +60,10 @@ void PtResolution() {
   std::vector<TString> in_file_names;
   // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_23_400_trees_0p002_node.root");
   // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_24_vars.root");
-  in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_24_bends.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_24_bends.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_26_NTrees.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_26_MaxDepth.root");
+  in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_26_mode_15_opt.root");
 
   // Open all input files
   for (int i = 0; i < in_file_names.size(); i++) {
@@ -75,6 +78,12 @@ void PtResolution() {
   // Tuple for factory directories: directory name, target pT, train chain, test chain
   // Target trigger pT: "inv" for 1/pT, "log2" for log2(pT), "" for pT
   std::vector<std::tuple<TString, TString, TChain*, TChain*>> facts;
+
+  // // Original EMTF variables + combinations, invPt target, no weighting
+  // facts.push_back( std::make_tuple("f_0x001f01fd_0x2",       "inv",  ch_tmp, ch_tmp) );
+
+  // Optimized mode 15
+  facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
 
   // // Training options (target pT, weighting, number of variables)
   // facts.push_back( std::make_tuple("f_0x0000011d_0x2"      , "inv",  ch_tmp, ch_tmp) );
@@ -110,13 +119,13 @@ void PtResolution() {
   // facts.push_back( std::make_tuple("f_0x001f09ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
   // facts.push_back( std::make_tuple("f_0x001f0fff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
 
-  // Different bend combinations
-  facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001f11ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001f31ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001f51ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001f91ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
-  facts.push_back( std::make_tuple("f_0x001ff1ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // // Different bend combinations
+  // facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f11ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f31ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f51ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f91ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001ff1ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
 
 
   // Add trees from the input files to the TChain
@@ -131,7 +140,10 @@ void PtResolution() {
 
   // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_23_400_trees_0p002_node.root";
   // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_24_vars_best.root";
-  TString out_file_name = "plots/PtResolution_AWB_v1_17_01_24_bends.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_24_bends.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_26_NTrees.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_26_MaxDepth.root";
+  TString out_file_name = "plots/PtResolution_AWB_v1_17_01_26_mode_15_opt.root";
   TFile *out_file = new TFile(out_file_name, "recreate");
 
 
@@ -149,8 +161,19 @@ void PtResolution() {
     MVAs.push_back( std::make_tuple("EMTF_pt",        -99., 1., 1.) );
     
     MVAs.push_back( std::make_tuple("BDTG_AWB",       -99., 1., 1.) );
-    // MVAs.push_back( std::make_tuple("BDTG_AWB_lite",  -99., 1., 1.) );
-    
+    // // MVAs.push_back( std::make_tuple("BDTG_AWB_lite",  -99., 1., 1.) );
+
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_50_trees",  -99., 1., 1.) );
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_100_trees", -99., 1., 1.) );
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_200_trees", -99., 1., 1.) );
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_400_trees", -99., 1., 1.) );
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_800_trees", -99., 1., 1.) );
+
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_3_deep",    -99., 1., 1.) );
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_4_deep",    -99., 1., 1.) );
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_5_deep",    -99., 1., 1.) );
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_6_deep",    -99., 1., 1.) );
+
 
     fMVAs.push_back( std::make_pair(facts.at(iFt), MVAs) );
   } // End loop: for (int iCh = 0; iCh < facts.size(); iCh++)
