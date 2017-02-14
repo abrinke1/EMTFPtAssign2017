@@ -24,7 +24,7 @@ const int    MAXEVT  =        -1;  // Maximum number of events to process
 const double BIT     =      0.01;  // Shift to trigger pT to get it off bin edge
 const double PTMIN   =       0.0;
 const double PTMAX   =      50.0;
-const int    PTBINS  =       100;
+const int    PTBINS  =        25;
 const double ETAMIN  =      1.24;  // Minimum GEN / trigger eta to consider
 const double ETAMAX  =      2.40;  // Maximum GEN / trigger eta to consider
 
@@ -44,6 +44,8 @@ void RateVsEff() {
   // in_dir = "./";
   std::vector<TString> in_file_names;
   in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_31_mode_15_opt.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_02_02_mode_15_opt_clean.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_02_09_mode_15_Sq.root");
 
   // Open all input files
   for (int i = 0; i < in_file_names.size(); i++) {
@@ -62,7 +64,8 @@ void RateVsEff() {
   // Original EMTF variables, invPt target, no weighting
   facts.push_back( std::make_tuple("f_0x0000011d_0x2",       "inv",  ch_tmp, ch_tmp) );
   // Optimized mode 15
-  facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPt", "log2", ch_tmp, ch_tmp) );
+  facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPt",   "log2", ch_tmp, ch_tmp) );
+  // facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPtSq", "log2", ch_tmp, ch_tmp) );
   
   // Add trees from the input files to the TChain
   for (int iFt = 0; iFt < facts.size(); iFt++) {
@@ -88,6 +91,7 @@ void RateVsEff() {
     MVAs.push_back( std::make_tuple("EMTF_pt",        -99.) );
     
     MVAs.push_back( std::make_tuple("BDTG_AWB",       -99.) );
+    // MVAs.push_back( std::make_tuple("BDTG_AWB_Sq",    -99.) );
 
 
     fMVAs.push_back( std::make_pair(facts.at(iFt), MVAs) );
@@ -102,8 +106,9 @@ void RateVsEff() {
 
   // Set efficiency thresholds
   std::vector<int> eff_cuts;
-  eff_cuts.push_back(90);
-  eff_cuts.push_back(95);
+  eff_cuts.push_back(92);
+  eff_cuts.push_back(94);
+  eff_cuts.push_back(96);
   eff_cuts.push_back(98);
 
   // 2D events: trigger vs. GEN pT
@@ -111,19 +116,32 @@ void RateVsEff() {
   // 2D efficiency: trigger vs. GEN pT
   std::vector< std::vector<std::pair<TH2D*, TH2D*> > > h_eff;
   // 1D counts: vs. threshold pT
-  std::vector< std::vector< std::pair<TH1D*, TH1D*> > > h_count;
-  // 1D rate: vs. 95% threshold pT
+  std::vector< std::vector<TH1D*> > h_count;
+  // 1D rate: vs. XX% threshold pT
   std::vector< std::vector< std::vector< std::pair<TH1D*, TH1D*> > > > h_rate;
+  // 1D turn-on efficiency: trigger pT = 20 GeV
+  std::vector< std::vector<TH1D*> > h_turn_on;
+  // 1D scaling histogram to scale by pT
+  TH1D* h_scale_pt = new TH1D( "h_scale_pt", "h_scale_pt", PTBINS, PTMIN, PTMAX );
+  for (int i = 1; i <= PTBINS; i++) {
+    float low_edge = max(PTMIN + (i - 1)*(PTMAX - PTMIN)/PTBINS, 1.0);
+    float hi_edge = max(PTMIN + i*(PTMAX - PTMIN)/PTBINS, 1.0);
+    // h_scale_pt->SetBinContent(i, 2/(1/low_edge + 1/hi_edge));
+    h_scale_pt->SetBinContent( i, pow(2/(1/low_edge + 1/hi_edge), 2) );
+    h_scale_pt->SetBinError(i, 0.);
+  }
 
   std::vector< std::vector< std::pair<TH1D*, TH1D*> > > empty1;
   std::vector< std::pair<TH1D*, TH1D*> > empty1a;
+  std::vector<TH1D*> empty1b;
   std::vector< std::pair<TH2D*, TH2D*> > empty2;
 
   // Book histograms for each trigger
   for (int iFM = 0; iFM < fMVAs.size(); iFM++) {
     h_pt.push_back( empty2 );
     h_eff.push_back( empty2 );
-    h_count.push_back( empty1a );
+    h_count.push_back( empty1b );
+    h_turn_on.push_back( empty1b );
     h_rate.push_back( empty1 );
     for (int iMVA = 0; iMVA < fMVAs.at(iFM).second.size(); iMVA++) {
       h_rate.at(iFM).push_back( empty1a );
@@ -133,6 +151,7 @@ void RateVsEff() {
       BookPtHist( iFM, iMVA, ft_name, mva_name, h_pt );
       BookEffHist( iFM, iMVA, ft_name, mva_name, h_eff );
       BookCountHist( iFM, iMVA, ft_name, mva_name, h_count );
+      BookTurnOnHist( iFM, iMVA, ft_name, mva_name, h_turn_on );
       for (int iEff = 0; iEff < eff_cuts.size(); iEff++)
 	BookRateHist( iFM, iMVA, iEff, ft_name, mva_name, eff_cuts.at(iEff), h_rate );
     }
@@ -164,16 +183,23 @@ void RateVsEff() {
 	  h_eff.at(iFM).at(iMVA).second->SetBinContent(iBin, jBin, num2 / den2);
 	  h_eff.at(iFM).at(iMVA).second->SetBinError  (iBin, jBin, (num2 / den2) * sqrt( (1/num2) + (1/den2) ) );
 
+	  if ( h_eff.at(iFM).at(iMVA).first->GetYaxis()->GetBinLowEdge(jBin) > 19.9 &&
+	       h_eff.at(iFM).at(iMVA).first->GetYaxis()->GetBinLowEdge(jBin) < 20.1 ) {
+	    h_turn_on.at(iFM).at(iMVA)->SetBinContent(iBin, num2 / den2);
+	    h_turn_on.at(iFM).at(iMVA)->SetBinError(iBin, (num2 / den2) * sqrt( (1/num2) + (1/den2) ) );
+	  }
+
 	  for (int iEff = 0; iEff < eff_cuts.size(); iEff++) {
-	    if ( (num1 / den1) > eff_cuts.at(iEff)*0.01 && h_rate.at(iFM).at(iMVA).at(iEff).first ->GetBinContent(iBin) < 0 )
-	      h_rate.at(iFM).at(iMVA).at(iEff).first ->SetBinContent( iBin, h_count.at(iFM).at(iMVA).first ->Integral(jBin, PTBINS) );
+	    if ( (num1 / den1) > eff_cuts.at(iEff)*0.01 && h_rate.at(iFM).at(iMVA).at(iEff).first ->GetBinContent(iBin) < 0 ) {
+	      h_rate.at(iFM).at(iMVA).at(iEff).first ->SetBinContent( iBin, h_count.at(iFM).at(iMVA)->Integral(jBin, PTBINS) );
+	    } 
 	    if ( (num2 / den2) > eff_cuts.at(iEff)*0.01 && h_rate.at(iFM).at(iMVA).at(iEff).second->GetBinContent(iBin) < 0 ) {
-	      h_rate.at(iFM).at(iMVA).at(iEff).second->SetBinContent( iBin, h_count.at(iFM).at(iMVA).second->Integral(jBin, PTBINS) );
+	      h_rate.at(iFM).at(iMVA).at(iEff).second->SetBinContent( iBin, h_count.at(iFM).at(iMVA)->Integral(jBin, PTBINS) );
 	    }
 	  }
 	}
       }
-      
+
     }
 
   } // End loop: for (int iFM = 0; iFM < fMVAs.size(); iFM++)
@@ -186,11 +212,30 @@ void RateVsEff() {
       h_pt.at(iFM).at(iMVA).second->Write();
       h_eff.at(iFM).at(iMVA).first ->Write();
       h_eff.at(iFM).at(iMVA).second->Write();
-      h_count.at(iFM).at(iMVA).first ->Write();
-      h_count.at(iFM).at(iMVA).second->Write();
+      h_count.at(iFM).at(iMVA)->Write();
+      h_turn_on.at(iFM).at(iMVA)->Write();
       for (int iEff = 0; iEff < eff_cuts.size(); iEff++) {
 	h_rate.at(iFM).at(iMVA).at(iEff).first ->Write();
 	h_rate.at(iFM).at(iMVA).at(iEff).second->Write();
+
+	h_rate.at(iFM).at(iMVA).at(iEff).first ->SetName( ((TString) h_rate.at(iFM).at(iMVA).at(iEff).first ->GetName()).ReplaceAll("train", "train_wgt") );
+	h_rate.at(iFM).at(iMVA).at(iEff).second->SetName( ((TString) h_rate.at(iFM).at(iMVA).at(iEff).second->GetName()).ReplaceAll("test", "test_wgt") );
+	h_rate.at(iFM).at(iMVA).at(iEff).first ->Multiply( h_scale_pt );
+	h_rate.at(iFM).at(iMVA).at(iEff).second->Multiply( h_scale_pt );
+	h_rate.at(iFM).at(iMVA).at(iEff).first ->Write();
+	h_rate.at(iFM).at(iMVA).at(iEff).second->Write();
+
+	if (iMVA > 0) {
+	  h_rate.at(iFM).at(iMVA).at(iEff).first ->SetName( ((TString) h_rate.at(iFM).at(iMVA).at(iEff).first ->GetName()).ReplaceAll("train_wgt", "train") );
+	  h_rate.at(iFM).at(iMVA).at(iEff).second->SetName( ((TString) h_rate.at(iFM).at(iMVA).at(iEff).second->GetName()).ReplaceAll("test_wgt", "test") );
+	  h_rate.at(iFM).at(iMVA).at(iEff).first ->SetName( ((TString) h_rate.at(iFM).at(iMVA).at(iEff).first ->GetName()).ReplaceAll("rate", "rate_ratio") );
+	  h_rate.at(iFM).at(iMVA).at(iEff).second->SetName( ((TString) h_rate.at(iFM).at(iMVA).at(iEff).second->GetName()).ReplaceAll("rate", "rate_ratio") );
+	  h_rate.at(iFM).at(iMVA).at(iEff).first ->Divide( h_rate.at(iFM).at(0).at(iEff).first );
+	  h_rate.at(iFM).at(iMVA).at(iEff).second->Divide( h_rate.at(iFM).at(0).at(iEff).second);
+	  h_rate.at(iFM).at(iMVA).at(iEff).first ->Write();
+	  h_rate.at(iFM).at(iMVA).at(iEff).second->Write();
+	}
+	
       }
     }
   }
@@ -264,19 +309,29 @@ void BookEffHist( const int iFM, const int iMVA, const TString ft_name, const TS
   
 		 
 void BookCountHist( const int iFM, const int iMVA, const TString ft_name, const TString mva_name,
-		    std::vector< std::vector<std::pair<TH1D*, TH1D*> > >& h_count ) {
+		    std::vector< std::vector<TH1D*> >& h_count ) {
   
-  TString h_count_str_tr = "h_count_"+ft_name+"_"+mva_name+"_train";
-  TString h_count_str_te = "h_count_"+ft_name+"_"+mva_name+"_test";
-  h_count.at(iFM).push_back( std::make_pair( new TH1D( h_count_str_tr, h_count_str_tr,
-						       PTBINS, PTMIN, PTMAX ),
-					     new TH1D( h_count_str_te,  h_count_str_te,
-						       PTBINS, PTMIN, PTMAX ) ) );
+  TString h_count_str = "h_count_"+ft_name+"_"+mva_name;
+  h_count.at(iFM).push_back( new TH1D( h_count_str, h_count_str, PTBINS, PTMIN, PTMAX ) );
   
-  h_count.at(iFM).at(iMVA).first ->Sumw2();
-  h_count.at(iFM).at(iMVA).second->Sumw2();
+  h_count.at(iFM).at(iMVA)->Sumw2();
+  h_count.at(iFM).at(iMVA)->SetLineWidth(2);
+  h_count.at(iFM).at(iMVA)->SetLineColor( (iMVA == 0 ? 1 : iFM+2) );
   
 } // End BookCountHist()
+
+		 
+void BookTurnOnHist( const int iFM, const int iMVA, const TString ft_name, const TString mva_name,
+		    std::vector< std::vector<TH1D*> >& h_turn_on ) {
+  
+  TString h_turn_on_str = "h_turn_on_"+ft_name+"_"+mva_name;
+  h_turn_on.at(iFM).push_back( new TH1D( h_turn_on_str, h_turn_on_str, PTBINS, PTMIN, PTMAX ) );
+  
+  h_turn_on.at(iFM).at(iMVA)->Sumw2();
+  h_turn_on.at(iFM).at(iMVA)->SetLineWidth(2);
+  h_turn_on.at(iFM).at(iMVA)->SetLineColor( (iMVA == 0 ? 1 : iFM+2) );
+  
+} // End BookTurnOnHist()
 
 		 
 void BookRateHist( const int iFM, const int iMVA, const int iEff,
@@ -295,7 +350,6 @@ void BookRateHist( const int iFM, const int iMVA, const int iEff,
   
   h_rate.at(iFM).at(iMVA).at(iEff).first ->Sumw2();
   h_rate.at(iFM).at(iMVA).at(iEff).second->Sumw2();
-  
   h_rate_str_tr.Form("%s %s (train) vs. %d%s efficiency p_{T} cut (GeV)", ft_name.Data(), mva_name.Data(), eff_cut, "%");
   h_rate_str_te.Form("%s %s (test) vs. %d%s efficiency p_{T} cut (GeV)",  ft_name.Data(), mva_name.Data(), eff_cut, "%");
   
@@ -311,13 +365,18 @@ void BookRateHist( const int iFM, const int iMVA, const int iEff,
     h_rate.at(iFM).at(iMVA).at(iEff).second->SetBinContent(i, -99);
   }
   
+  h_rate.at(iFM).at(iMVA).at(iEff).first ->SetLineWidth(2);
+  h_rate.at(iFM).at(iMVA).at(iEff).second->SetLineWidth(2);
+  h_rate.at(iFM).at(iMVA).at(iEff).first ->SetLineColor( (iMVA == 0 ? 1 : iFM+2) );
+  h_rate.at(iFM).at(iMVA).at(iEff).second->SetLineColor( (iMVA == 0 ? 1 : iFM+2) );
+  
 } // End BookRateHist()
 
 		 
 void LoopOverEvents( TChain* chain, const TString ft_name, const TString trgPt, const int iFM, const TString tr_te,
 		     std::vector<std::tuple<TString, float>>& MVAs,
 		     std::vector< std::vector< std::pair<TH2D*, TH2D*> > >& h_pt,
-		     std::vector< std::vector< std::pair<TH1D*, TH1D*> > >& h_count ) {
+		     std::vector< std::vector<TH1D*> >& h_count ) {
 
   // Get GEN branches from the factories
   float GEN_pt_br;
@@ -360,11 +419,8 @@ void LoopOverEvents( TChain* chain, const TString ft_name, const TString trgPt, 
       if ( fabs(EMTF_eta) > ETAMAX ) continue;
 
       // Fill counts from ZeroBias events
-      if (GEN_eta < -10) {
-	if (tr_te.Contains("train"))
-	  h_count.at(iFM).at(iMVA).first ->Fill( TRG_pt );
-	else if (tr_te.Contains("test"))
-	  h_count.at(iFM).at(iMVA).second->Fill( TRG_pt );
+      if (GEN_eta < -10 && tr_te.Contains("test")) {
+	h_count.at(iFM).at(iMVA)->Fill( TRG_pt );
       }
       
       if ( TRG_pt < 0 ) continue;
