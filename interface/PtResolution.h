@@ -20,7 +20,7 @@ void LoopOverEvents( TChain* chain, const TString ft_name, const TString trgPt, 
 void StoreMedians( const TString ft_name, const int iFM, 
 		   const std::vector<std::tuple<TString, float, float, TString>> pt_bins,
                    const std::vector<std::tuple<TString, float, float, TString>> eta_bins,
-                   const std::vector< std::vector< std::vector< std::vector< std::pair<TH1D*, TH1D*> > > > > h_res,
+                   std::vector< std::vector< std::vector< std::vector< std::pair<TH1D*, TH1D*> > > > >& h_res,
 		   std::vector<std::tuple<TString, float, float, float>>& MVAs );
 
 void FillScores( const TString ft_name, const int iFM,

@@ -24,7 +24,7 @@ const int    MAXEVT  =        -1;  // Maximum number of events to process
 const double BIT     =      0.01;  // Shift to trigger pT to get it off bin edge
 const double PTMIN   =       0.0;
 const double PTMAX   =      50.0;
-const int    PTBINS  =        25;
+const int    PTBINS  =        50;
 const double ETAMIN  =      1.24;  // Minimum GEN / trigger eta to consider
 const double ETAMAX  =      2.40;  // Maximum GEN / trigger eta to consider
 
@@ -43,9 +43,12 @@ void RateVsEff() {
   TString in_dir = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017/";
   // in_dir = "./";
   std::vector<TString> in_file_names;
-  in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_31_mode_15_opt.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_31_mode_15_opt.root");
   // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_02_02_mode_15_opt_clean.root");
   // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_02_09_mode_15_Sq.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_02_24_mode_15_opt_pt_1_256_clean.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_02_24_mode_15_opt_bend1_pt_1_256_clean.root");
+  in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_03_14_mode_15_opt_bends_dTh_pt_1_256_clean.root");
 
   // Open all input files
   for (int i = 0; i < in_file_names.size(); i++) {
@@ -61,11 +64,18 @@ void RateVsEff() {
   // Target trigger pT: "inv" for 1/pT, "log2" for log2(pT), "" for pT
   std::vector<std::tuple<TString, TString, TChain*, TChain*>> facts;
 
-  // Original EMTF variables, invPt target, no weighting
-  facts.push_back( std::make_tuple("f_0x0000011d_0x2",       "inv",  ch_tmp, ch_tmp) );
+  // // Original EMTF variables, invPt target, no weighting
+  // facts.push_back( std::make_tuple("f_0x0000011d_0x2",         "inv",  ch_tmp, ch_tmp) );
   // Optimized mode 15
   facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPt",   "log2", ch_tmp, ch_tmp) );
   // facts.push_back( std::make_tuple("f_0x001f01ff_0x4_invPtSq", "log2", ch_tmp, ch_tmp) );
+  // // Optimized mode 15 + bend1
+  // facts.push_back( std::make_tuple("f_0x001f11ff_0x4_invPt",   "log2", ch_tmp, ch_tmp) );
+  // Optimized mode 15 + dTheta14 + bend1
+  facts.push_back( std::make_tuple("f_0x401f11ff_0x4_invPt",   "log2", ch_tmp, ch_tmp) );
+  // Optimized mode 15 + dTheta14 + bend1 + bendMax3
+  facts.push_back( std::make_tuple("f_0xc01f11ff_0x4_invPt",   "log2", ch_tmp, ch_tmp) );
+
   
   // Add trees from the input files to the TChain
   for (int iFt = 0; iFt < facts.size(); iFt++) {
@@ -106,10 +116,8 @@ void RateVsEff() {
 
   // Set efficiency thresholds
   std::vector<int> eff_cuts;
-  eff_cuts.push_back(92);
-  eff_cuts.push_back(94);
-  eff_cuts.push_back(96);
-  eff_cuts.push_back(98);
+  // eff_cuts.push_back(85);
+  eff_cuts.push_back(90);
 
   // 2D events: trigger vs. GEN pT
   std::vector< std::vector<std::pair<TH2D*, TH2D*> > > h_pt;
@@ -121,12 +129,11 @@ void RateVsEff() {
   std::vector< std::vector< std::vector< std::pair<TH1D*, TH1D*> > > > h_rate;
   // 1D turn-on efficiency: trigger pT = 20 GeV
   std::vector< std::vector<TH1D*> > h_turn_on;
-  // 1D scaling histogram to scale by pT
+  // 1D scaling histogram to scale by pT^2
   TH1D* h_scale_pt = new TH1D( "h_scale_pt", "h_scale_pt", PTBINS, PTMIN, PTMAX );
   for (int i = 1; i <= PTBINS; i++) {
     float low_edge = max(PTMIN + (i - 1)*(PTMAX - PTMIN)/PTBINS, 1.0);
     float hi_edge = max(PTMIN + i*(PTMAX - PTMIN)/PTBINS, 1.0);
-    // h_scale_pt->SetBinContent(i, 2/(1/low_edge + 1/hi_edge));
     h_scale_pt->SetBinContent( i, pow(2/(1/low_edge + 1/hi_edge), 2) );
     h_scale_pt->SetBinError(i, 0.);
   }
@@ -172,36 +179,70 @@ void RateVsEff() {
       
       // Compute 2D efficiency histograms and rate at efficiency threshold histograms
       for (int iBin = 1; iBin <= PTBINS; iBin++) { // Loop over GEN pT bins (x-axis)
+
+	// Efficiency from previous bins
+	float preff1[4] = {0, 0, 0, 0};
+	float preff2[4] = {0, 0, 0, 0};
+	
 	for (int jBin = PTBINS; jBin >= 1; jBin--) { // Loop over trigger pT bins (y-axis)
 	  float num1 = h_pt.at(iFM).at(iMVA).first ->Integral(iBin, iBin, jBin, PTBINS); // Events passing trigger pT cut
 	  float den1 = h_pt.at(iFM).at(iMVA).first ->Integral(iBin, iBin,    1, PTBINS); // All events in GEN pT bin
+	  float eff1 = num1 / den1;
 	  float num2 = h_pt.at(iFM).at(iMVA).second->Integral(iBin, iBin, jBin, PTBINS);
 	  float den2 = h_pt.at(iFM).at(iMVA).second->Integral(iBin, iBin,    1, PTBINS);
+	  float eff2 = num2 / den2;
 
-	  h_eff.at(iFM).at(iMVA).first ->SetBinContent(iBin, jBin, num1 / den1);
-	  h_eff.at(iFM).at(iMVA).first ->SetBinError  (iBin, jBin, (num1 / den1) * sqrt( (1/num1) + (1/den1) ) );
-	  h_eff.at(iFM).at(iMVA).second->SetBinContent(iBin, jBin, num2 / den2);
-	  h_eff.at(iFM).at(iMVA).second->SetBinError  (iBin, jBin, (num2 / den2) * sqrt( (1/num2) + (1/den2) ) );
+	  h_eff.at(iFM).at(iMVA).first ->SetBinContent(iBin, jBin, eff1);
+	  h_eff.at(iFM).at(iMVA).first ->SetBinError  (iBin, jBin, eff1 * sqrt( (1/num1) + (1/den1) ) );
+	  h_eff.at(iFM).at(iMVA).second->SetBinContent(iBin, jBin, eff2);
+	  h_eff.at(iFM).at(iMVA).second->SetBinError  (iBin, jBin, eff2 * sqrt( (1/num2) + (1/den2) ) );
 
 	  if ( h_eff.at(iFM).at(iMVA).first->GetYaxis()->GetBinLowEdge(jBin) > 19.9 &&
 	       h_eff.at(iFM).at(iMVA).first->GetYaxis()->GetBinLowEdge(jBin) < 20.1 ) {
-	    h_turn_on.at(iFM).at(iMVA)->SetBinContent(iBin, num2 / den2);
-	    h_turn_on.at(iFM).at(iMVA)->SetBinError(iBin, (num2 / den2) * sqrt( (1/num2) + (1/den2) ) );
+	    h_turn_on.at(iFM).at(iMVA)->SetBinContent(iBin, eff2);
+	    h_turn_on.at(iFM).at(iMVA)->SetBinError(iBin, eff2 * sqrt( (1/num2) + (1/den2) ) );
 	  }
 
 	  for (int iEff = 0; iEff < eff_cuts.size(); iEff++) {
-	    if ( (num1 / den1) > eff_cuts.at(iEff)*0.01 && h_rate.at(iFM).at(iMVA).at(iEff).first ->GetBinContent(iBin) < 0 ) {
-	      h_rate.at(iFM).at(iMVA).at(iEff).first ->SetBinContent( iBin, h_count.at(iFM).at(iMVA)->Integral(jBin, PTBINS) );
-	    } 
-	    if ( (num2 / den2) > eff_cuts.at(iEff)*0.01 && h_rate.at(iFM).at(iMVA).at(iEff).second->GetBinContent(iBin) < 0 ) {
-	      h_rate.at(iFM).at(iMVA).at(iEff).second->SetBinContent( iBin, h_count.at(iFM).at(iMVA)->Integral(jBin, PTBINS) );
+	    float thresh = eff_cuts.at(iEff)*0.01;
+	    bool aboveT1 = (eff1 > thresh || preff1[0] > thresh || preff1[1] > thresh || preff1[2] > thresh || preff1[3] > thresh);
+	    bool aboveT2 = (eff2 > thresh || preff2[0] > thresh || preff2[1] > thresh || preff2[2] > thresh || preff2[3] > thresh);
+	    bool belowT1 = (eff1 < thresh || preff1[0] < thresh || preff1[1] < thresh || preff1[2] < thresh || preff1[3] < thresh);
+	    bool belowT2 = (eff2 < thresh || preff2[0] < thresh || preff2[1] < thresh || preff2[2] < thresh || preff2[3] < thresh);
+
+	    // Find the closest efficiency over 5 EMTF pT cuts
+	    float close1 = fabs(eff1 - thresh);
+	    float close2 = fabs(eff2 - thresh);
+	    int  iClose1 = 0;
+	    int  iClose2 = 0;
+	    for (int iPre = 0; iPre < 5; iPre++) {
+	      if (fabs(preff1[iPre] - thresh) < close1) {
+		close1  = fabs(preff1[iPre] - thresh);
+		iClose1 = iPre+1;
+	      }
+	      if (fabs(preff2[iPre] - thresh) < close2) {
+		close2  = fabs(preff2[iPre] - thresh);
+		iClose2 = iPre+1;
+	      }
 	    }
-	  }
-	}
-      }
 
-    }
+	    // bool noRate1 = h_rate.at(iFM).at(iMVA).at(iEff).first ->GetBinContent(iBin) < 0;
+	    // bool noRate2 = h_rate.at(iFM).at(iMVA).at(iEff).second->GetBinContent(iBin) < 0;
+	    
+	    if (aboveT1 && belowT1) // && noRate1?
+	      h_rate.at(iFM).at(iMVA).at(iEff).first ->SetBinContent( iBin, h_count.at(iFM).at(iMVA)->Integral(jBin+iClose1, PTBINS) );
+	    if (aboveT2 && belowT2) // && noRate2?
+	      h_rate.at(iFM).at(iMVA).at(iEff).second->SetBinContent( iBin, h_count.at(iFM).at(iMVA)->Integral(jBin+iClose2, PTBINS) );
+	  } // End loop: for (int iEff = 0; iEff < eff_cuts.size(); iEff++)
 
+	  // Push back previous efficiencies
+	  preff1[3] = preff1[2];  preff1[2] = preff1[1];  preff1[1] = preff1[0];  preff1[0] = eff1;
+	  preff2[3] = preff2[2];  preff2[2] = preff2[1];  preff2[1] = preff2[0];  preff2[0] = eff2;
+
+	} // End loop: for (int jBin = PTBINS; jBin >= 1; jBin--)
+      } // End loop: for (int iBin = 1; iBin <= PTBINS; iBin++)
+
+    } // End loop: for (int iMVA = 0; iMVA < fMVAs.at(iFM).second.size(); iMVA++)
   } // End loop: for (int iFM = 0; iFM < fMVAs.size(); iFM++)
 
 

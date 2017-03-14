@@ -25,11 +25,17 @@ def main():
     # file_name = dir_name+'PtResolution_AWB_v1_17_01_24_vars_all.root'
     # file_name = dir_name+'PtResolution_AWB_v1_17_01_24_vars_best.root'
     # file_name = dir_name+'PtResolution_AWB_v1_17_01_24_FRs.root'
-    file_name = dir_name+'PtResolution_AWB_v1_17_01_24_bends.root'
+    # file_name = dir_name+'PtResolution_AWB_v1_17_01_24_bends.root'
+    # file_name = dir_name+'PtResolution_AWB_v1_17_02_14_mode_11_RPC_vs_11.root'
+    # file_name = dir_name+'PtResolution_AWB_v1_17_02_14_mode_11_RPC_vs_15.root'
+    # file_name = dir_name+'PtResolution_AWB_v1_17_02_14_mode_7_RPC_vs_7.root'
+    file_name = dir_name+'PtResolution_AWB_v1_17_02_14_mode_7_RPC_vs_15.root'
 
     in_file = ROOT.TFile.Open(file_name)
 
-    out_file = ROOT.TFile('plots/DrawPtResolution.root', 'recreate')
+    # out_file = ROOT.TFile('plots/DrawPtResolution_RPC_11_vs_11.root', 'recreate')
+    # out_file = ROOT.TFile('plots/DrawPtResolution_RPC_11_vs_15.root', 'recreate')
+    out_file = ROOT.TFile('plots/DrawPtResolution_RPC_7_vs_7.root', 'recreate')
     out_dir = 'plots/png/'
 
 ##################
@@ -37,7 +43,8 @@ def main():
 ##################
 
     # colors = [ROOT.kBlack, ROOT.kViolet+2, ROOT.kViolet-2, ROOT.kBlue, ROOT.kSpring, ROOT.kOrange, ROOT.kRed, ROOT.kMagenta]
-    colors = [ROOT.kBlack, ROOT.kViolet, ROOT.kBlue, ROOT.kSpring, ROOT.kRed]
+    # colors = [ROOT.kBlack, ROOT.kViolet, ROOT.kBlue, ROOT.kSpring, ROOT.kRed]
+    colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed]
 
     weights = OrderedDict()
     weights['']     = [''           , 0.25] ## Plot central 99.5%
@@ -61,7 +68,8 @@ def main():
     pt_bins['250_1000'] = [250, 1000, '250 < p_{T} < 1000 GeV']
 
     eta_bins = OrderedDict()
-    eta_bins['all']       = [1.20, 2.40, '1.2 < |#eta| < 2.4']
+    # eta_bins['all']       = [1.20, 2.40, '1.2 < |#eta| < 2.4']
+    eta_bins['all']       = [1.20, 2.40, '1.2 < |#eta| < 1.6']
     # eta_bins['1p2_1p55']  = [1.20, 1.55, '1.2 < |#eta| < 1.55']
     # eta_bins['1p55_1p85'] = [1.55, 1.85, '1.55 < |#eta| < 1.85']
     # eta_bins['1p85_2p1']  = [1.85, 2.10, '1.85 < |#eta| < 2.1']
@@ -70,7 +78,7 @@ def main():
     Facts = OrderedDict()
 
     # Facts['f_0x001f01fd_0x2'] = ['d#phi12/23/34 + comb, #theta, FR1']
-    Facts['f_0x001f01ff_0x4_invPt'] = ['log_{2}p_{T}, 1/p_{T} wgt / EMTF vars + comb + St1 ring']
+    Facts['f_0x001f01ff_0x4_invPt'] = ['BDT, RPC in station 1'] ## ['log_{2}p_{T}, 1/p_{T} wgt / EMTF vars + comb + St1 ring']
 
     # # Facts['f_0x0000011d_0x2'      ] = ['1/p_{T} /  EMTF vars']
     # # Facts['f_0x0000011d_0x4'      ] = ['log_{2}p_{T}, EMTF vars']
@@ -103,16 +111,16 @@ def main():
     # # Facts['f_0x001f09ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1/4']
     # Facts['f_0x001f0fff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, all FRs']
 
-    Facts['f_0x001f01ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1']
-    Facts['f_0x001f11ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, bend 1']
-    Facts['f_0x001f31ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, bend 1/2']
-    Facts['f_0x001f51ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, bend 1/3']
-    Facts['f_0x001f91ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, bend 1/4']
-    Facts['f_0x001ff1ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, all bends']
+    # Facts['f_0x001f01ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1']
+    # Facts['f_0x001f11ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, bend 1']
+    # Facts['f_0x001f31ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, bend 1/2']
+    # Facts['f_0x001f51ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, bend 1/3']
+    # Facts['f_0x001f91ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, bend 1/4']
+    # Facts['f_0x001ff1ff_0x4_invPt'] = ['d#phi12/23/34 + comb, #theta, St1 ring, FR1, all bends']
 
 
     MVAs = OrderedDict()
-    MVAs['EMTF_pt']                = ['EMTF']
+    MVAs['EMTF_pt']                = ['EMTF, CSC in stations 1-2-3-4']
 
     MVAs['BDTG_AWB']               = ['BDT AWB']
 
@@ -121,17 +129,17 @@ def main():
 ## Draw plots
 #############
 
-    # print 'Resolution histograms: looping over pT and eta bins'
-    # for iWgt in weights.keys():
-    #     for iPt in pt_bins.keys():
-    #         for iEta in eta_bins.keys():
-    #             DrawRes(in_file, out_dir, colors, iWgt, weights[iWgt], 
-    #                     iPt, pt_bins[iPt], iEta, eta_bins[iEta], Facts, MVAs)
-    #             DrawResRatio(in_file, out_dir, colors, iWgt, weights[iWgt], 
-    #                          iPt, pt_bins[iPt], iEta, eta_bins[iEta], Facts, MVAs)
+    print 'Resolution histograms: looping over pT and eta bins'
+    for iWgt in weights.keys():
+        for iPt in pt_bins.keys():
+            for iEta in eta_bins.keys():
+                DrawRes(in_file, out_dir, colors, iWgt, weights[iWgt], 
+                        iPt, pt_bins[iPt], iEta, eta_bins[iEta], Facts, MVAs)
+                DrawResRatio(in_file, out_dir, colors, iWgt, weights[iWgt], 
+                             iPt, pt_bins[iPt], iEta, eta_bins[iEta], Facts, MVAs)
 
     print 'Score ratio graphs: looping over pT bins'
-    # DrawRatioGraph(in_file, out_dir, '')
+    DrawRatioGraph(in_file, out_dir, '', Facts, MVAs)
     for iPt in pt_bins.keys():
         DrawRatioGraph(in_file, out_dir, '_pt_%s' % iPt, Facts, MVAs)
 
@@ -209,7 +217,7 @@ def DrawRes(in_file, out_dir, colors, iWgt, weight,
     s_res_e.GetXaxis().SetTitle( x_str )
     s_res_e.GetXaxis().SetTitleSize(0.04)
     s_res_e.GetXaxis().SetLabelSize(0.038)
-    s_res_e.GetYaxis().SetTitle('Events'+weight[0])
+    s_res_e.GetYaxis().SetTitle('Fraction of events'+weight[0])
     s_res_e.GetYaxis().SetTitleSize(0.038)
     s_res_m.Draw("histsamenostack")
     l_res.Draw()
@@ -383,7 +391,7 @@ def DrawRatioGraph(in_file, out_dir, pt_str, Facts, MVAs):
     # h_rat_tr.SetTitle( t_str )
     # h_rat_tr.GetXaxis().SetTitle( x_str )
     # h_rat_tr.GetXaxis().SetLabelSize(0.038)
-    # h_rat_tr.GetYaxis().SetTitle('Events (weighted)')
+    # h_rat_tr.GetYaxis().SetTitle('Fraction of events (weighted)')
     # h_rat_tr.GetYaxis().SetTitleSize(0.038)    
     
     # l_res.Draw()

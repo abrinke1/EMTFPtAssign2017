@@ -24,7 +24,7 @@
 
 
 const int    PRTEVT  =     100000;  // When processing file, print every X events
-const int    MAXEVT  =         -1;  // Maximum number of events to process
+const int    MAXEVT  =    2000000;  // Maximum number of events to process
 const int     NBINS  =       1600;  // Number of bins in log2(TRG pT / GEN pT) plot
 const int     XMIN   =         -8;  // Minimum log2(TRG pT / GEN pT) value in plot
 const int     XMAX   =          8;  // Maximum log2(TRG pT / GEN pT) value in plot  
@@ -34,7 +34,9 @@ const double  PTMAX  =       256.;  // Maximum GEN and TRG pT values used
 
 // const double  EMTFSC =        1.0;  // Scaling of EMTF pT to yield median ratio of 1.0 (optional)
 const double  BDTGSC =        1.0;  // Scaling of BDTG pT to yield median ratio of 1.0 (optional)
-const double  EMTFSC = (1./1.25);  // Scaling of EMTF pT to yield median ratio of 1.0 (optional)
+// const double  EMTFSC = (1./1.25);  // Scaling of EMTF pT to yield median ratio of 1.0 for mode 15 (optional)
+const double  EMTFSC = (1./1.30);  // Scaling of EMTF pT to yield median ratio of 1.0 for mode 15 in RPC region (optional)
+// const double  EMTFSC = (1./1.67);  // Scaling of EMTF pT to yield median ratio of 1.0 for mode 11 in RPC region (optional)
 // const double  BDTGSC = (1./1.02);  // Scaling of BDTG pT to yield median ratio of 1.0 (optional)
 
 // const TString EVTWGT = "invLog10";  // Weight events: "invLog10" --> 1/(1 + log10(pT))
@@ -42,6 +44,8 @@ const double  EMTFSC = (1./1.25);  // Scaling of EMTF pT to yield median ratio o
 const TString EVTWGT =  "invSqrt";  // Weight events: "invSqrt"  --> 1/(sqrt(pT))
 // const TString EVTWGT =    "invPt";  // Weight events: "invPt"  --> 1/pT
 // const TString EVTWGT =         "";  // Don't weight events
+
+const bool RPC_STUDY = true;
 
 
 ///////////////////////////////////////
@@ -63,7 +67,9 @@ void PtResolution() {
   // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_24_bends.root");
   // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_26_NTrees.root");
   // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_26_MaxDepth.root");
-  in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_26_mode_15_opt.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_01_26_mode_15_opt.root");
+  // in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_02_14_mode_11_RPC.root");
+  in_file_names.push_back(in_dir+"PtRegression_AWB_v1_17_02_14_mode_7_RPC.root");
 
   // Open all input files
   for (int i = 0; i < in_file_names.size(); i++) {
@@ -143,7 +149,11 @@ void PtResolution() {
   // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_24_bends.root";
   // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_26_NTrees.root";
   // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_26_MaxDepth.root";
-  TString out_file_name = "plots/PtResolution_AWB_v1_17_01_26_mode_15_opt.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_01_26_mode_15_opt.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_02_14_mode_11_RPC_vs_11.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_02_14_mode_11_RPC_vs_15.root";
+  // TString out_file_name = "plots/PtResolution_AWB_v1_17_02_14_mode_7_RPC_vs_7.root";
+  TString out_file_name = "plots/PtResolution_AWB_v1_17_02_14_mode_7_RPC_vs_15.root";
   TFile *out_file = new TFile(out_file_name, "recreate");
 
 
@@ -206,10 +216,10 @@ void PtResolution() {
   pt_bins.push_back( std::make_tuple("250_1000", 250., 1000., "[250, 1000]") );
 
   eta_bins.push_back( std::make_tuple("all",       1.2,  2.4 , "     ALL    ") );
-  eta_bins.push_back( std::make_tuple("1p2_1p55",  1.2,  1.55, "[1.2 , 1.55]") );
-  eta_bins.push_back( std::make_tuple("1p55_1p85", 1.55, 1.85, "[1.55, 1.85]") );
-  eta_bins.push_back( std::make_tuple("1p85_2p1",  1.85, 2.1 , "[1.85, 2.1 ]") );
-  eta_bins.push_back( std::make_tuple("2p1_2p4",   2.1,  2.4 , "[2.1 , 2.4 ]") );
+  // eta_bins.push_back( std::make_tuple("1p2_1p55",  1.2,  1.55, "[1.2 , 1.55]") );
+  // eta_bins.push_back( std::make_tuple("1p55_1p85", 1.55, 1.85, "[1.55, 1.85]") );
+  // eta_bins.push_back( std::make_tuple("1p85_2p1",  1.85, 2.1 , "[1.85, 2.1 ]") );
+  // eta_bins.push_back( std::make_tuple("2p1_2p4",   2.1,  2.4 , "[2.1 , 2.4 ]") );
 
   // 1D resolution plots
   std::vector< std::vector< std::vector< std::vector< std::pair<TH1D*, TH1D*> > > > > h_res;
@@ -291,6 +301,12 @@ void PtResolution() {
 		EMTF_vec_tr,  EMTF_vec_tr_err,  EMTF_vec_te,  EMTF_vec_te_err,
 		ratio_vec_tr, ratio_vec_tr_err, ratio_vec_te, ratio_vec_te_err,
 		h_res, h_score );
+  }
+
+  // "Train" tree events have the wrong modes for EMTF (all tracks contain RPC hits)
+  if (RPC_STUDY) {
+    EMTF_vec_tr     = EMTF_vec_te;
+    EMTF_vec_tr_err = EMTF_vec_te_err;
   }
 
   // Fill 2D graphs of resolution ratio to EMTF
@@ -393,8 +409,12 @@ void LoopOverEvents( TChain* chain, const TString ft_name, const TString trgPt, 
   // Get GEN branches from the factories
   float GEN_pt_br;
   float GEN_eta_br;
+  float EMTF_mode_br; // For some reason, can't access as an integer ...
+  float EMTF_hasRPC_br; // For some reason, can't access as an integer ...
   chain->SetBranchAddress("GEN_pt", &GEN_pt_br);
   chain->SetBranchAddress("GEN_eta", &GEN_eta_br);
+  chain->SetBranchAddress("EMTF_mode", &EMTF_mode_br);
+  chain->SetBranchAddress("EMTF_hasRPC", &EMTF_hasRPC_br);
 
   // Get trigger branches from the factories
   for (int iMVA = 0; iMVA < MVAs.size(); iMVA++)
@@ -420,12 +440,14 @@ void LoopOverEvents( TChain* chain, const TString ft_name, const TString trgPt, 
 	  TRG_pt = pow(2, TRG_pt);
       }
       double GEN_pt = double(GEN_pt_br);
+      int EMTF_mode = int(EMTF_mode_br);
+      int EMTF_hasRPC = int(EMTF_hasRPC_br);
 
       // Scale trigger pT to shift median TRG pT / GEN pT value to 1.0 (optional)
       if (std::get<0>(MVAs.at(iMVA)).Contains("EMTF")) TRG_pt *= EMTFSC;
       if (std::get<0>(MVAs.at(iMVA)).Contains("BDTG")) TRG_pt *= BDTGSC;
 
-      // std::cout << "GEN_pt = " << GEN_pt << ", TRG_pt = " << TRG_pt << std::endl;
+      // std::cout << "GEN_pt = " << GEN_pt << ", TRG_pt = " << TRG_pt << ", EMTF_mode = " << EMTF_mode << std::endl;
 
       // Loop over pT and eta bins
       for (int iPt = 0; iPt < pt_bins.size(); iPt++) {
@@ -444,15 +466,24 @@ void LoopOverEvents( TChain* chain, const TString ft_name, const TString trgPt, 
 	  GEN_pt = min( PTMAX, max( PTMIN, GEN_pt ) );
 
 	  // std::cout << "Filling " << std::get<0>(MVAs.at(iMVA)) << " histogram: TRG_pt = " << TRG_pt << ", GEN_pt = " << GEN_pt << std::endl;
-	  if (tr_te.Contains("train"))
+	  if (tr_te.Contains("train")) {
 	    h_res.at(iFM).at(iMVA).at(iPt).at(iEta).first->Fill( log2( TRG_pt / GEN_pt ), evt_wgt );
-	  else if (tr_te.Contains("test"))
-	    h_res.at(iFM).at(iMVA).at(iPt).at(iEta).second->Fill( log2( TRG_pt / GEN_pt ), evt_wgt );
-	  else {
-	    std::cout << "tr_te = " << tr_te << ", not train or test. Exiting." << std::endl;
-	    break;
+	  } else if (tr_te.Contains("test")) {
+	    if (!RPC_STUDY) {
+	      h_res.at(iFM).at(iMVA).at(iPt).at(iEta).second->Fill( log2( TRG_pt / GEN_pt ), evt_wgt );
+	      // } else if ( std::get<0>(MVAs.at(iMVA)).Contains("EMTF") && EMTF_mode == 11 && EMTF_hasRPC == 0 ) {
+	      // } else if ( std::get<0>(MVAs.at(iMVA)).Contains("EMTF") && EMTF_mode == 15 && EMTF_hasRPC == 0 ) {
+	      // } else if ( std::get<0>(MVAs.at(iMVA)).Contains("EMTF") && EMTF_mode == 7 && EMTF_hasRPC == 0 ) {
+	    } else if ( std::get<0>(MVAs.at(iMVA)).Contains("EMTF") && EMTF_mode == 15 && EMTF_hasRPC == 0 ) {
+	      h_res.at(iFM).at(iMVA).at(iPt).at(iEta).second->Fill( log2( TRG_pt / GEN_pt ), evt_wgt );
+	    } else if ( std::get<0>(MVAs.at(iMVA)).Contains("EMTF") == 0 && EMTF_hasRPC == 1 ) {
+	      h_res.at(iFM).at(iMVA).at(iPt).at(iEta).second->Fill( log2( TRG_pt / GEN_pt ), evt_wgt );
+	    } else if ( EMTF_mode != 15 && EMTF_hasRPC != 0 ) {
+	      std::cout << "\n" << std::get<0>(MVAs.at(iMVA)) << ", mode " << EMTF_mode << ", has_RPC " << EMTF_hasRPC << std::endl;
+	      std::cout << "tr_te = " << tr_te << ", not train or test. Exiting." << std::endl;
+	      return;
+	    }
 	  }
-	  
 	} // End loop: for (int iEta = 0; iEta < eta_bins.size(); iEta++)
       } // End loop: for (int iPt = 0; iPt < pt_bins.size(); iPt++)
     } // End loop: for (int iMVA = 0; iMVA < MVAs.size(); iMVA++)
@@ -465,14 +496,19 @@ void LoopOverEvents( TChain* chain, const TString ft_name, const TString trgPt, 
 void StoreMedians( const TString ft_name, const int iFM, 
 		   const std::vector<std::tuple<TString, float, float, TString>> pt_bins,
 		   const std::vector<std::tuple<TString, float, float, TString>> eta_bins,
-		   const std::vector< std::vector< std::vector< std::vector< std::pair<TH1D*, TH1D*> > > > > h_res,
+		   std::vector< std::vector< std::vector< std::vector< std::pair<TH1D*, TH1D*> > > > >& h_res,
 		   std::vector<std::tuple<TString, float, float, float>>& MVAs ) {
 
   std::cout << "\n" << std::string(33,'*') << "\n" << "Median trigger pT / GEN pT values" << "\n" << std::string(33,'*') << std::endl;
   for (int iMVA = 0; iMVA < MVAs.size(); iMVA++) {
     for (int iPt = 0; iPt < pt_bins.size(); iPt++) {
-      if ( !(std::get<0>(pt_bins.at(iPt)).Contains("all")) ) continue;
       for (int iEta = 0; iEta < eta_bins.size(); iEta++) {
+
+	// Normalize resolution histograms to area = 1
+	h_res.at(iFM).at(iMVA).at(iPt).at(iEta).first ->Scale( 1. / h_res.at(iFM).at(iMVA).at(iPt).at(iEta).first ->Integral() );
+	h_res.at(iFM).at(iMVA).at(iPt).at(iEta).second->Scale( 1. / h_res.at(iFM).at(iMVA).at(iPt).at(iEta).second->Integral() );
+
+	if ( !(std::get<0>(pt_bins.at(iPt)).Contains("all")) ) continue;
 	if ( !(std::get<0>(eta_bins.at(iEta)).Contains("all")) ) continue;
 
 	std::get<2>(MVAs.at(iMVA)) = pow(2, GetMedian( h_res.at(iFM).at(iMVA).at(iPt).at(iEta).first ));  // Store median ratio in MVAs
@@ -483,7 +519,6 @@ void StoreMedians( const TString ft_name, const int iFM,
 	std::cout << std::setw(45) << std::left << ft_name
 		  << std::setw(35) << std::left << std::get<0>(MVAs.at(iMVA))+" test"
 		  << std::fixed << std::setprecision(3) << std::get<3>(MVAs.at(iMVA)) << std::endl;
-
       }
     }
   }
@@ -791,9 +826,9 @@ void PrintRatios( const TString ft_name, const int iFM,
       // Print pT resolution score ratios for each pT/eta bin
       for (int iEta = 0; iEta < eta_bins.size(); iEta++) {
 	Float_t score_num     = GetResScore(    h_res.at(iFM).at(iMVA).at(iPt).at(iEta).second, std::get<3>(MVAs.at(iMVA)) );
-	Float_t score_den     = GetResScore(    h_res.at(iFM).at(0)   .at(iPt).at(iEta).second, std::get<3>(MVAs.at(iMVA)) );
+	Float_t score_den     = GetResScore(    h_res.at(iFM).at(0)   .at(iPt).at(iEta).second, std::get<3>(MVAs.at(0)) );
 	Float_t score_err_num = GetResScoreErr( h_res.at(iFM).at(iMVA).at(iPt).at(iEta).second, std::get<3>(MVAs.at(iMVA)) );
-	Float_t score_err_den = GetResScoreErr( h_res.at(iFM).at(0)   .at(iPt).at(iEta).second, std::get<3>(MVAs.at(iMVA)) );
+	Float_t score_err_den = GetResScoreErr( h_res.at(iFM).at(0)   .at(iPt).at(iEta).second, std::get<3>(MVAs.at(0)) );
 	Float_t ratio         = score_num / score_den;
 	Float_t ratio_err     = ratio * sqrt( pow(score_err_num/score_num, 2) + pow(score_err_den/score_den, 2) );
 	
