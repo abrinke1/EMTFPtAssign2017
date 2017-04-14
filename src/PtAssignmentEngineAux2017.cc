@@ -69,13 +69,20 @@
 static const int dPhiNLBMap_4bit_256Max[16] = {0, 1, 2, 3, 4, 6, 8, 10, 12, 16, 20, 25, 31, 46, 68, 136};
 
 // For use in dPhi23, dPhi24, and dPhi34 in 3- and 4-station modes (7, 11, 13, 14, 15), except for dPhi23 in mode 7 and dPhi34 in mode 15
-static const int dPhiNLBMap_5bit_256Max[32] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 23, 25, 28, 31, 34, 39, 46, 55, 68, 91, 136};
+static const int dPhiNLBMap_5bit_256Max[32] = { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 
+					       16, 17, 19, 20, 21, 23, 25, 28, 31, 34, 39, 46, 55, 68, 91, 136};
 
 // 512 max units----
 
 // For use in all dPhiAB (where "A" and "B" are the first two stations in the track) in all modes
-static const int dPhiNLBMap_7bit_512Max[128] =  {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 71, 72, 73, 74, 75, 76, 77, 79, 80, 81, 83, 84, 86, 87, 89, 91, 92, 94, 96, 98, 100, 102, 105, 107, 110, 112, 115, 118, 121, 124, 127, 131, 135, 138, 143, 147, 152, 157, 162, 168, 174, 181, 188, 196, 204, 214, 224, 235, 247, 261, 276, 294, 313, 336, 361, 391, 427, 470};
-
+static const int dPhiNLBMap_7bit_512Max[128] =  {  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15, 
+						  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31, 
+						  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47, 
+						  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63, 
+						  64,  65,  66,  67,  68,  69,  71,  72,  73,  74,  75,  76,  77,  79,  80,  81, 
+						  83,  84,  86,  87,  89,  91,  92,  94,  96,  98, 100, 102, 105, 107, 110, 112, 
+						 115, 118, 121, 124, 127, 131, 135, 138, 143, 147, 152, 157, 162, 168, 174, 181, 
+						 188, 196, 204, 214, 224, 235, 247, 261, 276, 294, 313, 336, 361, 391, 427, 470};
 
 // const int (*PtAssignmentEngineAux2017::getModeVariables() const)[6] {
 //   return ModeVariables_Scheme3;
@@ -234,39 +241,39 @@ int PtAssignmentEngineAux2017::getCLCT(int clct, int endcap, int dPhiSign, int b
   //   * In ME+, even CLCTs have negative sign, odd CLCTs have positive
 
   // For use in all 3- and 4-station modes (7, 11, 13, 14, 15)
-  // Bends [0, -1] --> 0, [+1] --> 1, [-2, -3, -4] --> 2, [+2, +3, +4] --> 3
+  // Bends [-4, -3, -2] --> 0, [-1, 0] --> 1, [+1] --> 2, [+2, +3, +4] --> 3
   if (bits == 2) {
     assert(clct >= 2);
     switch (clct) {
-    case 10: clct_ = 0;                  break;
-    case  9: clct_ = (sign_ > 0 ? 0 : 1); break;
-    case  8: clct_ = (sign_ < 0 ? 0 : 1); break;
-    case  7: clct_ = (sign_ > 0 ? 2 : 3); break;
-    case  6: clct_ = (sign_ < 0 ? 2 : 3); break;
-    case  5: clct_ = (sign_ > 0 ? 2 : 3); break;
-    case  4: clct_ = (sign_ < 0 ? 2 : 3); break;
-    case  3: clct_ = (sign_ > 0 ? 2 : 3); break;
-    case  2: clct_ = (sign_ < 0 ? 2 : 3); break;
-    default: clct_ = 3;                  break;
+    case 10: clct_ = 1;                  break;
+    case  9: clct_ = (sign_ > 0 ? 1 : 2); break;
+    case  8: clct_ = (sign_ < 0 ? 1 : 2); break;
+    case  7: clct_ = (sign_ > 0 ? 0 : 3); break;
+    case  6: clct_ = (sign_ < 0 ? 0 : 3); break;
+    case  5: clct_ = (sign_ > 0 ? 0 : 3); break;
+    case  4: clct_ = (sign_ < 0 ? 0 : 3); break;
+    case  3: clct_ = (sign_ > 0 ? 0 : 3); break;
+    case  2: clct_ = (sign_ < 0 ? 0 : 3); break;
+    default: clct_ = 3;                   break;
     }
   }
 
   // For use in all 2-station modes (3, 5, 6, 9, 10, 12)
-  // Bends [0] --> 0, [-1] --> 1, [+1] --> 2, [-2] --> 3, [+2] --> 4, [-3, -4] --> 5, [+3, +4] --> 6, [isRPC] --> 7
+  // Bends [isRPC] --> 0, [-4, -3] --> 1, [-2] --> 2, [-1] --> 3, [0] --> 4, [+1] --> 5, [+2] --> 6, [+3, +4] --> 7
   else if (bits == 3) {
     assert(clct >= 2 || clct == 0);
     switch (clct) {
-    case 10: clct_ = 0;                  break;
-    case  9: clct_ = (sign_ > 0 ? 1 : 2); break;
-    case  8: clct_ = (sign_ < 0 ? 1 : 2); break;
-    case  7: clct_ = (sign_ > 0 ? 3 : 4); break;
-    case  6: clct_ = (sign_ < 0 ? 3 : 4); break;
-    case  5: clct_ = (sign_ > 0 ? 5 : 6); break;
-    case  4: clct_ = (sign_ < 0 ? 5 : 6); break;
-    case  3: clct_ = (sign_ > 0 ? 5 : 6); break;
-    case  2: clct_ = (sign_ < 0 ? 5 : 6); break;
-    case  0: clct_ = 7;                  break;
-    default: clct_ = 7;                  break;
+    case 10: clct_ = 4;                   break;
+    case  9: clct_ = (sign_ > 0 ? 3 : 5); break;
+    case  8: clct_ = (sign_ < 0 ? 3 : 5); break;
+    case  7: clct_ = (sign_ > 0 ? 2 : 6); break;
+    case  6: clct_ = (sign_ < 0 ? 2 : 6); break;
+    case  5: clct_ = (sign_ > 0 ? 1 : 7); break;
+    case  4: clct_ = (sign_ < 0 ? 1 : 7); break;
+    case  3: clct_ = (sign_ > 0 ? 1 : 7); break;
+    case  2: clct_ = (sign_ < 0 ? 1 : 7); break;
+    case  0: clct_ = 0;                   break;
+    default: clct_ = 0;                   break;
     }
   }
 
@@ -282,11 +289,11 @@ int PtAssignmentEngineAux2017::getdTheta(int dTheta, int bits) const {
 
   // For use in mode 15
   if (bits == 2) {
-    if      (abs(dTheta) <= 1)
+    if      (dTheta <= -3)
       dTheta_ = 0;
     else if (abs(dTheta) <= 2)
       dTheta_ = 1;
-    else if (dTheta >= +3)
+    else if (abs(dTheta) <= 1)
       dTheta_ = 2;
     else
       dTheta_ = 3;
@@ -294,19 +301,19 @@ int PtAssignmentEngineAux2017::getdTheta(int dTheta, int bits) const {
 
   // For use in all 2- and 3-station modes (all modes except 15)
   else if (bits == 3) {
-    if      (dTheta == 0)
+    if      (dTheta <= -4)
       dTheta_ = 0;
-    else if (dTheta == -1)
-      dTheta_ = 1;
-    else if (dTheta == +1)
-      dTheta_ = 2;
-    else if (dTheta == -2)
-      dTheta_ = 3;
-    else if (dTheta == +2)
-      dTheta_ = 4;
     else if (dTheta == -3)
+      dTheta_ = 1;
+    else if (dTheta == -2)
+      dTheta_ = 2;
+    else if (dTheta == -1)
+      dTheta_ = 3;
+    if      (dTheta ==  0)
+      dTheta_ = 4;
+    else if (dTheta == +1)
       dTheta_ = 5;
-    else if (dTheta >= +3)
+    else if (dTheta == +2)
       dTheta_ = 6;
     else
       dTheta_ = 7;
@@ -336,7 +343,6 @@ int PtAssignmentEngineAux2017::getTheta(int theta, int st1_ring2, int bits) cons
       if (theta < 44 || theta > 88) {
 	std::cout << "\n\n*** Bizzare case of mode 15 track with ME1/2 LCT and track theta = " << theta << std::endl;
       }
-      // theta_ = (std::min( std::max(theta, 44), 88) - 44) / 9;
       theta_ = ((std::min( std::max(theta, 44), 88) - 44) / 9) + 6;
     }
   }
@@ -419,13 +425,13 @@ int PtAssignmentEngineAux2017::getGMTPhiV2(int phi) const {
 int PtAssignmentEngineAux2017::getGMTEta(int theta, int endcap) const {
   if (theta < 0)
     return 0;
-  if (endcap == 2 && theta > 127)
+  if (endcap == -1 && theta > 127)
     return -240;
-  if (endcap == 1 && theta > 127)
+  if (endcap == +1 && theta > 127)
     return 239;
 
   int eta = GMT_eta_from_theta[theta];
-  if (endcap == 2)
+  if (endcap == -1)
     eta = -eta;
   return eta;
 }

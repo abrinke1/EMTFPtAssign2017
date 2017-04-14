@@ -1,10 +1,10 @@
 
 void BuildTracks( std::vector< std::vector<int> >& trks_hits,  // Vector of tracks, with hit indices by station
 		  std::vector< std::vector<int> >& trks_modes, // Mode, CSC mode, RPC mode, and sumAbsDPhi of tracks
-		  const std::vector< std::vector< std::vector<int> > > id, // All hit index values, by sector and station
-                  const std::vector< std::vector< std::vector<int> > > ph, // All full-precision integer phi values
-                  const std::vector< std::vector< std::vector<int> > > th, // All full-precision integer theta values
-                  const std::vector< std::vector< std::vector<int> > > dt, // All detector values (0 for none, 1 for CSC, 2 for RPC)
+		  const std::array< std::array< std::vector<int>, 4>, 12> id, // All hit index values, by sector and station
+                  const std::array< std::array< std::vector<int>, 4>, 12> ph, // All full-precision integer phi values
+                  const std::array< std::array< std::vector<int>, 4>, 12> th, // All full-precision integer theta values
+                  const std::array< std::array< std::vector<int>, 4>, 12> dt, // All detector values (0 for none, 1 for CSC, 2 for RPC)
                   const int mode,            // Mode of track we're building
                   const int maxRPC = 0,      // Maximum # of stations with RPC hits
                   const int minCSC = 2,      // Minimum # of stations with CSC hits
