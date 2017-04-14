@@ -28,7 +28,7 @@ void ReadMVAOut_v1_KNN() {
 
   // List of input files
   std::vector<TString> in_file_names;
-  in_file_names.push_back("/afs/cern.ch/work/w/wshi/public/TMVA_2017/TMVA/EMTFPtAssign2017/PtRegression_v1_KNN_k_4.root");
+  in_file_names.push_back("/afs/cern.ch/YOURFILEDIRECTORY");
 
   // Open all input files
   for (UInt_t i = 0; i < in_file_names.size(); i++) {
@@ -611,7 +611,7 @@ void ReadMVAOut_v1_KNN() {
     }//end Gen bin
     
     //write to output file
-    TFile myPlot("/afs/cern.ch/work/w/wshi/public/TMVA_2017/TMVA/EMTFPtAssign2017/Output_v1_KNN.root","RECREATE");
+    TFile myPlot("/afs/cern.ch/OUTPUTFILEDIRECTORY","RECREATE");
     
     //write 2D non scaled efficiency plot
     KNN_trigger_Gen_efficiency->Write();
