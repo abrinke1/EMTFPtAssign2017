@@ -125,12 +125,13 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    // Here the preparation phase begins
 
    // Configure settings for this mode and user
-   ConfigureMode( MODE );
-   ConfigureUser( USER );
+   PtRegression_Apr_2017_cfg::ConfigureMode( MODE );
+   PtRegression_Apr_2017_cfg::ConfigureUser( USER );
 
    // Create a new root output file
    TString out_file_str;
-   out_file_str.Form( "%s/%s_MODE_%d.root", OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), MODE );
+   if (BIT_COMP) out_file_str.Form( "%s/%s_MODE_%d_bitCompr.root",   OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), MODE );
+   else          out_file_str.Form( "%s/%s_MODE_%d_noBitCompr.root", OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), MODE );
    TFile* out_file = TFile::Open( out_file_str, "RECREATE" );
 
    // Read training and test data (see TMVAClassification for reading ASCII files)
@@ -232,7 +233,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
      for (int iWgt = 0; iWgt < EVT_WGTS.size(); iWgt++) {
 
        TString factName;  // "Targ" and "Wgt" components not arbitrary - correspond to specific options later on
-       factName.Form("f_MODE_%d_%sTarg_%sWgt", MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data());
+       if (BIT_COMP) factName.Form("f_MODE_%d_%sTarg_%sWgt_bitCompr",   MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data());
+       else          factName.Form("f_MODE_%d_%sTarg_%sWgt_noBitCompr", MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data());
        
        if        (MODE == 15) {
 	 // BASELINE mode 15 - dPhi12/23/34 + combos, theta, FR1, St1 ring, dTh14, bend1, RPC 1/2/3/4

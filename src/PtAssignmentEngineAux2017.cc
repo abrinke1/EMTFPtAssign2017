@@ -89,150 +89,145 @@ static const int dPhiNLBMap_7bit_512Max[128] =  {  0,   1,   2,   3,   4,   5,  
 // }
 
 int PtAssignmentEngineAux2017::getNLBdPhi(int dPhi, int bits, int max) const {
-  assert( (bits == 4 && max == 256) || (bits == 5 && max == 256) || (bits == 7 && max == 512) );
+  assert( (bits == 4 && max == 256) || 
+	  (bits == 5 && max == 256) || 
+	  (bits == 7 && max == 512) );
 
-  int dPhi_= max;
+  int dPhi_ = max;
   int sign_ = 1;
-  if (dPhi<0)
+  if (dPhi < 0)
     sign_ = -1;
   dPhi = sign_ * dPhi;
 
-  if (max==256)
-  {
-    if (bits == 4)
-    {
-      dPhi_ = dPhiNLBMap_4bit_256Max[(1<<bits)-1];
-      for (int edge=0; edge<(1<<bits)-1; edge++)
-      {
-        if (dPhiNLBMap_4bit_256Max[edge]<=dPhi && dPhiNLBMap_4bit_256Max[edge+1]>dPhi)
-        {
+  if (max == 256) {
+    if (bits == 4) {
+      dPhi_ = dPhiNLBMap_4bit_256Max[(1 << bits) - 1];
+      for (int edge = 0; edge < (1 << bits) - 1; edge++) {
+        if (dPhiNLBMap_4bit_256Max[edge]  <= dPhi && 
+	    dPhiNLBMap_4bit_256Max[edge+1] > dPhi) {
+          dPhi_ = dPhiNLBMap_4bit_256Max[edge];
+          break;
+        }
+      }
+    } // End conditional: if (bits == 4)
+    if (bits == 5) {
+      dPhi_ = dPhiNLBMap_5bit_256Max[(1 << bits) - 1];
+      for (int edge = 0; edge < (1 << bits) - 1; edge++) {
+        if (dPhiNLBMap_5bit_256Max[edge]  <= dPhi && 
+	    dPhiNLBMap_5bit_256Max[edge+1] > dPhi) {
           dPhi_ = dPhiNLBMap_5bit_256Max[edge];
           break;
         }
       }
-    }
-    if (bits == 5)
-    {
-      dPhi_ = dPhiNLBMap_5bit_256Max[(1<<bits)-1];
-      for (int edge=0; edge<(1<<bits)-1; edge++)
-      {
-        if (dPhiNLBMap_5bit_256Max[edge]<=dPhi && dPhiNLBMap_5bit_256Max[edge+1]>dPhi)
-        {
-          dPhi_ = dPhiNLBMap_5bit_256Max[edge];
-          break;
-        }
-      }
-    }
-  }
+    } // End conditional: if (bits == 5)
+  } // End conditional: if (max == 256)
 
-  else if (max==512)
-  {
-    if (bits == 7)
-    {
-      dPhi_ = dPhiNLBMap_7bit_512Max[(1<<bits)-1];
-      for (int edge=0; edge<(1<<bits)-1; edge++)
-      {
-        if (dPhiNLBMap_7bit_512Max[edge]<=dPhi && dPhiNLBMap_7bit_512Max[edge+1]>dPhi)
-        {
+  else if (max == 512) {
+    if (bits == 7) {
+      dPhi_ = dPhiNLBMap_7bit_512Max[(1 << bits) - 1];
+      for (int edge = 0; edge < (1 << bits) - 1; edge++) {
+        if (dPhiNLBMap_7bit_512Max[edge]  <= dPhi && 
+	    dPhiNLBMap_7bit_512Max[edge+1] > dPhi) {
           dPhi_ = dPhiNLBMap_7bit_512Max[edge];
           break;
         }
       }
-    }
-  }
+    } // End conditional: if (bits == 7)
+  } // End conditional: else if (max == 512)
 
-  if (dPhi>=max) dPhi_ = max;
-
-  assert( abs(sign_) == 1 && dPhi_ >= 0 && dPhi_ <= max);
+  assert( abs(sign_) == 1 && dPhi_ >= 0 && dPhi_ < max);
   return (sign_ * dPhi_);
-}
+} // End function: nt PtAssignmentEngineAux2017::getNLBdPhi()
+
 
 int PtAssignmentEngineAux2017::getNLBdPhiBin(int dPhi, int bits, int max) const {
-  assert( (bits == 4 && max == 256) || (bits == 5 && max == 256) || (bits == 7 && max == 512) );
-
-  int dPhiBin_= (1<<bits)-1;
+  assert( (bits == 4 && max == 256) || 
+	  (bits == 5 && max == 256) || 
+	  (bits == 7 && max == 512) );
+  
+  int dPhiBin_ = (1 << bits) - 1;
   int sign_ = 1;
-  if (dPhi<0)
+  if (dPhi < 0)
     sign_ = -1;
   dPhi = sign_ * dPhi;
+  
+  if (max == 256) {
+    if (bits == 4) {
+      for (int edge = 0; edge < (1 << bits) - 1; edge++) {
+        if (dPhiNLBMap_4bit_256Max[edge] <= dPhi && 
+	    dPhiNLBMap_4bit_256Max[edge+1] > dPhi) {
+          dPhiBin_ = edge;
+          break;
+        }
+      }
+    } // End conditional: if (bits == 4)
+    if (bits == 5) {
+      for (int edge = 0; edge < (1 << bits) - 1; edge++) {
+        if (dPhiNLBMap_5bit_256Max[edge]  <= dPhi && 
+	    dPhiNLBMap_5bit_256Max[edge+1] > dPhi) {
+          dPhiBin_ = edge;
+          break;
+        }
+      }
+    } // End conditional: if (bits == 5) 
+  } // End conditional: if (max == 256)
 
-  if (max==256)
-  {
-    if (bits == 4)
-    {
-      for (int edge=0; edge<(1<<bits)-1; edge++)
-      {
-        if (dPhiNLBMap_4bit_256Max[edge]<=dPhi && dPhiNLBMap_4bit_256Max[edge+1]>dPhi)
-        {
+  else if (max == 512) {
+    if (bits == 7) {
+      for (int edge = 0; edge < (1 << bits) - 1; edge++) {
+        if (dPhiNLBMap_7bit_512Max[edge]  <= dPhi && 
+	    dPhiNLBMap_7bit_512Max[edge+1] > dPhi) {
           dPhiBin_ = edge;
           break;
         }
       }
-    }
-    if (bits == 5)
-    {
-      for (int edge=0; edge<(1<<bits)-1; edge++)
-      {
-        if (dPhiNLBMap_5bit_256Max[edge]<=dPhi && dPhiNLBMap_5bit_256Max[edge+1]>dPhi)
-        {
-          dPhiBin_ = edge;
-          break;
-        }
-      }
-    }
-  }
-
-  else if (max==512)
-  {
-    if (bits == 7)
-    {
-      for (int edge=0; edge<(1<<bits)-1; edge++)
-      {
-        if (dPhiNLBMap_7bit_512Max[edge]<=dPhi && dPhiNLBMap_7bit_512Max[edge+1]>dPhi)
-        {
-          dPhiBin_ = edge;
-          break;
-        }
-      }
-    }
-  }
+    } // End conditional: if (bits == 7)
+  } // End conditional: else if (max == 512)
   
   assert(dPhiBin_ >= 0 && dPhiBin_ < pow(2, bits));
   return (dPhiBin_);
-}
+} // End function: int PtAssignmentEngineAux2017::getNLBdPhiBin()
+
 
 int PtAssignmentEngineAux2017::getdPhiFromBin(int dPhiBin, int bits, int max) const {
-  assert( (bits == 4 && max == 256) || (bits == 5 && max == 256) || (bits == 7 && max == 512) );
+  assert( (bits == 4 && max == 256) || 
+	  (bits == 5 && max == 256) || 
+	  (bits == 7 && max == 512) );
   
-  int dPhi_= (1<<bits)-1;
+  int dPhi_ = (1 << bits) - 1;
 
-  if (dPhiBin>(1<<bits)-1)
-    dPhiBin = (1<<bits)-1;
-
-  if (max==256)
-  {
+  if (dPhiBin > (1 << bits) - 1)
+    dPhiBin = (1 << bits) - 1;
+  
+  if (max == 256) {
     if (bits == 4)
       dPhi_ = dPhiNLBMap_4bit_256Max[dPhiBin];
     if (bits == 5)
       dPhi_ = dPhiNLBMap_5bit_256Max[dPhiBin];
-  }
+  } // End conditional: if (max == 256)
 
-  else if (max==512)
-  {
+  else if (max == 512) {
     if (bits == 7)
       dPhi_ = dPhiNLBMap_7bit_512Max[dPhiBin];
-  }
+  } // End conditional: else if (max == 512)
 
   assert(dPhi_ >= 0 && dPhi_ < max);
   return (dPhi_);
-}
+} // End function: int PtAssignmentEngineAux2017::getdPhiFromBin()
+
 
 int PtAssignmentEngineAux2017::getCLCT(int clct, int endcap, int dPhiSign, int bits) const {
-  assert( clct >= 0 && clct <= 10 && abs(endcap) == 1 && abs(dPhiSign) == 1 && (bits == 2 || bits == 3) );
+  assert( clct >= 0 && clct <= 10 && abs(endcap) == 1 && 
+	  abs(dPhiSign) == 1 && (bits == 2 || bits == 3) );
 
   // Convention here: endcap == +/-1, dPhiSign = +/-1.  May need to change to match FW. - AWB 17.03.17
   int clct_ = 0;
   int sign_ = -1 * endcap * dPhiSign;  // CLCT bend is with dPhi in ME-, opposite in ME+
+
+  if (clct < 2) {
+    // std::cout << "\n\n*** In endcap " << endcap << ", CLCT = " << clct << std::endl;
+    clct = 2;
+  }
 
   // CLCT pattern can be converted into |bend| x sign as follows:
   // |bend| = (10 + (pattern % 2) - pattern) / 2
@@ -254,9 +249,9 @@ int PtAssignmentEngineAux2017::getCLCT(int clct, int endcap, int dPhiSign, int b
     case  4: clct_ = (sign_ < 0 ? 0 : 3); break;
     case  3: clct_ = (sign_ > 0 ? 0 : 3); break;
     case  2: clct_ = (sign_ < 0 ? 0 : 3); break;
-    default: clct_ = 3;                   break;
+    default: clct_ = 0;                   break;
     }
-  }
+  } // End conditional: if (bits == 2)
 
   // For use in all 2-station modes (3, 5, 6, 9, 10, 12)
   // Bends [isRPC] --> 0, [-4, -3] --> 1, [-2] --> 2, [-1] --> 3, [0] --> 4, [+1] --> 5, [+2] --> 6, [+3, +4] --> 7
@@ -275,11 +270,11 @@ int PtAssignmentEngineAux2017::getCLCT(int clct, int endcap, int dPhiSign, int b
     case  0: clct_ = 0;                   break;
     default: clct_ = 0;                   break;
     }
-  }
+  } // End conditional: else if (bits == 3)
 
   assert(clct_ >= 0 && clct_ < pow(2, bits));
   return clct_;
-}
+} // End function: int PtAssignmentEngineAux2017::getCLCT()
 
 
 int PtAssignmentEngineAux2017::getdTheta(int dTheta, int bits) const {
@@ -289,15 +284,15 @@ int PtAssignmentEngineAux2017::getdTheta(int dTheta, int bits) const {
 
   // For use in mode 15
   if (bits == 2) {
-    if      (dTheta <= -3)
-      dTheta_ = 0;
+    if      (abs(dTheta) <= 1)
+      dTheta_ = 2;
     else if (abs(dTheta) <= 2)
       dTheta_ = 1;
-    else if (abs(dTheta) <= 1)
-      dTheta_ = 2;
+    else if (dTheta <= -3)
+      dTheta_ = 0;
     else
       dTheta_ = 3;
-  }
+  } // End conditional: if (bits == 2)
 
   // For use in all 2- and 3-station modes (all modes except 15)
   else if (bits == 3) {
@@ -317,15 +312,17 @@ int PtAssignmentEngineAux2017::getdTheta(int dTheta, int bits) const {
       dTheta_ = 6;
     else
       dTheta_ = 7;
-  }
+  } // End conditional: if (bits == 3)
 
   assert(dTheta_ >= 0 && dTheta_ < pow(2, bits));
   return (dTheta_);
-}
+} // End function: int PtAssignmentEngineAux2017::getdTheta()
 
 
 int PtAssignmentEngineAux2017::getTheta(int theta, int st1_ring2, int bits) const {
-  assert( theta >= 5 && theta < 128 && (st1_ring2 == 0 || st1_ring2 == 1) && (bits == 4 || bits == 5) );
+  assert( theta >= 5 && theta < 128 && 
+	  (st1_ring2 == 0 || st1_ring2 == 1) && 
+	  (bits == 4 || bits == 5) );
 
   int theta_ = -99;
 
@@ -335,8 +332,8 @@ int PtAssignmentEngineAux2017::getTheta(int theta, int st1_ring2, int bits) cons
       // Should never fail with dTheta < 4 windows ... should change to using ME1 for track theta - AWB 17.03.17
       if (theta > 58) {
 	std::cout << "\n\n*** Bizzare case of mode 15 track with ME1/1 LCT and track theta = " << theta << std::endl;
-      }      
-      theta_ = (std::min(theta, 58) - 5) / 9;
+      }     
+      theta_ = (std::min( std::max(theta, 5), 58) - 5) / 9;
     }
     else if (st1_ring2 == 1) {
       // Should rarely fail with dTheta < 4 windows ... should change to using ME1 for track theta - AWB 17.03.17
@@ -345,21 +342,21 @@ int PtAssignmentEngineAux2017::getTheta(int theta, int st1_ring2, int bits) cons
       }
       theta_ = ((std::min( std::max(theta, 44), 88) - 44) / 9) + 6;
     }
-  }
+  } // End conditional: if (bits == 4)
 
   // For use in all 2- and 3-station modes (all modes except 15)
   else if (bits == 5) {
     if (st1_ring2 == 0) {
-      theta_ = (theta - 1) / 4;
+      theta_ = (std::max(theta, 1) - 1) / 4;
     }
     else if (st1_ring2 == 1) {
-      theta_ = ((std::max(theta, 104) - 1) / 4) + 6;
+      theta_ = ((std::min(theta, 104) - 1) / 4) + 6;
     }
-  }
+  } // End conditional: else if (bits == 5)
 
   assert(theta_ >= 0 && ((bits == 4 && theta_ <= 10) || (bits == 5 && theta_ < pow(2, bits))) );
   return (theta_);
-}
+} // End function: int PtAssignmentEngineAux2017::getTheta()
 
 
 // // Need to re-check / verify this - AWB 17.03.17
