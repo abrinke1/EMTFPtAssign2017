@@ -13,6 +13,9 @@ void CalcBends( int& bend1, int& bend2, int& bend3, int& bend4,
 		const int pat1, const int pat2, const int pat3, const int pat4,
 		const int dPhSign, const int endcap, const int mode, const bool BIT_COMP=false );
 
+void CalcRPCs( int& RPC1, int& RPC2, int& RPC3, int& RPC4, 
+	       const int mode, const bool BIT_COMP=false );
+
 int CalcBendFromPattern( const int pattern, const int endcap );
 
 

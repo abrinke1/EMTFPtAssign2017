@@ -130,8 +130,12 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 
    // Create a new root output file
    TString out_file_str;
-   if (BIT_COMP) out_file_str.Form( "%s/%s_MODE_%d_bitCompr.root",   OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), MODE );
-   else          out_file_str.Form( "%s/%s_MODE_%d_noBitCompr.root", OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), MODE );
+   TString bit_str = (BIT_COMP ? "bitCompr" : "noBitCompr");
+   TString RPC_str = (USE_RPC  ? "RPC"      : "noRPC");
+   out_file_str.Form( "%s/%s_MODE_%d_%s_%s.root", 
+		      OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), 
+		      MODE, bit_str.Data(), RPC_str.Data() );
+
    TFile* out_file = TFile::Open( out_file_str, "RECREATE" );
 
    // Read training and test data (see TMVAClassification for reading ASCII files)
@@ -144,7 +148,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    int nZB_in = 0;
    if (USE_RPC) {
      TString in_dir = "ZeroBiasIsolatedBunch0/Slim_RPC/170213_174254/0000";
-     for (int j = 1; j < 50; j++) {
+     for (int j = 16; j < 50; j++) {  // First 15 files are empty
        if (nZB_in >= MAX_ZB_FIL) break;
        in_file_name.Form("%s/%s/tuple_%d.root", EOS_DIR_NAME.Data(), in_dir.Data(), j);
        std::cout << "Adding file " << in_file_name.Data() << std::endl;
@@ -233,8 +237,9 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
      for (int iWgt = 0; iWgt < EVT_WGTS.size(); iWgt++) {
 
        TString factName;  // "Targ" and "Wgt" components not arbitrary - correspond to specific options later on
-       if (BIT_COMP) factName.Form("f_MODE_%d_%sTarg_%sWgt_bitCompr",   MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data());
-       else          factName.Form("f_MODE_%d_%sTarg_%sWgt_noBitCompr", MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data());
+       factName.Form( "f_MODE_%d_%sTarg_%sWgt_%s_%s", 
+		      MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data(), 
+		      bit_str.Data(), RPC_str.Data() );
        
        if        (MODE == 15) {
 	 // BASELINE mode 15 - dPhi12/23/34 + combos, theta, FR1, St1 ring, dTh14, bend1, RPC 1/2/3/4
@@ -752,6 +757,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   RPC2 = (i2 >= 0 ? ((hit_br->GetLeaf("isRPC"))->GetValue(i2) == 1 ? 1 : 0) : -99);
 	   RPC3 = (i3 >= 0 ? ((hit_br->GetLeaf("isRPC"))->GetValue(i3) == 1 ? 1 : 0) : -99);
 	   RPC4 = (i4 >= 0 ? ((hit_br->GetLeaf("isRPC"))->GetValue(i4) == 1 ? 1 : 0) : -99);
+
+	   CalcRPCs( RPC1, RPC2, RPC3, RPC4, mode, BIT_COMP );
 	   
 	   // Clean out showering muons with outlier station 1, or >= 2 outlier stations
 	   if (isMC && log2(mu_pt) > 6 && CLEAN_HI_PT)

@@ -189,6 +189,58 @@ void CalcBends( int& bend1, int& bend2, int& bend3, int& bend4,
 
 } // End function: CalcBends()
 
+void CalcRPCs( int& RPC1, int& RPC2, int& RPC3, int& RPC4,
+	       const int mode, const bool BIT_COMP ) {
+
+  if (BIT_COMP) {
+    int nRPC = (RPC1 == 1) + (RPC2 == 1) + (RPC3 == 1) + (RPC4 == 1);
+    
+    // In 3- and 4-station modes, only specify some combinations of RPCs
+    if (nRPC >= 2) {
+
+      if        (mode == 15) {
+	if        (RPC1 == 1 && RPC2 == 1) {
+	  RPC3 = 0;
+	  RPC4 = 0;
+	} else if (RPC1 == 1 && RPC3 == 1) {
+	  RPC4 = 0;
+	} else if (RPC4 == 1 && RPC2 == 1) {
+	  RPC3 = 0;
+	}
+      } else if (mode == 14) {
+	if        (RPC1 == 1) {
+	  RPC2 = 0;
+	  RPC3 = 0;
+	} else if (RPC3 == 1) {
+	  RPC2 = 0;
+	}
+      } else if (mode == 13) {
+	if        (RPC1 == 1) {
+	  RPC2 = 0;
+	  RPC4 = 0;
+	} else if (RPC4 == 1) {
+	  RPC2 = 0;
+	}
+      } else if (mode == 11) {
+	if        (RPC1 == 1) {
+	  RPC3 = 0;
+	  RPC4 = 0;
+	} else if (RPC4 == 1) {
+	  RPC3 = 0;
+	}
+      } else if (mode == 7) {
+	if        (RPC2 == 1) {
+	  RPC3 = 0;
+	  RPC4 = 0;
+	} else if (RPC4 == 1) {
+	  RPC3 = 0;
+	}
+      }
+
+    } // End conditional: if (nRPC >= 2)
+  } // End conditional: if (BIT_COMP)
+
+} // End function: void CalcRPCs()
 
 
 int CalcBendFromPattern( const int pattern, const int endcap ) {
