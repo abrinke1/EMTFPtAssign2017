@@ -12,5 +12,7 @@ const double ETAMAX  = 2.40;  // Maximum GEN / trigger eta to consider
 
 // *** Rate plot settings *** //
 const double PTMIN   =  1.0;  // Minimum pT
-const double PTMAX   = 50.0;  // Maximum pT
-const int    PTBINS  =   49;  // Number of bins in rate plot
+const double PTMAX   = 51.0;  // Maximum pT
+const int    PTBINS  =   50;  // Number of bins in rate plot
+const int    PTDIVS  =   10;  // Number of trigger pT bins per GEN pT bin, before scaling
+const double BIT     = 0.1 * (PTMIN - PTMAX) / (PTBINS * PTDIVS);  // Small pT offset increment
