@@ -10,15 +10,18 @@
 #include "TChain.h"
 #include "TTree.h"
 #include "TBranch.h"
+#include "ReadMVAOut.h"
 
 void ReadMVAOut() {
 
+  std::cout<<"foo = "<<foo<<endl;
   // Initialize empty file to access each file in the list
   TFile *file_tmp(0);
 
   // List of input files
   std::vector<TString> in_file_names;
-  in_file_names.push_back("/afs/cern.ch/user/a/abrinke1/TMVA/EMTFPtAssign2017/PtRegression_AWB_v0_16_12_09.root");
+  //in_file_names.push_back("/afs/cern.ch/user/a/abrinke1/TMVA/EMTFPtAssign2017/PtRegression_AWB_v0_16_12_09.root");
+  in_file_names.push_back(str_file_location);
 
   // Open all input files
   for (UInt_t i = 0; i < in_file_names.size(); i++) {
