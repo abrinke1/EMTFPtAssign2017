@@ -52,6 +52,8 @@ class PtAlgo {
 
     fact_name = "";
     MVA_name  = "";
+    unique_ID = "";
+    alias     = "";
     
     modes     = {};
     modes_CSC = {};
@@ -74,6 +76,8 @@ class PtAlgo {
   // Algorithm to test
   TString fact_name;
   TString MVA_name;
+  TString unique_ID;
+  TString alias;
   float   MVA_val;
   
   // Track modes to test

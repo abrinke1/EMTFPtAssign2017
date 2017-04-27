@@ -762,8 +762,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   
 	   // Clean out showering muons with outlier station 1, or >= 2 outlier stations
 	   if (isMC && log2(mu_pt) > 6 && CLEAN_HI_PT)
-	     if ( dPhSum4A >= std::max(40., 332. - 40*log2(mu_pt)) )
-	       if ( outStPh < 2 || dPhSum3A >= std::max(24., 174. - 20*log2(mu_pt)) )
+	     if ( dPhSum4A >= fmax(40., 332. - 40*log2(mu_pt)) )
+	       if ( outStPh < 2 || dPhSum3A >= fmax(24., 174. - 20*log2(mu_pt)) )
 		 trainEvt = false;
 
 
@@ -876,11 +876,11 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	       //////////////////////////////
 
 	       if ( vName == "GEN_pt_trg" )
-		 var_vals.at(iVar) = min(mu_pt, PTMAX_TRG);
+		 var_vals.at(iVar) = fmin(mu_pt, PTMAX_TRG);
 	       if ( vName == "inv_GEN_pt_trg" )
-		 var_vals.at(iVar) = 1. / min(mu_pt, PTMAX_TRG);
+		 var_vals.at(iVar) = 1. / fmin(mu_pt, PTMAX_TRG);
 	       if ( vName == "log2_GEN_pt_trg" )
-		 var_vals.at(iVar) = log2(min(mu_pt, PTMAX_TRG));
+		 var_vals.at(iVar) = log2(fmin(mu_pt, PTMAX_TRG));
 	       if ( vName == "GEN_charge_trg" )
 		 var_vals.at(iVar) = mu_charge * dPhSign;
 
