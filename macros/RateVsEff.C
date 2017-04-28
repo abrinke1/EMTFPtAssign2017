@@ -80,22 +80,26 @@ void RateVsEff() {
     LoopOverEvents( algo, "test" );
 
     // Compute 2D efficiency histograms and rate at efficiency threshold histograms
+    int jBinPrev1 = -99; // Save threshold for previous (lower-pT) bin
+    int jBinPrev2 = -99;
     for (int iBin = 1; iBin <= PTBINS; iBin++) { // Loop over GEN pT bins (x-axis)
       float iBinMin = PTMIN + (iBin - 1) * (PTMAX - PTMIN) / PTBINS;
       float iBinMax = PTMIN +  iBin      * (PTMAX - PTMIN) / PTBINS;
+      iBinMin = fmax(iBinMin, BIT);
 
       for (int jBin = PTBINS*PTDIVS; jBin >= 1; jBin--) { // Loop over trigger pT bins (y-axis)
 	float jBinMin = PTMIN + (jBin - 1) * (PTMAX - PTMIN) / (PTBINS*PTDIVS);
 	float jBinMax = PTMIN +  jBin      * (PTMAX - PTMIN) / (PTBINS*PTDIVS);
+	jBinMin = fmax(jBinMin, BIT);
 
-	if (jBinMin > iBinMin) continue; // Don't set threshold higher than nominal pT
+	if (jBinMin > iBinMin + BIT) continue; // Don't set threshold higher than nominal pT
 
 	float num1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin, jBin, PTBINS*PTDIVS); // Events passing trigger pT cut
 	float den1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin,    1, PTBINS*PTDIVS); // All events in GEN pT bin
-	float eff1 = num1 / den1;
+	float eff1 = fmax(1.0, num1) / fmax(1.0, den1);
 	float num2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin, jBin, PTBINS*PTDIVS);
 	float den2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin,    1, PTBINS*PTDIVS);
-	float eff2 = num2 / den2;
+	float eff2 = fmax(1.0, num2) / fmax(1.0, den2);
 
 	algo.h_trg_vs_GEN_pt_eff.first ->SetBinContent(iBin, jBin, eff1);
 	algo.h_trg_vs_GEN_pt_eff.first ->SetBinError  (iBin, jBin, eff1 * sqrt( (1/fmax(1.0, num1)) + (1/fmax(1.0, den1)) ) );
@@ -106,13 +110,16 @@ void RateVsEff() {
 	for (int iEff = 0; iEff < EFF_CUTS.size(); iEff++) {
 	  float thresh = EFF_CUTS.at(iEff)*0.01;
 
-	  if (eff1 >= thresh && algo.h_pt_scales.at(iEff).first ->GetBinContent(iBin) < 0) {
+	  // Fill if efficiency reaches working point, or if it reaches pT threshold for lower-pT bin
+	  if ( (eff1 >= thresh || jBin == jBinPrev1) && algo.h_pt_scales.at(iEff).first ->GetBinContent(iBin) < 0) {
 	    algo.h_ZB_rates.at(iEff).first  ->SetBinContent( iBin, algo.h_ZB_count->Integral(jBin, PTBINS*PTDIVS) );
 	    algo.h_pt_scales.at(iEff).first ->SetBinContent( iBin, iBinMin / jBinMin );
+	    jBinPrev1 = jBin;
 	  }
-	  if (eff2 >= thresh && algo.h_pt_scales.at(iEff).second->GetBinContent(iBin) < 0) {
+	  if ( (eff2 >= thresh || jBin == jBinPrev2) && algo.h_pt_scales.at(iEff).second->GetBinContent(iBin) < 0) {
 	    algo.h_ZB_rates.at(iEff).second ->SetBinContent( iBin, algo.h_ZB_count->Integral(jBin, PTBINS*PTDIVS) );
 	    algo.h_pt_scales.at(iEff).second->SetBinContent( iBin, iBinMin / jBinMin );
+	    jBinPrev2 = jBin;
 	  }
 
 	} // End loop: for (int iEff = 0; iEff < EFF_CUTS.size(); iEff++)
@@ -401,7 +408,7 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
   // Get trigger branch from the factory
   chain->SetBranchAddress( algo.MVA_name, &(algo.MVA_val) );
   
-  std::cout << "\n******* About to enter the " << algo.fact_name << "(" << algo.unique_ID << ") " << tr_te << " event loop *******" << std::endl;
+  std::cout << "\n******* About to enter the " << algo.fact_name << " (" << algo.unique_ID << ") " << tr_te << " event loop *******" << std::endl;
   for (int iEvt = 0; iEvt < chain->GetEntries(); iEvt++) {
     
     if (iEvt > MAX_EVT && MAX_EVT > 0) break;
@@ -471,7 +478,7 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
       algo.h_trg_vs_GEN_pt.second->Fill( GEN_pt, TRG_pt );
     
   } // End loop: for (int iEvt = 0; iEvt < chain->GetEntries(); iEvt++)
-  std::cout << "******* Leaving the " << algo.fact_name << " " << tr_te << " event loop *******" << std::endl;
+  std::cout << "\n******* Leaving the " << algo.fact_name << " (" << algo.unique_ID << ") " << tr_te << " event loop *******" << std::endl;
 
 } // End function: void LoopOverEvents()
 

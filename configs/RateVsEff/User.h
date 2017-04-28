@@ -54,7 +54,7 @@ namespace RateVsEff_cfg {
       MVA2.color        = 3;  // kGreen 
 
       PtAlgo MVA3;
-      MVA3.in_file_name = "PtRegression_Apr_2017_04_20_MODE_15_bitCompr_RPC.root";
+      MVA3.in_file_name = "PtRegression_Apr_2017_04_28_MODE_15_bitCompr_RPC.root";
       MVA3.fact_name    = "f_MODE_15_logPtTarg_invPtWgt_bitCompr_RPC";
       MVA3.MVA_name     = "BDTG_AWB";
       MVA3.unique_ID    = "BDT_CSC_RPC_compr_mode_15_15_0";
@@ -65,7 +65,7 @@ namespace RateVsEff_cfg {
       MVA3.color        = 2;  // kRed 
 
       PtAlgo MVA4;
-      MVA4.in_file_name = "PtRegression_Apr_2017_04_20_MODE_15_bitCompr_RPC.root";
+      MVA4.in_file_name = "PtRegression_Apr_2017_04_28_MODE_15_bitCompr_RPC.root";
       MVA4.fact_name    = "f_MODE_15_logPtTarg_invPtWgt_bitCompr_RPC";
       MVA4.MVA_name     = "BDTG_AWB";
       MVA4.unique_ID    = "BDT_CSC_RPC_compr_mode_15_14_1";
@@ -76,7 +76,7 @@ namespace RateVsEff_cfg {
       MVA4.color        = 2;  // kRed 
 
       PtAlgo MVA5;
-      MVA5.in_file_name = "PtRegression_Apr_2017_04_20_MODE_15_bitCompr_RPC.root";
+      MVA5.in_file_name = "PtRegression_Apr_2017_04_28_MODE_15_bitCompr_RPC.root";
       MVA5.fact_name    = "f_MODE_15_logPtTarg_invPtWgt_bitCompr_RPC";
       MVA5.MVA_name     = "BDTG_AWB";
       MVA5.unique_ID    = "BDT_CSC_RPC_compr_mode_15_13_2";
@@ -87,7 +87,7 @@ namespace RateVsEff_cfg {
       MVA5.color        = 2;  // kRed 
 
       PtAlgo MVA6;
-      MVA6.in_file_name = "PtRegression_Apr_2017_04_20_MODE_15_bitCompr_RPC.root";
+      MVA6.in_file_name = "PtRegression_Apr_2017_04_28_MODE_15_bitCompr_RPC.root";
       MVA6.fact_name    = "f_MODE_15_logPtTarg_invPtWgt_bitCompr_RPC";
       MVA6.MVA_name     = "BDTG_AWB";
       MVA6.unique_ID    = "BDT_CSC_RPC_compr_mode_15_11_4";
@@ -98,7 +98,7 @@ namespace RateVsEff_cfg {
       MVA6.color        = 2;  // kRed 
 
       PtAlgo MVA7;
-      MVA7.in_file_name = "PtRegression_Apr_2017_04_20_MODE_15_bitCompr_RPC.root";
+      MVA7.in_file_name = "PtRegression_Apr_2017_04_28_MODE_15_bitCompr_RPC.root";
       MVA7.fact_name    = "f_MODE_15_logPtTarg_invPtWgt_bitCompr_RPC";
       MVA7.MVA_name     = "BDTG_AWB";
       MVA7.unique_ID    = "BDT_CSC_RPC_compr_mode_15_7_8";
@@ -112,10 +112,10 @@ namespace RateVsEff_cfg {
       ALGOS.push_back(MVA1);
       ALGOS.push_back(MVA2);
       ALGOS.push_back(MVA3);
-      /* ALGOS.push_back(MVA4); */
-      /* ALGOS.push_back(MVA5); */
-      /* ALGOS.push_back(MVA6); */
-      /* ALGOS.push_back(MVA7); */
+      ALGOS.push_back(MVA4);
+      ALGOS.push_back(MVA5);
+      ALGOS.push_back(MVA6);
+      ALGOS.push_back(MVA7);
 
     } // End conditional: if (USER == "AWB")
 
