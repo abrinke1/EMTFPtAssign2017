@@ -181,12 +181,16 @@ void CalcBends( int& bend1, int& bend2, int& bend3, int& bend4,
     if (mode == 7 || mode == 11 || mode > 12)
       nBits = 2;
 
-    bend1 = ENG.getCLCT( pat1, endcap, dPhSign, nBits );
-    bend2 = ENG.getCLCT( pat2, endcap, dPhSign, nBits );
-    bend3 = ENG.getCLCT( pat3, endcap, dPhSign, nBits );
-    bend4 = ENG.getCLCT( pat4, endcap, dPhSign, nBits );
+    if (  mode      / 8 > 0 ) // Has station 1 hit
+      bend1 = ENG.getCLCT( pat1, endcap, dPhSign, nBits );
+    if ( (mode % 8) / 4 > 0 ) // Has station 2 hit
+      bend2 = ENG.getCLCT( pat2, endcap, dPhSign, nBits );
+    if ( (mode % 4) / 2 > 0 ) // Has station 3 hit
+      bend3 = ENG.getCLCT( pat3, endcap, dPhSign, nBits );
+    if ( (mode % 2)     > 0 ) // Has station 4 hit
+      bend4 = ENG.getCLCT( pat4, endcap, dPhSign, nBits );
   } // End conditional: if (BIT_COMP)
-
+  
 } // End function: CalcBends()
 
 void CalcRPCs( int& RPC1, int& RPC2, int& RPC3, int& RPC4,

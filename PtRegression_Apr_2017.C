@@ -132,6 +132,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    TString out_file_str;
    TString bit_str = (BIT_COMP ? "bitCompr" : "noBitCompr");
    TString RPC_str = (USE_RPC  ? "RPC"      : "noRPC");
+
    out_file_str.Form( "%s/%s_MODE_%d_%s_%s.root", 
 		      OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), 
 		      MODE, bit_str.Data(), RPC_str.Data() );
@@ -148,7 +149,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    int nZB_in = 0;
    if (USE_RPC) {
      TString in_dir = "ZeroBiasIsolatedBunch0/Slim_RPC/170213_174254/0000";
-     for (int j = 16; j < 50; j++) {  // First 15 files are empty
+     for (int j = 20; j < 50; j++) {  // First 19 files are empty
        if (nZB_in >= MAX_ZB_FIL) break;
        in_file_name.Form("%s/%s/tuple_%d.root", EOS_DIR_NAME.Data(), in_dir.Data(), j);
        std::cout << "Adding file " << in_file_name.Data() << std::endl;
@@ -471,13 +472,13 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	 double emtf_phi   = -99.;
 	 int emtf_charge   = -99;
 	 int emtf_mode     = -99;
-	 int emtf_mode_CSC = 0;
-	 int emtf_mode_RPC = 0;
+	 int emtf_mode_CSC = -99;
+	 int emtf_mode_RPC = -99;
 	 int emtf_sect_idx = -99;
-	 std::vector<int> emtf_id = {-99, -99, -99, -99};
-	 std::vector<int> emtf_ph = {-99, -99, -99, -99};
-	 std::vector<int> emtf_th = {-99, -99, -99, -99};
-	 std::vector<int> emtf_dt = {-99, -99, -99, -99};
+	 std::array<int, 4> emtf_id = {-99, -99, -99, -99};
+	 std::array<int, 4> emtf_ph = {-99, -99, -99, -99};
+	 std::array<int, 4> emtf_th = {-99, -99, -99, -99};
+	 std::array<int, 4> emtf_dt = {-99, -99, -99, -99};
 
 	 for (UInt_t iTrk = 0; iTrk < nTrks; iTrk++) {
 
@@ -488,8 +489,11 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	     continue;
 	   }
 
-	   // Require valid mode
 	   emtf_mode = (trk_br->GetLeaf("mode"))->GetValue(iTrk);
+	   emtf_mode_CSC = 0;
+	   emtf_mode_RPC = 0;
+
+	   // Require valid mode
 	   bool good_emtf_mode = false;
 	   for (UInt_t jMode = 0; jMode < EMTF_MODES.size(); jMode++) {
 	     if (emtf_mode == EMTF_MODES.at(jMode))
@@ -499,25 +503,34 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	     emtf_mode = -99;
 	     continue;
 	   }
-	   
+	   	   
 	   emtf_pt       = (trk_br->GetLeaf("pt"))->GetValue(iTrk);
 	   emtf_phi      = (trk_br->GetLeaf("phi"))->GetValue(iTrk);;
 	   emtf_charge   = (trk_br->GetLeaf("charge"))->GetValue(iTrk);
 	   emtf_sect_idx = (trk_br->GetLeaf("sector_index"))->GetValue(iTrk);
-	   
+
 	   for (int ii = 0; ii < 4; ii++) {
-	     if (emtf_mode % int(pow(2, 4 - ii)) / pow(2, 3 - ii) > 0) {
+	     if (emtf_mode < 0)
+	       continue;
+	     if ( (emtf_mode % int(pow(2, 4 - ii))) / int(pow(2, 3 - ii)) > 0) {
 	       emtf_id.at(ii) = iTrk*4 + ii;
 	       emtf_ph.at(ii) = (trk_br->GetLeaf("hit_phi_int"))->GetValue(iTrk*4 + ii);
 	       emtf_th.at(ii) = (trk_br->GetLeaf("hit_theta_int"))->GetValue(iTrk*4 + ii);
-	       emtf_dt.at(ii) = ( (trk_br->GetLeaf("hit_isRPC"))->GetValue(iTrk*4 + ii) ? 2 : 1);
+	       emtf_dt.at(ii) = ( (trk_br->GetLeaf("hit_isRPC"))->GetValue(iTrk*4 + ii) == 1 ? 2 : 1);
 	       if (emtf_dt.at(ii) == 1)
 		 emtf_mode_CSC += int(pow(2, 3 - ii));
 	       else if (emtf_dt.at(ii) == 2)
 		 emtf_mode_RPC += int(pow(2, 3 - ii));
 	     }
 	   }
-	   
+
+	   if (emtf_mode_CSC + emtf_mode_RPC != emtf_mode) {
+	     std::cout << "\n\n*** Super-bizzare case where EMTF mode = " << emtf_mode  << ", but CSC mode = " 
+		       << emtf_mode_CSC << " and RPC mode = " << emtf_mode_RPC << " ***" << std::endl;
+	     std::cout << "  - Rare bug in EMTF emulator - skipping.\n\n" << std::endl;
+	     continue;
+	   }
+
 	   break; // Only one EMTF track per GEN muon considered
 
 	 } // End loop: for (UInt_t iTrk = 0; iTrk < nTrks; iTrk++)
@@ -624,14 +637,14 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   dt.at(iSc).at(iSt).erase(dt.at(iSc).at(iSt).begin() + iHt);
 	 }
 	 
-	 // Vector indices of hits in each track; 4 in each, stations 1-2-3-4 
-	 std::vector< std::vector<int> > all_trk_hits;
-	 // Vector of mode, CSC mode, RPC mode, and sumAbsDPhi in each track
-	 std::vector< std::vector<int> > all_trk_modes;
+	 // Array indices of hits in each track; 4 in each, stations 1-2-3-4 
+	 std::vector< std::array<int, 4> > all_trk_hits;
+	 // Array of mode, CSC mode, RPC mode, sumAbsDPhi, and sumAbsDTheta in each track
+	 std::vector< std::array<int, 5> > all_trk_modes;
       
 	 // Build tracks for the specified mode
-	 std::vector< std::vector<int> > trk_hits;
-	 std::vector< std::vector<int> > trk_modes;
+	 std::vector< std::array<int, 4> > trk_hits;
+	 std::vector< std::array<int, 5> > trk_modes;
 	 
 	 BuildTracks( trk_hits, trk_modes, id, ph, th, dt, MODE, MAX_RPC, MIN_CSC, MAX_DPH, MAX_DTH );
 	 all_trk_hits.insert( all_trk_hits.end(), trk_hits.begin(), trk_hits.end() );
@@ -646,10 +659,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	 
 	 for (UInt_t iTrk = 0; iTrk < all_trk_hits.size(); iTrk++) {
 	   
-	   std::vector<int> trk_hits  = all_trk_hits.at(iTrk);
-	   std::vector<int> trk_modes = all_trk_modes.at(iTrk);
-	   assert(trk_hits.size() == 4);
-	   assert(trk_modes.size() == 5);
+	   std::array<int, 4> trk_hits  = all_trk_hits.at(iTrk);
+	   std::array<int, 5> trk_modes = all_trk_modes.at(iTrk);
 
 	   int i1 = trk_hits.at(0);
 	   int i2 = trk_hits.at(1);
@@ -761,7 +772,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   CalcRPCs( RPC1, RPC2, RPC3, RPC4, mode, BIT_COMP );
 	   
 	   // Clean out showering muons with outlier station 1, or >= 2 outlier stations
-	   if (isMC && log2(mu_pt) > 6 && CLEAN_HI_PT)
+	   if (isMC && log2(mu_pt) > 6 && CLEAN_HI_PT && MODE == 15)
 	     if ( dPhSum4A >= fmax(40., 332. - 40*log2(mu_pt)) )
 	       if ( outStPh < 2 || dPhSum3A >= fmax(24., 174. - 20*log2(mu_pt)) )
 		 trainEvt = false;
