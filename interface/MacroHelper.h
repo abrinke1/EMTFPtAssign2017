@@ -98,5 +98,5 @@ class PtAlgo {
   std::vector< std::pair<TH1D*, TH1D*> > h_ZB_rates;   // 1D ZeroBias rate vs. trigger pT plots for multiple efficiency thresholds
   std::vector< std::pair<TH1D*, TH1D*> > h_pt_scales;  // 1D scaling factor vs. initial trigger pT needed to achieve XX% efficiency
   std::vector< std::pair<TH1D*, TH1D*> > h_turn_ons;   // 1D turn-on efficiency plots for multiple pT thresholds
-  
+  TH1D*                                  h_charge_eff; // 1D EMTF correct-charge efficiency vs. pT 
 };

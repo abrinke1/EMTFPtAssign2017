@@ -62,6 +62,7 @@ void RateVsEff() {
     BookPtHist( algo );
     BookEffHist( algo );
     BookCountHist( algo );
+    BookChargeHist( algo );
     for (int iPt = 0; iPt < TURN_ONS.size(); iPt++)
       BookTurnOnHist( algo, iPt, TURN_ONS.at(iPt) );
     for (int iEff = 0; iEff < EFF_CUTS.size(); iEff++) {
@@ -87,6 +88,16 @@ void RateVsEff() {
       float iBinMax = PTMIN +  iBin      * (PTMAX - PTMIN) / PTBINS;
       iBinMin = fmax(iBinMin, BIT);
 
+      float den1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin, 1, PTBINS*PTDIVS); // All events in GEN pT bin
+      float den2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin, 1, PTBINS*PTDIVS);
+
+      // Fill EMTF charge-efficiency plot
+      if (algo.MVA_name.Contains("EMTF")) {
+	algo.h_charge_eff->SetBinContent(iBin, algo.h_charge_eff->GetBinContent(iBin) / fmax(1.0, den1 + den2));
+	algo.h_charge_eff->SetBinError  (iBin, 1. / sqrt(fmax(1.0, den1 + den2)));
+      }
+
+      // Fill trigger pT scaling and ZeroBias rate plots
       for (int jBin = PTBINS*PTDIVS; jBin >= 1; jBin--) { // Loop over trigger pT bins (y-axis)
 	float jBinMin = PTMIN + (jBin - 1) * (PTMAX - PTMIN) / (PTBINS*PTDIVS);
 	float jBinMax = PTMIN +  jBin      * (PTMAX - PTMIN) / (PTBINS*PTDIVS);
@@ -95,10 +106,8 @@ void RateVsEff() {
 	if (jBinMin > iBinMin + BIT) continue; // Don't set threshold higher than nominal pT
 
 	float num1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin, jBin, PTBINS*PTDIVS); // Events passing trigger pT cut
-	float den1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin,    1, PTBINS*PTDIVS); // All events in GEN pT bin
 	float eff1 = fmax(1.0, num1) / fmax(1.0, den1);
 	float num2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin, jBin, PTBINS*PTDIVS);
-	float den2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin,    1, PTBINS*PTDIVS);
 	float eff2 = fmax(1.0, num2) / fmax(1.0, den2);
 
 	algo.h_trg_vs_GEN_pt_eff.first ->SetBinContent(iBin, jBin, eff1);
@@ -139,19 +148,16 @@ void RateVsEff() {
 	int jBin2 = int( PTBINS*PTDIVS * fmin(1.0, fmax(0.0, (pt_cut2 - PTMIN) / (PTMAX - PTMIN))) );
 
 	float num1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin, jBin1, PTBINS*PTDIVS); // Events passing trigger pT cut
-	float den1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin,     1, PTBINS*PTDIVS); // All events in GEN pT bin
 	float eff1 = num1 / den1;
 	float num2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin, jBin2, PTBINS*PTDIVS);
-	float den2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin,     1, PTBINS*PTDIVS);
 	float eff2 = num2 / den2;
 	
 	algo.h_turn_ons.at(iPt).first ->SetBinContent(iBin, eff1);
 	algo.h_turn_ons.at(iPt).first ->SetBinError(iBin, eff1 * sqrt( (1/fmax(1.0, num1)) + (1/fmax(1.0, den1)) ) );
 	algo.h_turn_ons.at(iPt).second->SetBinContent(iBin, eff2);
 	algo.h_turn_ons.at(iPt).second->SetBinError(iBin, eff2 * sqrt( (1/fmax(1.0, num2)) + (1/fmax(1.0, den2)) ) );
-      } // End loop: for (int iPt = 0; iPt < TURN_ONS.size(); iPt++)ð
+      } // End loop: for (int iPt = 0; iPt < TURN_ONS.size(); iPt++)
       
-
     } // End loop: for (int iBin = 1; iBin <= PTBINS; iBin++)
     
     ALGOS.at(i) = algo; // Update ALGOS
@@ -167,6 +173,8 @@ void RateVsEff() {
     algo.h_trg_vs_GEN_pt_eff.first ->Write();
     algo.h_trg_vs_GEN_pt_eff.second->Write();
     algo.h_ZB_count->Write();
+    if (algo.MVA_name.Contains("EMTF"))
+      algo.h_charge_eff->Write();
 
     for (int j = 0; j < TURN_ONS.size(); j++) {
       algo.h_turn_ons.at(j).first ->Write();
@@ -264,6 +272,24 @@ void BookCountHist( PtAlgo& algo ) {
   algo.h_ZB_count->GetXaxis()->SetTitle("ZeroBias events") ;
   
 } // End BookCountHist()
+
+		 
+void BookChargeHist( PtAlgo& algo ) {
+
+  if (!algo.MVA_name.Contains("EMTF")) return; // Only plot for EMTF charge assignment
+  
+  TString h_charge_eff_str = "h_charge_eff_"+algo.unique_ID;
+  algo.h_charge_eff = new TH1D( h_charge_eff_str, h_charge_eff_str, PTBINS, PTMIN, PTMAX );
+  
+  algo.h_charge_eff->Sumw2();
+  algo.h_charge_eff->SetLineWidth(2);
+  algo.h_charge_eff->SetLineColor(algo.color);
+
+  algo.h_charge_eff->SetTitle(algo.alias+" correct-charge efficiency vs. GEN p_{T} (GeV)") ;
+  algo.h_charge_eff->GetXaxis()->SetTitle("GEN muon p_{T} (GeV)") ;
+  algo.h_charge_eff->GetYaxis()->SetTitle("Efficiency") ;
+  
+} // End BookChargeHist()
 
 		 
 void BookTurnOnHist( PtAlgo& algo, const int iPt, const int pt_cut ) {
@@ -374,6 +400,8 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
   // Get GEN branches from the factories
   float GEN_pt_br;
   float GEN_eta_br;
+  float GEN_charge_br;
+  float EMTF_charge_br;
   float TRK_eta_br;
   float TRK_mode_br;
   float TRK_mode_CSC_br;
@@ -393,6 +421,8 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
 
   chain->SetBranchAddress("GEN_pt", &GEN_pt_br);
   chain->SetBranchAddress("GEN_eta", &GEN_eta_br);
+  chain->SetBranchAddress("GEN_charge", &GEN_charge_br);
+  chain->SetBranchAddress("EMTF_charge", &EMTF_charge_br);
   if (isEMTF) {
     chain->SetBranchAddress("EMTF_eta", &TRK_eta_br);
     chain->SetBranchAddress("EMTF_mode", &TRK_mode_br);
@@ -433,9 +463,11 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
     double GEN_pt  = double(GEN_pt_br);
     double GEN_eta = double(GEN_eta_br);
     double TRK_eta = double(TRK_eta_br);
-    int TRK_mode     =  int(TRK_mode_br);
-    int TRK_mode_CSC =  int(TRK_mode_CSC_br);
-    int TRK_mode_RPC =  int(TRK_mode_RPC_br);
+    int GEN_charge   = int(GEN_charge_br);
+    int EMTF_charge  = int(EMTF_charge_br);
+    int TRK_mode     = int(TRK_mode_br);
+    int TRK_mode_CSC = int(TRK_mode_CSC_br);
+    int TRK_mode_RPC = int(TRK_mode_RPC_br);
 
     if ( fabs(TRK_eta) < ETAMIN ) continue;
     if ( fabs(TRK_eta) > ETAMAX ) continue;
@@ -476,6 +508,9 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
       algo.h_trg_vs_GEN_pt.first ->Fill( GEN_pt, TRG_pt );
     else if (tr_te == "test")
       algo.h_trg_vs_GEN_pt.second->Fill( GEN_pt, TRG_pt );
+
+    if (isEMTF && EMTF_charge == GEN_charge)
+      algo.h_charge_eff->Fill( GEN_pt );
     
   } // End loop: for (int iEvt = 0; iEvt < chain->GetEntries(); iEvt++)
   std::cout << "\n******* Leaving the " << algo.fact_name << " (" << algo.unique_ID << ") " << tr_te << " event loop *******" << std::endl;

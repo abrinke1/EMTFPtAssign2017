@@ -7,6 +7,8 @@ void BookEffHist( PtAlgo& algo );
 
 void BookCountHist( PtAlgo& algo );
 
+void BookChargeHist( PtAlgo& algo );
+
 void BookTurnOnHist( PtAlgo& algo, const int iPt, const int pt_cut );
 
 void BookPtScaleHist( PtAlgo& algo, const int iEff, const int eff_cut);

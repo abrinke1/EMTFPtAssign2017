@@ -241,17 +241,49 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
        factName.Form( "f_MODE_%d_%sTarg_%sWgt_%s_%s", 
 		      MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data(), 
 		      bit_str.Data(), RPC_str.Data() );
-       
+
+       // 4-station tracks
        if        (MODE == 15) {
 	 // BASELINE mode 15 - dPhi12/23/34 + combos, theta, FR1, St1 ring, dTh14, bend1, RPC 1/2/3/4
 	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xf41f11ff) );
-       } else if (MODE == 14) {
-	 // BASELINE mode 14 - dPhi12/23 + combos, theta, FR1/2, St1 ring, dTh13, bend1, RPC 1/2/3
+       } 
+
+       // 3-station tracks
+       else if   (MODE == 14) {
+	 // BASELINE mode 14 - dPhi12/23/13, theta, FR1/2, St1 ring, dTh13, bend1, RPC 1/2/3
 	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x7200132f) );
-       } else if (MODE == 12) {
+       } else if (MODE == 13) {
+	 // BASELINE mode 13 - dPhi12/24/14, theta, FR1/2, St1 ring, dTh14, bend1, RPC 1/2/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xb40013c7) );
+       } else if (MODE == 11) {
+	 // BASELINE mode 11 - dPhi13/34/14, theta, FR1/3, St1 ring, dTh14, bend1, RPC 1/3/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xd4001573) );
+       } else if (MODE ==  7) {
+	 // BASELINE mode  7 - dPhi23/34/24, theta, FR2, dTh24, bend2, RPC 2/3/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xe800229b) );
+       } 
+
+       // 2-station tracks
+       else if   (MODE == 12) {
 	 // BASELINE mode 12 - dPhi12, theta, FR1/2, St1 ring, dTh12, bend1/2, RPC 1/2
 	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x30403307) );
+       } else if (MODE == 10) {
+	 // BASELINE mode 10 - dPhi13, theta, FR1/3, St1 ring, dTh13, bend1/3, RPC 1/3
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x52005523) );
+       } else if (MODE ==  9) {
+	 // BASELINE mode  9 - dPhi14, theta, FR1/4, St1 ring, dTh14, bend1/4, RPC 1/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x94009943) );
+       } else if (MODE ==  6) {
+	 // BASELINE mode  6 - dPhi23, theta, FR2/3, dTh23, bend2/3, RPC 2/3
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x60806609) );
+       } else if (MODE ==  5) {
+	 // BASELINE mode  5 - dPhi24, theta, FR2/4, dTh24, bend2/4, RPC 2/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xa800aa81) );
+       } else if (MODE ==  3) {
+	 // BASELINE mode  3 - dPhi34, theta, FR3/4, dTh12, bend3/4, RPC 3/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xc100cc11) );
        }
+
      } // End loop: for (int iTarg = 0; iTarg < TARG_VARS.size(); iTarg++)
    } // End loop: for (int iWgt = 0; iWgt < EVT_WGTS.size(); iWgt++)
 
@@ -458,11 +490,9 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   mu_charge = (muon_br->GetLeaf("charge"))->GetValue(iMu);
 	 }
 
-	 if ( mu_pt < PTMIN && isMC ) continue;
-	 if ( mu_pt > PTMAX && isMC ) continue;
-	 if ( fabs( mu_eta ) < ETAMIN && isMC ) continue;
-	 if ( fabs( mu_eta ) > ETAMAX && isMC ) continue;
-	 if ( mu_pt > PTMAX_TR && isMC ) trainEvt = false;
+	 if ( isMC && (mu_pt < PTMIN || mu_pt > PTMAX) ) continue;
+	 if ( isMC && (fabs( mu_eta ) < ETAMIN || fabs( mu_eta ) > ETAMAX) ) continue;
+	 if ( isMC && (mu_pt < PTMIN_TR || mu_pt > PTMAX_TR) ) trainEvt = false;
 	 // std::cout << "\nMuon " << iMu+1 << " has pt = " << mu_pt << ", eta = " << mu_eta << ", phi = " << mu_phi << std::endl;
 
 

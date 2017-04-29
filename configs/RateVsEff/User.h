@@ -15,7 +15,7 @@ namespace RateVsEff_cfg {
     
     if (USER == "AWB") {
 
-      IN_DIR_NAME = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017";
+      IN_DIR_NAME = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017/files/";
       EFF_CUTS    = {90};
       TURN_ONS    = {8, 16, 24};
 
@@ -111,11 +111,11 @@ namespace RateVsEff_cfg {
       ALGOS.push_back(EMTF15);  // First algo is always the standard comparison algo
       ALGOS.push_back(MVA1);
       ALGOS.push_back(MVA2);
-      ALGOS.push_back(MVA3);
-      ALGOS.push_back(MVA4);
-      ALGOS.push_back(MVA5);
-      ALGOS.push_back(MVA6);
-      ALGOS.push_back(MVA7);
+      /* ALGOS.push_back(MVA3); */
+      /* ALGOS.push_back(MVA4); */
+      /* ALGOS.push_back(MVA5); */
+      /* ALGOS.push_back(MVA6); */
+      /* ALGOS.push_back(MVA7); */
 
     } // End conditional: if (USER == "AWB")
 

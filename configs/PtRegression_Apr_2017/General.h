@@ -36,6 +36,7 @@ const std::vector<int> EMTF_MODES = {15, 14, 13, 12, 11, 10, 9, 7, 6, 5, 3};  //
 const bool SPEC_VARS = true;  // When generating final XMLs, set to "false" to leave out spectators
 
 // *** High-pT muons *** //
+const double PTMIN_TR =    1.;  // Minimum GEN pT for training
 const double PTMAX_TR =  256.;  // Maximum GEN pT for training
 const double PTMAX_TRG = 128.;  // Maximum trigger pT assigned
 const bool CLEAN_HI_PT = true;  // Remove showering high-pT mode 15 tracks from training
