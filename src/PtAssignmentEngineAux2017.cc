@@ -304,7 +304,7 @@ int PtAssignmentEngineAux2017::getdTheta(int dTheta, int bits) const {
       dTheta_ = 2;
     else if (dTheta == -1)
       dTheta_ = 3;
-    if      (dTheta ==  0)
+    else if (dTheta ==  0)
       dTheta_ = 4;
     else if (dTheta == +1)
       dTheta_ = 5;
