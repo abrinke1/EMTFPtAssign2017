@@ -284,6 +284,11 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xc100cc11) );
        }
 
+       else if   (MODE == 0) {
+	 // Null track, for testing EMTF performance
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xc0000001) );
+       }
+
      } // End loop: for (int iTarg = 0; iTarg < TARG_VARS.size(); iTarg++)
    } // End loop: for (int iWgt = 0; iWgt < EVT_WGTS.size(); iWgt++)
 
@@ -365,17 +370,17 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    
    spec_vars.push_back( MVA_var( "GEN_pt",       "GEN p_{T}",               "GeV",      'F', -77 ) );
    spec_vars.push_back( MVA_var( "EMTF_pt",      "EMTF p_{T}",              "GeV",      'F', -77 ) );
-   spec_vars.push_back( MVA_var( "inv_GEN_pt",   "1 / GEN muon p_{T}",      "GeV^{-1}", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "inv_EMTF_pt",  "1 / EMTF p_{T}",          "GeV^{-1}", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "log2_GEN_pt",  "log_{2}(GEN muon p_{T})", "GeV",      'F', -77 ) );
-   spec_vars.push_back( MVA_var( "log2_EMTF_pt", "log_{2}(EMTF p_{T})",     "GeV",      'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "inv_GEN_pt",   "1 / GEN muon p_{T}",      "GeV^{-1}", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "inv_EMTF_pt",  "1 / EMTF p_{T}",          "GeV^{-1}", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "log2_GEN_pt",  "log_{2}(GEN muon p_{T})", "GeV",      'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "log2_EMTF_pt", "log_{2}(EMTF p_{T})",     "GeV",      'F', -77 ) );
 
    spec_vars.push_back( MVA_var( "GEN_eta",       "GEN #eta",                "", 'F', -77 ) );
    spec_vars.push_back( MVA_var( "EMTF_eta",      "EMTF #eta",               "", 'F', -77 ) );
    spec_vars.push_back( MVA_var( "TRK_eta",       "Track #eta",              "", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "GEN_phi",       "GEN #phi",                "", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "EMTF_phi",      "EMTF #phi",               "", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "TRK_phi",       "Track #phi",              "", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "GEN_phi",       "GEN #phi",                "", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "EMTF_phi",      "EMTF #phi",               "", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "TRK_phi",       "Track #phi",              "", 'F', -77 ) );
    spec_vars.push_back( MVA_var( "GEN_charge",    "GEN charge",              "", 'I', -77 ) );
    spec_vars.push_back( MVA_var( "EMTF_charge",   "EMTF charge",             "", 'I', -77 ) );
 
@@ -385,12 +390,12 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    spec_vars.push_back( MVA_var( "TRK_mode",      "Track mode",                  "", 'I', -77 ) );
    spec_vars.push_back( MVA_var( "TRK_mode_CSC",  "Track CSC-only mode",         "", 'I', -77 ) );
    spec_vars.push_back( MVA_var( "TRK_mode_RPC",  "Track RPC-only mode",         "", 'I', -77 ) );
-   spec_vars.push_back( MVA_var( "SHRD_mode",     "EMTF-track shared mode",      "", 'I', -77 ) );
-   spec_vars.push_back( MVA_var( "SHRD_mode_CSC", "EMTF-track shared CSC mode",  "", 'I', -77 ) );
-   spec_vars.push_back( MVA_var( "SHRD_mode_RPC", "EMTF-track shared RPC mode",  "", 'I', -77 ) );
+   // spec_vars.push_back( MVA_var( "SHRD_mode",     "EMTF-track shared mode",      "", 'I', -77 ) );
+   // spec_vars.push_back( MVA_var( "SHRD_mode_CSC", "EMTF-track shared CSC mode",  "", 'I', -77 ) );
+   // spec_vars.push_back( MVA_var( "SHRD_mode_RPC", "EMTF-track shared RPC mode",  "", 'I', -77 ) );
 
    spec_vars.push_back( MVA_var( "dPhi_sign",  "#phi(B) - #phi(A) sign",    "", 'I', -77 ) );
-   spec_vars.push_back( MVA_var( "nTRK",       "Number of tracks built",    "", 'I', -77 ) );
+   // spec_vars.push_back( MVA_var( "nTRK",       "Number of tracks built",    "", 'I', -77 ) );
    spec_vars.push_back( MVA_var( "evt_weight", "Event weight for training", "", 'F', -77 ) );
 
 
@@ -499,6 +504,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	 // Find the relevant EMTF track
 	 double emtf_pt    = 999.;
 	 double emtf_eta   = -99.;
+	 int emtf_eta_int  = -99;
 	 double emtf_phi   = -99.;
 	 int emtf_charge   = -99;
 	 int emtf_mode     = -99;
@@ -513,7 +519,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	 for (UInt_t iTrk = 0; iTrk < nTrks; iTrk++) {
 
 	   // Require same endcap
-	   emtf_eta  = (trk_br->GetLeaf("eta"))->GetValue(iTrk);
+	   emtf_eta     = (trk_br->GetLeaf("eta"))->GetValue(iTrk);
+	   emtf_eta_int = (trk_br->GetLeaf("eta_int"))->GetValue(iTrk);
 	   if ((emtf_eta > 0) != (mu_eta > 0)) {
 	     emtf_eta = -99.;
 	     continue;
@@ -671,17 +678,17 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	 std::vector< std::array<int, 4> > all_trk_hits;
 	 // Array of mode, CSC mode, RPC mode, sumAbsDPhi, and sumAbsDTheta in each track
 	 std::vector< std::array<int, 5> > all_trk_modes;
-      
-	 // Build tracks for the specified mode
-	 std::vector< std::array<int, 4> > trk_hits;
-	 std::vector< std::array<int, 5> > trk_modes;
-	 
-	 BuildTracks( trk_hits, trk_modes, id, ph, th, dt, MODE, MAX_RPC, MIN_CSC, MAX_DPH, MAX_DTH );
-	 all_trk_hits.insert( all_trk_hits.end(), trk_hits.begin(), trk_hits.end() );
-	 all_trk_modes.insert( all_trk_modes.end(), trk_modes.begin(), trk_modes.end() );
 
-	 // std::cout << "  * Built " << all_trk_hits.size() << " tracks out of " << nHits << " hits" << std::endl;
-	 assert(all_trk_modes.size() == all_trk_hits.size());
+	 if (MODE > 0) {
+	   // Build tracks for the specified mode
+	   BuildTracks( all_trk_hits, all_trk_modes, id, ph, th, dt, MODE, MAX_RPC, MIN_CSC, MAX_DPH, MAX_DTH );
+	   // std::cout << "  * Built " << all_trk_hits.size() << " tracks out of " << nHits << " hits" << std::endl;
+	   assert(all_trk_modes.size() == all_trk_hits.size());
+	 } else { 
+	   // Skip track building, just store EMTF info
+	   all_trk_hits.push_back({-99, -99, -99, -99});
+	   all_trk_modes.push_back({0, 0, 0, 0, 0});
+	 }
 	 
 	 ///////////////////////////////
 	 ///  Loop over built tracks ///
@@ -727,7 +734,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   int pat3 = (i3 >= 0 ? (hit_br->GetLeaf("pattern"))->GetValue(i3) : -99);
 	   int pat4 = (i4 >= 0 ? (hit_br->GetLeaf("pattern"))->GetValue(i4) : -99);
 
-	   int st1_ring2 = (i1 >= 0 ? ((hit_br->GetLeaf("ring"))->GetValue(i1) == 2) : -99);
+	   int st1_ring2 = (i1 >= 0 ? ((hit_br->GetLeaf("ring"))->GetValue(i1) == 2) : 0);
 
 	   double eta;
 	   double phi;
@@ -770,6 +777,11 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   int bend1, bend2, bend3, bend4;
 	   int RPC1, RPC2, RPC3, RPC4;
 
+	   if (MODE == 0) {
+	     theta = emtf_eta_int;
+	     goto EMTF_ONLY;
+	   }
+
 	   // std::cout << "    - Computing theta" << std::endl;
 	   theta = CalcTrackTheta( th1, th2, th3, th4, st1_ring2, mode, BIT_COMP );
 	   
@@ -807,6 +819,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	       if ( outStPh < 2 || dPhSum3A >= fmax(24., 174. - 20*log2(mu_pt)) )
 		 trainEvt = false;
 
+	 EMTF_ONLY: // Skip track building, just store EMTF info
 
 	   /////////////////////////////////////////////////////
 	   ///  Loop over factories and set variable values  ///
@@ -989,7 +1002,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	     } // End loop: for (UInt_t iVar = 0; iVar < var_names.size(); iVar++)
 	     
 	     // Load values into event
-	     if ( (iEvt % 2) == 0 && isMC && trainEvt && nTrain < (MAX_TR - (iFact == 0)) ) { 
+	     if ( (iEvt % 2) == 0 && isMC && trainEvt && nTrain < (MAX_TR - (iFact == 0)) && (MODE > 0 || (iEvt % 1000) == 0) ) { 
 	       std::get<1>(factories.at(iFact))->AddTrainingEvent( "Regression", var_vals, evt_weight );
 	       if (iFact == 0) nTrain += 1;
 	       // std::cout << "Added train event " << nTrain << std::endl;
