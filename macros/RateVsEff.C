@@ -63,8 +63,11 @@ void RateVsEff() {
     BookEffHist( algo );
     BookCountHist( algo );
     BookChargeHist( algo );
-    for (int iPt = 0; iPt < TURN_ONS.size(); iPt++)
+    for (int iPt = 0; iPt < TURN_ONS.size(); iPt++) {
       BookTurnOnHist( algo, iPt, TURN_ONS.at(iPt) );
+      BookEtaHist( algo, iPt, TURN_ONS.at(iPt) );
+    }
+    BookEtaHist( algo, TURN_ONS.size(), 0 );
     for (int iEff = 0; iEff < EFF_CUTS.size(); iEff++) {
       BookPtScaleHist( algo, iEff, EFF_CUTS.at(iEff) );
       BookRateHist( algo, iEff, EFF_CUTS.at(iEff) );
@@ -81,20 +84,32 @@ void RateVsEff() {
     LoopOverEvents( algo, "test" );
 
     // Compute 2D efficiency histograms and rate at efficiency threshold histograms
-    int jBinPrev1 = -99; // Save threshold for previous (lower-pT) bin
-    int jBinPrev2 = -99;
+    int jBinPrev1 = 1; // Save threshold for previous (lower-pT) bin
+    int jBinPrev2 = 1;
     for (int iBin = 1; iBin <= PTBINS; iBin++) { // Loop over GEN pT bins (x-axis)
+      int   nBinsEx = 0;  // Number of bins on either side to consider, to add stats
       float iBinMin = PTMIN + (iBin - 1) * (PTMAX - PTMIN) / PTBINS;
       float iBinMax = PTMIN +  iBin      * (PTMAX - PTMIN) / PTBINS;
       iBinMin = fmax(iBinMin, BIT);
 
-      float den1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin, 1, PTBINS*PTDIVS); // All events in GEN pT bin
-      float den2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin, 1, PTBINS*PTDIVS);
+      float den1 = fmax(algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin, 1, PTBINS*PTDIVS), BIT); // All events in GEN pT bin
+      float den2 = fmax(algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin, 1, PTBINS*PTDIVS), BIT);
+
+      // Get enough stats in denominator to achieve ~2% uncertainty
+      while(den1 < pow(1./ERRMIN, 2) && den2 < pow(1./ERRMIN, 2) && iBin-nBinsEx > 1 && iBin+nBinsEx < PTBINS) {
+	nBinsEx += 1;
+	iBinMin = PTMIN + (iBin-nBinsEx - 1) * (PTMAX - PTMIN) / PTBINS;
+	iBinMax = PTMIN + (iBin+nBinsEx    ) * (PTMAX - PTMIN) / PTBINS;
+	iBinMin = fmax(iBinMin-nBinsEx, BIT);
+	den1 = fmax(algo.h_trg_vs_GEN_pt.first ->Integral(iBin-nBinsEx, iBin+nBinsEx, 1, PTBINS*PTDIVS), BIT); // All events in GEN pT bin
+	den2 = fmax(algo.h_trg_vs_GEN_pt.second->Integral(iBin-nBinsEx, iBin+nBinsEx, 1, PTBINS*PTDIVS), BIT);
+      }
+
 
       // Fill EMTF charge-efficiency plot
       if (algo.MVA_name.Contains("EMTF")) {
-	algo.h_charge_eff->SetBinContent(iBin, algo.h_charge_eff->GetBinContent(iBin) / fmax(1.0, den1 + den2));
-	algo.h_charge_eff->SetBinError  (iBin, 1. / sqrt(fmax(1.0, den1 + den2)));
+	algo.h_charge_eff->SetBinContent(iBin, algo.h_charge_eff->GetBinContent(iBin) / (den1 + den2));
+	algo.h_charge_eff->SetBinError  (iBin, 1. / sqrt(den1 + den2));
       }
 
       // Fill trigger pT scaling and ZeroBias rate plots
@@ -105,28 +120,28 @@ void RateVsEff() {
 
 	if (jBinMin > iBinMin + BIT) continue; // Don't set threshold higher than nominal pT
 
-	float num1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin, jBin, PTBINS*PTDIVS); // Events passing trigger pT cut
-	float eff1 = fmax(1.0, num1) / fmax(1.0, den1);
-	float num2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin, jBin, PTBINS*PTDIVS);
-	float eff2 = fmax(1.0, num2) / fmax(1.0, den2);
+	float num1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin-nBinsEx, iBin+nBinsEx, jBin, PTBINS*PTDIVS); // Events passing trigger pT cut
+	float eff1 = num1 / den1;
+	float num2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin-nBinsEx, iBin+nBinsEx, jBin, PTBINS*PTDIVS);
+	float eff2 = num2 / den2;
 
-	algo.h_trg_vs_GEN_pt_eff.first ->SetBinContent(iBin, jBin, eff1);
-	algo.h_trg_vs_GEN_pt_eff.first ->SetBinError  (iBin, jBin, eff1 * sqrt( (1/fmax(1.0, num1)) + (1/fmax(1.0, den1)) ) );
-	algo.h_trg_vs_GEN_pt_eff.second->SetBinContent(iBin, jBin, eff2);
-	algo.h_trg_vs_GEN_pt_eff.second->SetBinError  (iBin, jBin, eff2 * sqrt( (1/fmax(1.0, num2)) + (1/fmax(1.0, den2)) ) );
+	algo.h_trg_eff_vs_GEN_pt.first ->SetBinContent(iBin, jBin, eff1);
+	algo.h_trg_eff_vs_GEN_pt.first ->SetBinError  (iBin, jBin, eff1 / sqrt(den1) );
+	algo.h_trg_eff_vs_GEN_pt.second->SetBinContent(iBin, jBin, eff2);
+	algo.h_trg_eff_vs_GEN_pt.second->SetBinError  (iBin, jBin, eff2 / sqrt(den2) );
 
 	// Loop over efficiency-at-turn-on working points
 	for (int iEff = 0; iEff < EFF_CUTS.size(); iEff++) {
 	  float thresh = EFF_CUTS.at(iEff)*0.01;
 
-	  // Fill if efficiency reaches working point, or if it reaches pT threshold for lower-pT bin
-	  if ( (eff1 >= thresh || jBin == jBinPrev1) && algo.h_pt_scales.at(iEff).first ->GetBinContent(iBin) < 0) {
-	    algo.h_ZB_rates.at(iEff).first  ->SetBinContent( iBin, algo.h_ZB_count->Integral(jBin, PTBINS*PTDIVS) );
+	  // Fill if efficiency reaches working point
+	  if ( (eff1 >= thresh || jBin == 1) && algo.h_pt_scales.at(iEff).first ->GetBinContent(iBin) < 0) {
+	    algo.h_ZB_rates.at(iEff).first  ->SetBinContent( iBin, algo.h_ZB_count->Integral(jBin, PTBINS*PTDIVS) / (2*nBinsEx + 1) );
 	    algo.h_pt_scales.at(iEff).first ->SetBinContent( iBin, iBinMin / jBinMin );
 	    jBinPrev1 = jBin;
 	  }
-	  if ( (eff2 >= thresh || jBin == jBinPrev2) && algo.h_pt_scales.at(iEff).second->GetBinContent(iBin) < 0) {
-	    algo.h_ZB_rates.at(iEff).second ->SetBinContent( iBin, algo.h_ZB_count->Integral(jBin, PTBINS*PTDIVS) );
+	  if ( (eff2 >= thresh || jBin == 1) && algo.h_pt_scales.at(iEff).second->GetBinContent(iBin) < 0) {
+	    algo.h_ZB_rates.at(iEff).second ->SetBinContent( iBin, algo.h_ZB_count->Integral(jBin, PTBINS*PTDIVS) / (2*nBinsEx + 1) );
 	    algo.h_pt_scales.at(iEff).second->SetBinContent( iBin, iBinMin / jBinMin );
 	    jBinPrev2 = jBin;
 	  }
@@ -147,17 +162,28 @@ void RateVsEff() {
 	int jBin1 = int( PTBINS*PTDIVS * fmin(1.0, fmax(0.0, (pt_cut1 - PTMIN) / (PTMAX - PTMIN))) );
 	int jBin2 = int( PTBINS*PTDIVS * fmin(1.0, fmax(0.0, (pt_cut2 - PTMIN) / (PTMAX - PTMIN))) );
 
-	float num1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin, iBin, jBin1, PTBINS*PTDIVS); // Events passing trigger pT cut
+	float num1 = algo.h_trg_vs_GEN_pt.first ->Integral(iBin-nBinsEx, iBin+nBinsEx, jBin1, PTBINS*PTDIVS); // Events passing trigger pT cut
 	float eff1 = num1 / den1;
-	float num2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin, iBin, jBin2, PTBINS*PTDIVS);
+	float num2 = algo.h_trg_vs_GEN_pt.second->Integral(iBin-nBinsEx, iBin+nBinsEx, jBin2, PTBINS*PTDIVS);
 	float eff2 = num2 / den2;
-	
+
 	algo.h_turn_ons.at(iPt).first ->SetBinContent(iBin, eff1);
-	algo.h_turn_ons.at(iPt).first ->SetBinError(iBin, eff1 * sqrt( (1/fmax(1.0, num1)) + (1/fmax(1.0, den1)) ) );
+	algo.h_turn_ons.at(iPt).first ->SetBinError(iBin, eff1 / sqrt(den1) );
 	algo.h_turn_ons.at(iPt).second->SetBinContent(iBin, eff2);
-	algo.h_turn_ons.at(iPt).second->SetBinError(iBin, eff2 * sqrt( (1/fmax(1.0, num2)) + (1/fmax(1.0, den2)) ) );
+	algo.h_turn_ons.at(iPt).second->SetBinError(iBin, eff2 / sqrt(den2) );
+
+	for (int iEta = 1; iEta <= ETABINS; iEta++) {
+	  algo.h_ZB_etas.at(iPt).first ->SetBinContent( iEta, algo.h_ZB_count_eta->Integral(jBin1, PTBINS*PTDIVS, iEta, iEta) / (2*nBinsEx + 1) );
+	  algo.h_ZB_etas.at(iPt).second->SetBinContent( iEta, algo.h_ZB_count_eta->Integral(jBin2, PTBINS*PTDIVS, iEta, iEta) / (2*nBinsEx + 1) );
+
+	  if (iPt == TURN_ONS.size() - 1) {  // Also fill inclusive eta plot
+	    algo.h_ZB_etas.at(iPt+1).first ->SetBinContent( iEta, algo.h_ZB_count_eta->Integral(1, PTBINS*PTDIVS, iEta, iEta) / (2*nBinsEx + 1) );
+	    algo.h_ZB_etas.at(iPt+1).second->SetBinContent( iEta, algo.h_ZB_count_eta->Integral(1, PTBINS*PTDIVS, iEta, iEta) / (2*nBinsEx + 1) );
+	  }
+	}
+
       } // End loop: for (int iPt = 0; iPt < TURN_ONS.size(); iPt++)
-      
+
     } // End loop: for (int iBin = 1; iBin <= PTBINS; iBin++)
     
     ALGOS.at(i) = algo; // Update ALGOS
@@ -170,16 +196,21 @@ void RateVsEff() {
 
     algo.h_trg_vs_GEN_pt.first ->Write();
     algo.h_trg_vs_GEN_pt.second->Write();
-    algo.h_trg_vs_GEN_pt_eff.first ->Write();
-    algo.h_trg_vs_GEN_pt_eff.second->Write();
+    algo.h_trg_eff_vs_GEN_pt.first ->Write();
+    algo.h_trg_eff_vs_GEN_pt.second->Write();
     algo.h_ZB_count->Write();
+    algo.h_ZB_count_eta->Write();
     if (algo.MVA_name.Contains("EMTF"))
       algo.h_charge_eff->Write();
 
     for (int j = 0; j < TURN_ONS.size(); j++) {
       algo.h_turn_ons.at(j).first ->Write();
       algo.h_turn_ons.at(j).second->Write();
+      algo.h_ZB_etas.at(j).first ->Write();
+      algo.h_ZB_etas.at(j).second->Write();
     }
+    algo.h_ZB_etas.at(TURN_ONS.size()).first ->Write();
+    algo.h_ZB_etas.at(TURN_ONS.size()).second->Write();
     
     for (int iEff = 0; iEff < EFF_CUTS.size(); iEff++) {
       algo.h_pt_scales.at(iEff).first ->Write();
@@ -238,22 +269,22 @@ void BookPtHist( PtAlgo& algo ) {
 
 void BookEffHist( PtAlgo& algo ) {
   
-  TString h_eff_str_tr = "h_trg_vs_GEN_pt_eff_"+algo.unique_ID+"_train";
-  TString h_eff_str_te = "h_trg_vs_GEN_pt_eff_"+algo.unique_ID+"_test";
-  algo.h_trg_vs_GEN_pt_eff =  std::make_pair( new TH2D( h_eff_str_tr, h_eff_str_tr,
+  TString h_eff_str_tr = "h_trg_eff_vs_GEN_pt_"+algo.unique_ID+"_train";
+  TString h_eff_str_te = "h_trg_eff_vs_GEN_pt_"+algo.unique_ID+"_test";
+  algo.h_trg_eff_vs_GEN_pt =  std::make_pair( new TH2D( h_eff_str_tr, h_eff_str_tr,
 							PTBINS, PTMIN, PTMAX, PTBINS*PTDIVS, PTMIN, PTMAX ),
 					      new TH2D( h_eff_str_te,  h_eff_str_te,
 							PTBINS, PTMIN, PTMAX, PTBINS*PTDIVS, PTMIN, PTMAX ) );
   
-  algo.h_trg_vs_GEN_pt_eff.first ->Sumw2();
-  algo.h_trg_vs_GEN_pt_eff.second->Sumw2();
+  algo.h_trg_eff_vs_GEN_pt.first ->Sumw2();
+  algo.h_trg_eff_vs_GEN_pt.second->Sumw2();
   
-  algo.h_trg_vs_GEN_pt_eff.first ->SetTitle(algo.alias+" (train) vs. GEN p_{T} efficiency");
-  algo.h_trg_vs_GEN_pt_eff.second->SetTitle(algo.alias+" (test) vs. GEN p_{T} efficiency");
-  algo.h_trg_vs_GEN_pt_eff.first ->GetXaxis()->SetTitle("GEN p_{T} (GeV)");
-  algo.h_trg_vs_GEN_pt_eff.second->GetXaxis()->SetTitle("GEN p_{T} (GeV)");
-  algo.h_trg_vs_GEN_pt_eff.first ->GetYaxis()->SetTitle("Unscaled trigger p_{T} (GeV)");
-  algo.h_trg_vs_GEN_pt_eff.second->GetYaxis()->SetTitle("Unscaled trigger p_{T} (GeV)");
+  algo.h_trg_eff_vs_GEN_pt.first ->SetTitle(algo.alias+" (train) vs. GEN p_{T} efficiency");
+  algo.h_trg_eff_vs_GEN_pt.second->SetTitle(algo.alias+" (test) vs. GEN p_{T} efficiency");
+  algo.h_trg_eff_vs_GEN_pt.first ->GetXaxis()->SetTitle("GEN p_{T} (GeV)");
+  algo.h_trg_eff_vs_GEN_pt.second->GetXaxis()->SetTitle("GEN p_{T} (GeV)");
+  algo.h_trg_eff_vs_GEN_pt.first ->GetYaxis()->SetTitle("Unscaled trigger p_{T} (GeV)");
+  algo.h_trg_eff_vs_GEN_pt.second->GetYaxis()->SetTitle("Unscaled trigger p_{T} (GeV)");
   
 } // End BookEffHist()
   
@@ -261,15 +292,25 @@ void BookEffHist( PtAlgo& algo ) {
 void BookCountHist( PtAlgo& algo ) {
   
   TString h_ZB_count_str = "h_ZB_count_"+algo.unique_ID;
-  algo.h_ZB_count = new TH1D( h_ZB_count_str, h_ZB_count_str, PTBINS*PTDIVS, PTMIN, PTMAX );
+  TString h_ZB_count_eta_str = "h_ZB_count_eta_"+algo.unique_ID;
+  algo.h_ZB_count     = new TH1D( h_ZB_count_str,     h_ZB_count_str,     PTBINS*PTDIVS, PTMIN, PTMAX );
+  algo.h_ZB_count_eta = new TH2D( h_ZB_count_eta_str, h_ZB_count_eta_str, PTBINS*PTDIVS, PTMIN, PTMAX, ETABINS, ETAMIN, ETAMAX );
   
   algo.h_ZB_count->Sumw2();
   algo.h_ZB_count->SetLineWidth(2);
   algo.h_ZB_count->SetLineColor(algo.color);
 
+  algo.h_ZB_count_eta->Sumw2();
+  algo.h_ZB_count_eta->SetLineWidth(2);
+  algo.h_ZB_count_eta->SetLineColor(algo.color);
+
   algo.h_ZB_count->SetTitle(algo.alias+" events vs. p_{T} threshold (GeV)") ;
   algo.h_ZB_count->GetXaxis()->SetTitle("Unscaled trigger p_{T} threshold (GeV)") ;
-  algo.h_ZB_count->GetXaxis()->SetTitle("ZeroBias events") ;
+  algo.h_ZB_count->GetYaxis()->SetTitle("ZeroBias events") ;
+  
+  algo.h_ZB_count_eta->SetTitle(algo.alias+" events vs. p_{T} threshold (GeV) vs. muon |#eta|") ;
+  algo.h_ZB_count_eta->GetXaxis()->SetTitle("Unscaled trigger p_{T} threshold (GeV)") ;
+  algo.h_ZB_count_eta->GetYaxis()->SetTitle("Muon |#eta|");
   
 } // End BookCountHist()
 
@@ -319,6 +360,35 @@ void BookTurnOnHist( PtAlgo& algo, const int iPt, const int pt_cut ) {
   algo.h_turn_ons.at(iPt).second->GetXaxis()->SetTitle("Efficiency") ;
   
 } // End BookTurnOnHist()
+
+		 
+void BookEtaHist( PtAlgo& algo, const int iPt, const int pt_cut ) {
+
+  TString h_ZB_eta_str_tr;
+  TString h_ZB_eta_str_te;
+  h_ZB_eta_str_tr.Form("h_ZB_eta_%s_%d_train", algo.unique_ID.Data(), pt_cut);
+  h_ZB_eta_str_te.Form("h_ZB_eta_%s_%d_test",  algo.unique_ID.Data(), pt_cut);
+  algo.h_ZB_etas.push_back( std::make_pair( new TH1D( h_ZB_eta_str_tr, h_ZB_eta_str_tr, ETABINS, ETAMIN, ETAMAX ),
+					    new TH1D( h_ZB_eta_str_te, h_ZB_eta_str_te, ETABINS, ETAMIN, ETAMAX ) ) );
+  
+  algo.h_ZB_etas.at(iPt).first ->Sumw2();
+  algo.h_ZB_etas.at(iPt).second->Sumw2();
+  algo.h_ZB_etas.at(iPt).first ->SetLineWidth(2);
+  algo.h_ZB_etas.at(iPt).second->SetLineWidth(2);
+  algo.h_ZB_etas.at(iPt).first ->SetLineColor(algo.color);
+  algo.h_ZB_etas.at(iPt).second->SetLineColor(algo.color);
+
+  h_ZB_eta_str_tr.Form("%s ZeroBias |#eta| at %d GeV threshold (train)", algo.alias.Data(), pt_cut);
+  h_ZB_eta_str_te.Form("%s ZeroBias |#eta| at %d GeV threshold (test)",  algo.alias.Data(), pt_cut);
+  
+  algo.h_ZB_etas.at(iPt).first ->SetTitle(h_ZB_eta_str_tr);
+  algo.h_ZB_etas.at(iPt).second->SetTitle(h_ZB_eta_str_te);
+  algo.h_ZB_etas.at(iPt).first ->GetXaxis()->SetTitle("Muon |#eta|") ;
+  algo.h_ZB_etas.at(iPt).second->GetXaxis()->SetTitle("Muon |#eta|") ;
+  algo.h_ZB_etas.at(iPt).first ->GetXaxis()->SetTitle("Counts") ;
+  algo.h_ZB_etas.at(iPt).second->GetXaxis()->SetTitle("Counts") ;
+  
+} // End BookEtaHist()
 
 		 
 void BookPtScaleHist( PtAlgo& algo, const int iEff, const int eff_cut ) {
@@ -402,6 +472,8 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
   float GEN_eta_br;
   float GEN_charge_br;
   float EMTF_charge_br;
+  float EMTF_mode_br;
+  float EMTF_mode_CSC_br;
   float TRK_eta_br;
   float TRK_mode_br;
   float TRK_mode_CSC_br;
@@ -423,6 +495,8 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
   chain->SetBranchAddress("GEN_eta", &GEN_eta_br);
   chain->SetBranchAddress("GEN_charge", &GEN_charge_br);
   chain->SetBranchAddress("EMTF_charge", &EMTF_charge_br);
+  chain->SetBranchAddress("EMTF_mode", &EMTF_mode_br);
+  chain->SetBranchAddress("EMTF_mode_CSC", &EMTF_mode_CSC_br);
   if (isEMTF) {
     chain->SetBranchAddress("EMTF_eta", &TRK_eta_br);
     chain->SetBranchAddress("EMTF_mode", &TRK_mode_br);
@@ -460,14 +534,16 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
     TRG_pt *= algo.trg_pt_scale;
     TRG_pt += BIT; // Small value to offset EMTF trigger pT right on 0.0/0.5 GeV boundaries 
 
-    double GEN_pt  = double(GEN_pt_br);
-    double GEN_eta = double(GEN_eta_br);
-    double TRK_eta = double(TRK_eta_br);
-    int GEN_charge   = int(GEN_charge_br);
-    int EMTF_charge  = int(EMTF_charge_br);
-    int TRK_mode     = int(TRK_mode_br);
-    int TRK_mode_CSC = int(TRK_mode_CSC_br);
-    int TRK_mode_RPC = int(TRK_mode_RPC_br);
+    double GEN_pt     = double(GEN_pt_br);
+    double GEN_eta    = double(GEN_eta_br);
+    double TRK_eta    = double(TRK_eta_br);
+    int GEN_charge    = int(GEN_charge_br);
+    int EMTF_charge   = int(EMTF_charge_br);
+    int EMTF_mode     = int(EMTF_mode_br);
+    int EMTF_mode_CSC = int(EMTF_mode_CSC_br);
+    int TRK_mode      = int(TRK_mode_br);
+    int TRK_mode_CSC  = int(TRK_mode_CSC_br);
+    int TRK_mode_RPC  = int(TRK_mode_RPC_br);
 
     if ( fabs(TRK_eta) < ETAMIN ) continue;
     if ( fabs(TRK_eta) > ETAMAX ) continue;
@@ -496,7 +572,10 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
 
     // Fill counts from ZeroBias events
     if (GEN_eta < -10 && tr_te.Contains("test")) {
-      algo.h_ZB_count->Fill( TRG_pt );
+      if ( isEMTF || (!algo.match_EMTF) || (TRK_mode == EMTF_mode && TRK_mode_CSC == EMTF_mode_CSC) ) {
+	algo.h_ZB_count    ->Fill( TRG_pt );
+	algo.h_ZB_count_eta->Fill( TRG_pt, fabs(TRK_eta) );
+      }
     }
 
     if ( GEN_pt < PTMIN + BIT ) continue;

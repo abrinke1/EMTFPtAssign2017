@@ -11,6 +11,8 @@ void BookChargeHist( PtAlgo& algo );
 
 void BookTurnOnHist( PtAlgo& algo, const int iPt, const int pt_cut );
 
+void BookEtaHist( PtAlgo& algo, const int iPt, const int pt_cut );
+
 void BookPtScaleHist( PtAlgo& algo, const int iEff, const int eff_cut);
 
 void BookRateHist( PtAlgo& algo, const int iEff, const int eff_cut);
