@@ -77,7 +77,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    Use["BDTG_default"]            = 0;
 
    Use["BDTG_AWB"]                = 1;
-   Use["BDTG_AWB_Sq"]             = 0;
+   Use["BDTG_AWB_Hub"]            = 1;
+   Use["BDTG_AWB_Sq"]             = 1;
    Use["BDTG_AWB_lite"]           = 0;
 
    Use["BDTG_AWB_50_trees"]       = 0;
@@ -260,7 +261,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xd4001573) );
        } else if (MODE ==  7) {
 	 // BASELINE mode  7 - dPhi23/34/24, theta, FR2, dTh24, bend2, RPC 2/3/4
-	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xe800229b) );
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xe8002299) );
        } 
 
        // 2-station tracks
@@ -734,7 +735,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   int pat3 = (i3 >= 0 ? (hit_br->GetLeaf("pattern"))->GetValue(i3) : -99);
 	   int pat4 = (i4 >= 0 ? (hit_br->GetLeaf("pattern"))->GetValue(i4) : -99);
 
-	   int st1_ring2 = (i1 >= 0 ? ((hit_br->GetLeaf("ring"))->GetValue(i1) == 2) : 0);
+	   int st1_ring2 = (i1 >= 0 ? ((hit_br->GetLeaf("ring"))->GetValue(i1) == 2 || (hit_br->GetLeaf("ring"))->GetValue(i1) == 3) : 0);
 
 	   double eta;
 	   double phi;
@@ -811,7 +812,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   RPC3 = (i3 >= 0 ? ((hit_br->GetLeaf("isRPC"))->GetValue(i3) == 1 ? 1 : 0) : -99);
 	   RPC4 = (i4 >= 0 ? ((hit_br->GetLeaf("isRPC"))->GetValue(i4) == 1 ? 1 : 0) : -99);
 
-	   CalcRPCs( RPC1, RPC2, RPC3, RPC4, mode, BIT_COMP );
+	   CalcRPCs( RPC1, RPC2, RPC3, RPC4, mode, st1_ring2, theta, BIT_COMP );
 	   
 	   // Clean out showering muons with outlier station 1, or >= 2 outlier stations
 	   if (isMC && log2(mu_pt) > 6 && CLEAN_HI_PT && MODE == 15)
@@ -1146,6 +1147,11 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB", (string)
 			  "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
+     // AWB settings - Huber
+     if (Use["BDTG_AWB_Hub"]) // Optimized settings
+       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_Hub", (string)
+			  "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:"+
+			  "RegressionLossFunctionBDTG=Huber" );
      // AWB settings - LeastSquares
      if (Use["BDTG_AWB_Sq"]) // Optimized settings
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_Sq", (string)
@@ -1180,7 +1186,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
      
      if (Use["BDTG_AWB_3_deep"])
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_3_deep", (string)
-			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=4:MinNodeSize=0.001:"+
+			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=3:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
      if (Use["BDTG_AWB_4_deep"])
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_4_deep", (string)

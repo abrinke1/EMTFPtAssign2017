@@ -2,6 +2,9 @@
 #include "../interface/PtLutVarCalc.h"
 #include "../src/PtAssignmentEngineAux2017.cc"
 
+// From here down, exact copy of code used in emulator: L1Trigger/L1TMuonEndCap/src/PtLutVarCalc.cc
+
+
 PtAssignmentEngineAux2017 ENG;
 
 
@@ -109,34 +112,8 @@ void CalcDeltaPhis( int& dPh12, int& dPh13, int& dPh14, int& dPh23, int& dPh24, 
 
 
   // Compute summed quantities
-  if (mode == 15) {
-    dPhSum4  = dPh12 + dPh13 + dPh14 + dPh23 + dPh24 + dPh34;
-    dPhSum4A = abs(dPh12) + abs(dPh13) + abs(dPh14) + abs(dPh23) + abs(dPh24) + abs(dPh34);
-    int devSt1 = abs(dPh12) + abs(dPh13) + abs(dPh14);
-    int devSt2 = abs(dPh12) + abs(dPh23) + abs(dPh24);
-    int devSt3 = abs(dPh13) + abs(dPh23) + abs(dPh34);
-    int devSt4 = abs(dPh14) + abs(dPh24) + abs(dPh34);
-    
-    if      (devSt4 > devSt3 && devSt4 > devSt2 && devSt4 > devSt1)  outStPh = 4;
-    else if (devSt3 > devSt4 && devSt3 > devSt2 && devSt3 > devSt1)  outStPh = 3;
-    else if (devSt2 > devSt4 && devSt2 > devSt3 && devSt2 > devSt1)  outStPh = 2;
-    else if (devSt1 > devSt4 && devSt1 > devSt3 && devSt1 > devSt2)  outStPh = 1;
-    else                                                             outStPh = 0;
-    
-    if      (outStPh == 4) {
-      dPhSum3  = dPh12 + dPh13 + dPh23;
-      dPhSum3A = abs(dPh12) + abs(dPh13) + abs(dPh23);
-    } else if (outStPh == 3) {
-      dPhSum3  = dPh12 + dPh14 + dPh24;
-      dPhSum3A = abs(dPh12) + abs(dPh14) + abs(dPh24);
-    } else if (outStPh == 2) {
-      dPhSum3  = dPh13 + dPh14 + dPh34;
-      dPhSum3A = abs(dPh13) + abs(dPh14) + abs(dPh34);
-    } else {
-      dPhSum3  = dPh23 + dPh24 + dPh34;
-      dPhSum3A = abs(dPh23) + abs(dPh24) + abs(dPh34);
-    }
-  }
+  if (mode == 15) CalcDeltaPhiSums( dPhSum4, dPhSum4A, dPhSum3, dPhSum3A, outStPh,
+				    dPh12,  dPh13,  dPh14,  dPh23,  dPh24,  dPh34 );
 
 } // End function: CalcDeltaPhis()
 
@@ -193,10 +170,22 @@ void CalcBends( int& bend1, int& bend2, int& bend3, int& bend4,
   
 } // End function: CalcBends()
 
-void CalcRPCs( int& RPC1, int& RPC2, int& RPC3, int& RPC4,
-	       const int mode, const bool BIT_COMP ) {
+void CalcRPCs( int& RPC1, int& RPC2, int& RPC3, int& RPC4, const int mode,
+	       const int st1_ring2, const int theta, const bool BIT_COMP ) {
 
   if (BIT_COMP) {
+
+    // Mask some invalid locations for RPC hits
+    // theta is assumed to be the compressed, mode 15 version
+    if (mode == 15 && !st1_ring2) {
+      RPC1 = 0;
+      RPC2 = 0;
+      if (theta < 3) {
+	RPC3 = 0;
+	RPC4 = 0;
+      }
+    }
+
     int nRPC = (RPC1 == 1) + (RPC2 == 1) + (RPC3 == 1) + (RPC4 == 1);
     
     // In 3- and 4-station modes, only specify some combinations of RPCs
@@ -209,6 +198,8 @@ void CalcRPCs( int& RPC1, int& RPC2, int& RPC3, int& RPC4,
 	} else if (RPC1 == 1 && RPC3 == 1) {
 	  RPC4 = 0;
 	} else if (RPC4 == 1 && RPC2 == 1) {
+	  RPC3 = 0;
+	} else if (RPC3 == 1 && RPC4 == 1 && !st1_ring2) {
 	  RPC3 = 0;
 	}
       } else if (mode == 14) {
@@ -267,3 +258,36 @@ int CalcBendFromPattern( const int pattern, const int endcap ) {
   assert( bend != -99 );
   return bend;
 }
+
+
+void CalcDeltaPhiSums( int& dPhSum4, int& dPhSum4A, int& dPhSum3, int& dPhSum3A, int& outStPh,
+		       const int dPh12, const int dPh13, const int dPh14, const int dPh23, const int dPh24, const int dPh34 ) {
+
+    dPhSum4  = dPh12 + dPh13 + dPh14 + dPh23 + dPh24 + dPh34;
+    dPhSum4A = abs(dPh12) + abs(dPh13) + abs(dPh14) + abs(dPh23) + abs(dPh24) + abs(dPh34);
+    int devSt1 = abs(dPh12) + abs(dPh13) + abs(dPh14);
+    int devSt2 = abs(dPh12) + abs(dPh23) + abs(dPh24);
+    int devSt3 = abs(dPh13) + abs(dPh23) + abs(dPh34);
+    int devSt4 = abs(dPh14) + abs(dPh24) + abs(dPh34);
+    
+    if      (devSt4 > devSt3 && devSt4 > devSt2 && devSt4 > devSt1)  outStPh = 4;
+    else if (devSt3 > devSt4 && devSt3 > devSt2 && devSt3 > devSt1)  outStPh = 3;
+    else if (devSt2 > devSt4 && devSt2 > devSt3 && devSt2 > devSt1)  outStPh = 2;
+    else if (devSt1 > devSt4 && devSt1 > devSt3 && devSt1 > devSt2)  outStPh = 1;
+    else                                                             outStPh = 0;
+    
+    if      (outStPh == 4) {
+      dPhSum3  = dPh12 + dPh13 + dPh23;
+      dPhSum3A = abs(dPh12) + abs(dPh13) + abs(dPh23);
+    } else if (outStPh == 3) {
+      dPhSum3  = dPh12 + dPh14 + dPh24;
+      dPhSum3A = abs(dPh12) + abs(dPh14) + abs(dPh24);
+    } else if (outStPh == 2) {
+      dPhSum3  = dPh13 + dPh14 + dPh34;
+      dPhSum3A = abs(dPh13) + abs(dPh14) + abs(dPh34);
+    } else {
+      dPhSum3  = dPh23 + dPh24 + dPh34;
+      dPhSum3A = abs(dPh23) + abs(dPh24) + abs(dPh34);
+    }
+
+} // End function: void CalcDeltaPhiSums()

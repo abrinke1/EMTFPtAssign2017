@@ -11,8 +11,8 @@ namespace PtRegression_Apr_2017_cfg {
     
     // 4-station mode
     if (MODE == 15) {
-      MIN_CSC = 2;
-      MAX_RPC = 2;
+      MIN_CSC = 3; 
+      MAX_RPC = 1; // Saves time on training ... ideally should change back to 2? - AWB 02.06.17
     } 
     
     // 3-station modes

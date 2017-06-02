@@ -3,10 +3,10 @@
 const TString USER = "AWB";  // Settings applied in User.h
 
 // *** Events to process *** //
-const int MAX_EVT    = 1000000;  // Number of MC events to process          (4M default for mode 15)
-const int MAX_TR     =  500000;  // Number of MC events to use for training (1M default for mode 15)
-const int REPORT_EVT =   10000;  // Report every Nth event during processing
-const int MAX_ZB_FIL =      50;  // Number of ZeroBias files to include (~200 CSC-only, ~30 with RPC)
+const int MAX_EVT    =  2000000;  // Number of MC events to process          (4M default for mode 15, 12M available)
+const int MAX_TR     =  1000000;  // Number of MC events to use for training (2M default for mode 15)
+const int REPORT_EVT =    10000;  // Report every Nth event during processing
+const int MAX_ZB_FIL =       50;  // Number of ZeroBias files to include (~200 CSC-only, ~30 with RPC)
 
 /* // // ***** Test settings ***** // // */
 /* const int MAX_EVT    =  40000;  // Number of MC events to process */
@@ -23,9 +23,9 @@ const std::vector<int> RPC_MASK = {};  // Mask RPC hits in these stations
 
 // *** Target and event weights *** //
 // Choose "pt", "invPt", "logPt", and/or "charge"
-const std::vector<TString> TARG_VARS = {"logPt"};
+const std::vector<TString> TARG_VARS = {"invPt"}; // Default "invPt"
 // Choose "no", "invPt", and/or "invPtSq"
-const std::vector<TString> EVT_WGTS  = {"invPt"};
+const std::vector<TString> EVT_WGTS  = {"invPt"}; // Default "invPt" 
 
 // *** EMTF tracks *** //
 const bool REQ_EMTF     = true;  // Require that an EMTF muon be matched to the GEN muon
