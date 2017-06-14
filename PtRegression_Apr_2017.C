@@ -76,8 +76,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 
    Use["BDTG_default"]            = 0;
 
-   Use["BDTG_AWB"]                = 1;
-   Use["BDTG_AWB_Hub"]            = 1;
+   Use["BDTG_AWB"]                = 0;
+   Use["BDTG_AWB_Hub"]            = 0;
    Use["BDTG_AWB_Sq"]             = 1;
    Use["BDTG_AWB_lite"]           = 0;
 
@@ -522,7 +522,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   // Require same endcap
 	   emtf_eta     = (trk_br->GetLeaf("eta"))->GetValue(iTrk);
 	   emtf_eta_int = (trk_br->GetLeaf("eta_int"))->GetValue(iTrk);
-	   if ((emtf_eta > 0) != (mu_eta > 0)) {
+	   if (isMC && (emtf_eta > 0) != (mu_eta > 0)) {
 	     emtf_eta = -99.;
 	     continue;
 	   }
@@ -796,10 +796,25 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 			    th1, th2, th3, th4, mode, BIT_COMP );
 
 	   // std::cout << "    - Computing FRs" << std::endl;
-	   FR1 = (i1 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i1) : -99);
-	   FR2 = (i2 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i2) : -99);
-	   FR3 = (i3 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i3) : -99);
-	   FR4 = (i4 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i4) : -99);
+
+	   // // FR bit directly out of the NTuples
+	   // FR1 = (i1 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i1) : -99);
+	   // FR2 = (i2 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i2) : -99);
+	   // FR3 = (i3 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i3) : -99);
+	   // FR4 = (i4 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i4) : -99);
+
+	   // In firmware, RPC 'FR' bit set according to FR of corresponding CSC chamber
+	   int ring1 = (i1 >= 0 ? (hit_br->GetLeaf("ring"))   ->GetValue(i1) : -99);
+	   int cham1 = (i1 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i1) : -99);
+	   int cham2 = (i2 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i2) : -99);
+	   int cham3 = (i3 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i3) : -99);
+	   int cham4 = (i4 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i4) : -99);
+
+	   FR1 = (i1 >= 0 ? (cham1 % 2 == 0) : -99);  // Odd chambers are bolted to the iron,
+	   FR2 = (i2 >= 0 ? (cham2 % 2 == 0) : -99);  // which faces forwared in stations 1 & 2,
+	   FR3 = (i3 >= 0 ? (cham3 % 2 == 1) : -99);  // backwards in 3 & 4
+	   FR4 = (i4 >= 0 ? (cham4 % 2 == 1) : -99);
+	   if (ring1 == 3) FR1 = 0;                   // In ME1/3 chambers are non-overlapping
 
 	   // std::cout << "    - Computing bend" << std::endl;
 	   CalcBends( bend1, bend2, bend3, bend4,
