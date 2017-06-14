@@ -180,7 +180,7 @@ void CalcRPCs( int& RPC1, int& RPC2, int& RPC3, int& RPC4, const int mode,
     if (mode == 15 && !st1_ring2) {
       RPC1 = 0;
       RPC2 = 0;
-      if (theta < 3) {
+      if (theta < 4) {
 	RPC3 = 0;
 	RPC4 = 0;
       }

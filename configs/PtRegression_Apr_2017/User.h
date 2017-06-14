@@ -13,7 +13,7 @@ namespace PtRegression_Apr_2017_cfg {
     if (USER == "AWB") {
       EOS_DIR_NAME = "root://eoscms.cern.ch//store/user/abrinke1/EMTF/Emulator/ntuples";  // Input directory in eos
       OUT_DIR_NAME = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017/files";
-      OUT_FILE_NAME = "PtRegression_Apr_2017_05_10_invPtTarg_invPtWgt";
+      OUT_FILE_NAME = "PtRegression_Apr_2017_06_05_invPtTarg_invPtWgt";
     }
     if (USER == "JTR") {
     }
