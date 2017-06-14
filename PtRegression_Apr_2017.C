@@ -778,6 +778,9 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   int bend1, bend2, bend3, bend4;
 	   int RPC1, RPC2, RPC3, RPC4;
 
+	   // Extra variables for FR computation
+	   int ring1, cham1, cham2, cham3, cham4;
+
 	   if (MODE == 0) {
 	     theta = emtf_eta_int;
 	     goto EMTF_ONLY;
@@ -804,11 +807,11 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   // FR4 = (i4 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i4) : -99);
 
 	   // In firmware, RPC 'FR' bit set according to FR of corresponding CSC chamber
-	   int ring1 = (i1 >= 0 ? (hit_br->GetLeaf("ring"))   ->GetValue(i1) : -99);
-	   int cham1 = (i1 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i1) : -99);
-	   int cham2 = (i2 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i2) : -99);
-	   int cham3 = (i3 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i3) : -99);
-	   int cham4 = (i4 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i4) : -99);
+	   ring1 = (i1 >= 0 ? (hit_br->GetLeaf("ring"))   ->GetValue(i1) : -99);
+	   cham1 = (i1 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i1) : -99);
+	   cham2 = (i2 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i2) : -99);
+	   cham3 = (i3 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i3) : -99);
+	   cham4 = (i4 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i4) : -99);
 
 	   FR1 = (i1 >= 0 ? (cham1 % 2 == 0) : -99);  // Odd chambers are bolted to the iron,
 	   FR2 = (i2 >= 0 ? (cham2 % 2 == 0) : -99);  // which faces forwared in stations 1 & 2,
