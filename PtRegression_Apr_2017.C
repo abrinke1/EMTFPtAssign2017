@@ -76,8 +76,9 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 
    Use["BDTG_default"]            = 0;
 
-   Use["BDTG_AWB"]                = 1;
-   Use["BDTG_AWB_Sq"]             = 0;
+   Use["BDTG_AWB"]                = 0;
+   Use["BDTG_AWB_Hub"]            = 0;
+   Use["BDTG_AWB_Sq"]             = 1;
    Use["BDTG_AWB_lite"]           = 0;
 
    Use["BDTG_AWB_50_trees"]       = 0;
@@ -125,12 +126,18 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    // Here the preparation phase begins
 
    // Configure settings for this mode and user
-   ConfigureMode( MODE );
-   ConfigureUser( USER );
+   PtRegression_Apr_2017_cfg::ConfigureMode( MODE );
+   PtRegression_Apr_2017_cfg::ConfigureUser( USER );
 
    // Create a new root output file
    TString out_file_str;
-   out_file_str.Form( "%s/%s_MODE_%d.root", OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), MODE );
+   TString bit_str = (BIT_COMP ? "bitCompr" : "noBitCompr");
+   TString RPC_str = (USE_RPC  ? "RPC"      : "noRPC");
+
+   out_file_str.Form( "%s/%s_MODE_%d_%s_%s.root", 
+		      OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), 
+		      MODE, bit_str.Data(), RPC_str.Data() );
+
    TFile* out_file = TFile::Open( out_file_str, "RECREATE" );
 
    // Read training and test data (see TMVAClassification for reading ASCII files)
@@ -143,7 +150,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    int nZB_in = 0;
    if (USE_RPC) {
      TString in_dir = "ZeroBiasIsolatedBunch0/Slim_RPC/170213_174254/0000";
-     for (int j = 1; j < 50; j++) {
+     for (int j = 20; j < 50; j++) {  // First 19 files are empty
        if (nZB_in >= MAX_ZB_FIL) break;
        in_file_name.Form("%s/%s/tuple_%d.root", EOS_DIR_NAME.Data(), in_dir.Data(), j);
        std::cout << "Adding file " << in_file_name.Data() << std::endl;
@@ -232,18 +239,57 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
      for (int iWgt = 0; iWgt < EVT_WGTS.size(); iWgt++) {
 
        TString factName;  // "Targ" and "Wgt" components not arbitrary - correspond to specific options later on
-       factName.Form("f_MODE_%d_%sTarg_%sWgt", MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data());
-       
+       factName.Form( "f_MODE_%d_%sTarg_%sWgt_%s_%s", 
+		      MODE, TARG_VARS.at(iTarg).Data(), EVT_WGTS.at(iWgt).Data(), 
+		      bit_str.Data(), RPC_str.Data() );
+
+       // 4-station tracks
        if        (MODE == 15) {
 	 // BASELINE mode 15 - dPhi12/23/34 + combos, theta, FR1, St1 ring, dTh14, bend1, RPC 1/2/3/4
 	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xf41f11ff) );
-       } else if (MODE == 14) {
-	 // BASELINE mode 14 - dPhi12/23 + combos, theta, FR1/2, St1 ring, dTh13, bend1, RPC 1/2/3
+       } 
+
+       // 3-station tracks
+       else if   (MODE == 14) {
+	 // BASELINE mode 14 - dPhi12/23/13, theta, FR1/2, St1 ring, dTh13, bend1, RPC 1/2/3
 	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x7200132f) );
-       } else if (MODE == 12) {
+       } else if (MODE == 13) {
+	 // BASELINE mode 13 - dPhi12/24/14, theta, FR1/2, St1 ring, dTh14, bend1, RPC 1/2/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xb40013c7) );
+       } else if (MODE == 11) {
+	 // BASELINE mode 11 - dPhi13/34/14, theta, FR1/3, St1 ring, dTh14, bend1, RPC 1/3/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xd4001573) );
+       } else if (MODE ==  7) {
+	 // BASELINE mode  7 - dPhi23/34/24, theta, FR2, dTh24, bend2, RPC 2/3/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xe8002299) );
+       } 
+
+       // 2-station tracks
+       else if   (MODE == 12) {
 	 // BASELINE mode 12 - dPhi12, theta, FR1/2, St1 ring, dTh12, bend1/2, RPC 1/2
 	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x30403307) );
+       } else if (MODE == 10) {
+	 // BASELINE mode 10 - dPhi13, theta, FR1/3, St1 ring, dTh13, bend1/3, RPC 1/3
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x52005523) );
+       } else if (MODE ==  9) {
+	 // BASELINE mode  9 - dPhi14, theta, FR1/4, St1 ring, dTh14, bend1/4, RPC 1/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x94009943) );
+       } else if (MODE ==  6) {
+	 // BASELINE mode  6 - dPhi23, theta, FR2/3, dTh23, bend2/3, RPC 2/3
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0x60806609) );
+       } else if (MODE ==  5) {
+	 // BASELINE mode  5 - dPhi24, theta, FR2/4, dTh24, bend2/4, RPC 2/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xa800aa81) );
+       } else if (MODE ==  3) {
+	 // BASELINE mode  3 - dPhi34, theta, FR3/4, dTh12, bend3/4, RPC 3/4
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xc100cc11) );
        }
+
+       else if   (MODE == 0) {
+	 // Null track, for testing EMTF performance
+	 factories.push_back( std::make_tuple( nullF, nullL, factName, var_names, var_vals, 0xc0000001) );
+       }
+
      } // End loop: for (int iTarg = 0; iTarg < TARG_VARS.size(); iTarg++)
    } // End loop: for (int iWgt = 0; iWgt < EVT_WGTS.size(); iWgt++)
 
@@ -325,17 +371,17 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    
    spec_vars.push_back( MVA_var( "GEN_pt",       "GEN p_{T}",               "GeV",      'F', -77 ) );
    spec_vars.push_back( MVA_var( "EMTF_pt",      "EMTF p_{T}",              "GeV",      'F', -77 ) );
-   spec_vars.push_back( MVA_var( "inv_GEN_pt",   "1 / GEN muon p_{T}",      "GeV^{-1}", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "inv_EMTF_pt",  "1 / EMTF p_{T}",          "GeV^{-1}", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "log2_GEN_pt",  "log_{2}(GEN muon p_{T})", "GeV",      'F', -77 ) );
-   spec_vars.push_back( MVA_var( "log2_EMTF_pt", "log_{2}(EMTF p_{T})",     "GeV",      'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "inv_GEN_pt",   "1 / GEN muon p_{T}",      "GeV^{-1}", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "inv_EMTF_pt",  "1 / EMTF p_{T}",          "GeV^{-1}", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "log2_GEN_pt",  "log_{2}(GEN muon p_{T})", "GeV",      'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "log2_EMTF_pt", "log_{2}(EMTF p_{T})",     "GeV",      'F', -77 ) );
 
    spec_vars.push_back( MVA_var( "GEN_eta",       "GEN #eta",                "", 'F', -77 ) );
    spec_vars.push_back( MVA_var( "EMTF_eta",      "EMTF #eta",               "", 'F', -77 ) );
    spec_vars.push_back( MVA_var( "TRK_eta",       "Track #eta",              "", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "GEN_phi",       "GEN #phi",                "", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "EMTF_phi",      "EMTF #phi",               "", 'F', -77 ) );
-   spec_vars.push_back( MVA_var( "TRK_phi",       "Track #phi",              "", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "GEN_phi",       "GEN #phi",                "", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "EMTF_phi",      "EMTF #phi",               "", 'F', -77 ) );
+   // spec_vars.push_back( MVA_var( "TRK_phi",       "Track #phi",              "", 'F', -77 ) );
    spec_vars.push_back( MVA_var( "GEN_charge",    "GEN charge",              "", 'I', -77 ) );
    spec_vars.push_back( MVA_var( "EMTF_charge",   "EMTF charge",             "", 'I', -77 ) );
 
@@ -345,12 +391,12 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    spec_vars.push_back( MVA_var( "TRK_mode",      "Track mode",                  "", 'I', -77 ) );
    spec_vars.push_back( MVA_var( "TRK_mode_CSC",  "Track CSC-only mode",         "", 'I', -77 ) );
    spec_vars.push_back( MVA_var( "TRK_mode_RPC",  "Track RPC-only mode",         "", 'I', -77 ) );
-   spec_vars.push_back( MVA_var( "SHRD_mode",     "EMTF-track shared mode",      "", 'I', -77 ) );
-   spec_vars.push_back( MVA_var( "SHRD_mode_CSC", "EMTF-track shared CSC mode",  "", 'I', -77 ) );
-   spec_vars.push_back( MVA_var( "SHRD_mode_RPC", "EMTF-track shared RPC mode",  "", 'I', -77 ) );
+   // spec_vars.push_back( MVA_var( "SHRD_mode",     "EMTF-track shared mode",      "", 'I', -77 ) );
+   // spec_vars.push_back( MVA_var( "SHRD_mode_CSC", "EMTF-track shared CSC mode",  "", 'I', -77 ) );
+   // spec_vars.push_back( MVA_var( "SHRD_mode_RPC", "EMTF-track shared RPC mode",  "", 'I', -77 ) );
 
    spec_vars.push_back( MVA_var( "dPhi_sign",  "#phi(B) - #phi(A) sign",    "", 'I', -77 ) );
-   spec_vars.push_back( MVA_var( "nTRK",       "Number of tracks built",    "", 'I', -77 ) );
+   // spec_vars.push_back( MVA_var( "nTRK",       "Number of tracks built",    "", 'I', -77 ) );
    spec_vars.push_back( MVA_var( "evt_weight", "Event weight for training", "", 'F', -77 ) );
 
 
@@ -450,39 +496,42 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   mu_charge = (muon_br->GetLeaf("charge"))->GetValue(iMu);
 	 }
 
-	 if ( mu_pt < PTMIN && isMC ) continue;
-	 if ( mu_pt > PTMAX && isMC ) continue;
-	 if ( fabs( mu_eta ) < ETAMIN && isMC ) continue;
-	 if ( fabs( mu_eta ) > ETAMAX && isMC ) continue;
-	 if ( mu_pt > PTMAX_TR && isMC ) trainEvt = false;
+	 if ( isMC && (mu_pt < PTMIN || mu_pt > PTMAX) ) continue;
+	 if ( isMC && (fabs( mu_eta ) < ETAMIN || fabs( mu_eta ) > ETAMAX) ) continue;
+	 if ( isMC && (mu_pt < PTMIN_TR || mu_pt > PTMAX_TR) ) trainEvt = false;
 	 // std::cout << "\nMuon " << iMu+1 << " has pt = " << mu_pt << ", eta = " << mu_eta << ", phi = " << mu_phi << std::endl;
 
 
 	 // Find the relevant EMTF track
 	 double emtf_pt    = 999.;
 	 double emtf_eta   = -99.;
+	 int emtf_eta_int  = -99;
 	 double emtf_phi   = -99.;
 	 int emtf_charge   = -99;
 	 int emtf_mode     = -99;
-	 int emtf_mode_CSC = 0;
-	 int emtf_mode_RPC = 0;
+	 int emtf_mode_CSC = -99;
+	 int emtf_mode_RPC = -99;
 	 int emtf_sect_idx = -99;
-	 std::vector<int> emtf_id = {-99, -99, -99, -99};
-	 std::vector<int> emtf_ph = {-99, -99, -99, -99};
-	 std::vector<int> emtf_th = {-99, -99, -99, -99};
-	 std::vector<int> emtf_dt = {-99, -99, -99, -99};
+	 std::array<int, 4> emtf_id = {-99, -99, -99, -99};
+	 std::array<int, 4> emtf_ph = {-99, -99, -99, -99};
+	 std::array<int, 4> emtf_th = {-99, -99, -99, -99};
+	 std::array<int, 4> emtf_dt = {-99, -99, -99, -99};
 
 	 for (UInt_t iTrk = 0; iTrk < nTrks; iTrk++) {
 
 	   // Require same endcap
-	   emtf_eta  = (trk_br->GetLeaf("eta"))->GetValue(iTrk);
-	   if ((emtf_eta > 0) != (mu_eta > 0)) {
+	   emtf_eta     = (trk_br->GetLeaf("eta"))->GetValue(iTrk);
+	   emtf_eta_int = (trk_br->GetLeaf("eta_int"))->GetValue(iTrk);
+	   if (isMC && (emtf_eta > 0) != (mu_eta > 0)) {
 	     emtf_eta = -99.;
 	     continue;
 	   }
 
-	   // Require valid mode
 	   emtf_mode = (trk_br->GetLeaf("mode"))->GetValue(iTrk);
+	   emtf_mode_CSC = 0;
+	   emtf_mode_RPC = 0;
+
+	   // Require valid mode
 	   bool good_emtf_mode = false;
 	   for (UInt_t jMode = 0; jMode < EMTF_MODES.size(); jMode++) {
 	     if (emtf_mode == EMTF_MODES.at(jMode))
@@ -492,25 +541,34 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	     emtf_mode = -99;
 	     continue;
 	   }
-	   
+	   	   
 	   emtf_pt       = (trk_br->GetLeaf("pt"))->GetValue(iTrk);
 	   emtf_phi      = (trk_br->GetLeaf("phi"))->GetValue(iTrk);;
 	   emtf_charge   = (trk_br->GetLeaf("charge"))->GetValue(iTrk);
 	   emtf_sect_idx = (trk_br->GetLeaf("sector_index"))->GetValue(iTrk);
-	   
+
 	   for (int ii = 0; ii < 4; ii++) {
-	     if (emtf_mode % int(pow(2, 4 - ii)) / pow(2, 3 - ii) > 0) {
+	     if (emtf_mode < 0)
+	       continue;
+	     if ( (emtf_mode % int(pow(2, 4 - ii))) / int(pow(2, 3 - ii)) > 0) {
 	       emtf_id.at(ii) = iTrk*4 + ii;
 	       emtf_ph.at(ii) = (trk_br->GetLeaf("hit_phi_int"))->GetValue(iTrk*4 + ii);
 	       emtf_th.at(ii) = (trk_br->GetLeaf("hit_theta_int"))->GetValue(iTrk*4 + ii);
-	       emtf_dt.at(ii) = ( (trk_br->GetLeaf("hit_isRPC"))->GetValue(iTrk*4 + ii) ? 2 : 1);
+	       emtf_dt.at(ii) = ( (trk_br->GetLeaf("hit_isRPC"))->GetValue(iTrk*4 + ii) == 1 ? 2 : 1);
 	       if (emtf_dt.at(ii) == 1)
 		 emtf_mode_CSC += int(pow(2, 3 - ii));
 	       else if (emtf_dt.at(ii) == 2)
 		 emtf_mode_RPC += int(pow(2, 3 - ii));
 	     }
 	   }
-	   
+
+	   if (emtf_mode_CSC + emtf_mode_RPC != emtf_mode) {
+	     std::cout << "\n\n*** Super-bizzare case where EMTF mode = " << emtf_mode  << ", but CSC mode = " 
+		       << emtf_mode_CSC << " and RPC mode = " << emtf_mode_RPC << " ***" << std::endl;
+	     std::cout << "  - Rare bug in EMTF emulator - skipping.\n\n" << std::endl;
+	     continue;
+	   }
+
 	   break; // Only one EMTF track per GEN muon considered
 
 	 } // End loop: for (UInt_t iTrk = 0; iTrk < nTrks; iTrk++)
@@ -617,21 +675,21 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   dt.at(iSc).at(iSt).erase(dt.at(iSc).at(iSt).begin() + iHt);
 	 }
 	 
-	 // Vector indices of hits in each track; 4 in each, stations 1-2-3-4 
-	 std::vector< std::vector<int> > all_trk_hits;
-	 // Vector of mode, CSC mode, RPC mode, and sumAbsDPhi in each track
-	 std::vector< std::vector<int> > all_trk_modes;
-      
-	 // Build tracks for the specified mode
-	 std::vector< std::vector<int> > trk_hits;
-	 std::vector< std::vector<int> > trk_modes;
-	 
-	 BuildTracks( trk_hits, trk_modes, id, ph, th, dt, MODE, MAX_RPC, MIN_CSC, MAX_DPH, MAX_DTH );
-	 all_trk_hits.insert( all_trk_hits.end(), trk_hits.begin(), trk_hits.end() );
-	 all_trk_modes.insert( all_trk_modes.end(), trk_modes.begin(), trk_modes.end() );
+	 // Array indices of hits in each track; 4 in each, stations 1-2-3-4 
+	 std::vector< std::array<int, 4> > all_trk_hits;
+	 // Array of mode, CSC mode, RPC mode, sumAbsDPhi, and sumAbsDTheta in each track
+	 std::vector< std::array<int, 5> > all_trk_modes;
 
-	 // std::cout << "  * Built " << all_trk_hits.size() << " tracks out of " << nHits << " hits" << std::endl;
-	 assert(all_trk_modes.size() == all_trk_hits.size());
+	 if (MODE > 0) {
+	   // Build tracks for the specified mode
+	   BuildTracks( all_trk_hits, all_trk_modes, id, ph, th, dt, MODE, MAX_RPC, MIN_CSC, MAX_DPH, MAX_DTH );
+	   // std::cout << "  * Built " << all_trk_hits.size() << " tracks out of " << nHits << " hits" << std::endl;
+	   assert(all_trk_modes.size() == all_trk_hits.size());
+	 } else { 
+	   // Skip track building, just store EMTF info
+	   all_trk_hits.push_back({-99, -99, -99, -99});
+	   all_trk_modes.push_back({0, 0, 0, 0, 0});
+	 }
 	 
 	 ///////////////////////////////
 	 ///  Loop over built tracks ///
@@ -639,10 +697,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	 
 	 for (UInt_t iTrk = 0; iTrk < all_trk_hits.size(); iTrk++) {
 	   
-	   std::vector<int> trk_hits  = all_trk_hits.at(iTrk);
-	   std::vector<int> trk_modes = all_trk_modes.at(iTrk);
-	   assert(trk_hits.size() == 4);
-	   assert(trk_modes.size() == 5);
+	   std::array<int, 4> trk_hits  = all_trk_hits.at(iTrk);
+	   std::array<int, 5> trk_modes = all_trk_modes.at(iTrk);
 
 	   int i1 = trk_hits.at(0);
 	   int i2 = trk_hits.at(1);
@@ -679,7 +735,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   int pat3 = (i3 >= 0 ? (hit_br->GetLeaf("pattern"))->GetValue(i3) : -99);
 	   int pat4 = (i4 >= 0 ? (hit_br->GetLeaf("pattern"))->GetValue(i4) : -99);
 
-	   int st1_ring2 = (i1 >= 0 ? ((hit_br->GetLeaf("ring"))->GetValue(i1) == 2) : -99);
+	   int st1_ring2 = (i1 >= 0 ? ((hit_br->GetLeaf("ring"))->GetValue(i1) == 2 || (hit_br->GetLeaf("ring"))->GetValue(i1) == 3) : 0);
 
 	   double eta;
 	   double phi;
@@ -722,6 +778,14 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   int bend1, bend2, bend3, bend4;
 	   int RPC1, RPC2, RPC3, RPC4;
 
+	   // Extra variables for FR computation
+	   int ring1, cham1, cham2, cham3, cham4;
+
+	   if (MODE == 0) {
+	     theta = emtf_eta_int;
+	     goto EMTF_ONLY;
+	   }
+
 	   // std::cout << "    - Computing theta" << std::endl;
 	   theta = CalcTrackTheta( th1, th2, th3, th4, st1_ring2, mode, BIT_COMP );
 	   
@@ -735,10 +799,25 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 			    th1, th2, th3, th4, mode, BIT_COMP );
 
 	   // std::cout << "    - Computing FRs" << std::endl;
-	   FR1 = (i1 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i1) : -99);
-	   FR2 = (i2 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i2) : -99);
-	   FR3 = (i3 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i3) : -99);
-	   FR4 = (i4 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i4) : -99);
+
+	   // // FR bit directly out of the NTuples
+	   // FR1 = (i1 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i1) : -99);
+	   // FR2 = (i2 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i2) : -99);
+	   // FR3 = (i3 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i3) : -99);
+	   // FR4 = (i4 >= 0 ? (hit_br->GetLeaf("FR"))->GetValue(i4) : -99);
+
+	   // In firmware, RPC 'FR' bit set according to FR of corresponding CSC chamber
+	   ring1 = (i1 >= 0 ? (hit_br->GetLeaf("ring"))   ->GetValue(i1) : -99);
+	   cham1 = (i1 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i1) : -99);
+	   cham2 = (i2 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i2) : -99);
+	   cham3 = (i3 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i3) : -99);
+	   cham4 = (i4 >= 0 ? (hit_br->GetLeaf("chamber"))->GetValue(i4) : -99);
+
+	   FR1 = (i1 >= 0 ? (cham1 % 2 == 0) : -99);  // Odd chambers are bolted to the iron,
+	   FR2 = (i2 >= 0 ? (cham2 % 2 == 0) : -99);  // which faces forwared in stations 1 & 2,
+	   FR3 = (i3 >= 0 ? (cham3 % 2 == 1) : -99);  // backwards in 3 & 4
+	   FR4 = (i4 >= 0 ? (cham4 % 2 == 1) : -99);
+	   if (ring1 == 3) FR1 = 0;                   // In ME1/3 chambers are non-overlapping
 
 	   // std::cout << "    - Computing bend" << std::endl;
 	   CalcBends( bend1, bend2, bend3, bend4,
@@ -750,13 +829,16 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	   RPC2 = (i2 >= 0 ? ((hit_br->GetLeaf("isRPC"))->GetValue(i2) == 1 ? 1 : 0) : -99);
 	   RPC3 = (i3 >= 0 ? ((hit_br->GetLeaf("isRPC"))->GetValue(i3) == 1 ? 1 : 0) : -99);
 	   RPC4 = (i4 >= 0 ? ((hit_br->GetLeaf("isRPC"))->GetValue(i4) == 1 ? 1 : 0) : -99);
+
+	   CalcRPCs( RPC1, RPC2, RPC3, RPC4, mode, st1_ring2, theta, BIT_COMP );
 	   
 	   // Clean out showering muons with outlier station 1, or >= 2 outlier stations
-	   if (isMC && log2(mu_pt) > 6 && CLEAN_HI_PT)
-	     if ( dPhSum4A >= std::max(40., 332. - 40*log2(mu_pt)) )
-	       if ( outStPh < 2 || dPhSum3A >= std::max(24., 174. - 20*log2(mu_pt)) )
+	   if (isMC && log2(mu_pt) > 6 && CLEAN_HI_PT && MODE == 15)
+	     if ( dPhSum4A >= fmax(40., 332. - 40*log2(mu_pt)) )
+	       if ( outStPh < 2 || dPhSum3A >= fmax(24., 174. - 20*log2(mu_pt)) )
 		 trainEvt = false;
 
+	 EMTF_ONLY: // Skip track building, just store EMTF info
 
 	   /////////////////////////////////////////////////////
 	   ///  Loop over factories and set variable values  ///
@@ -867,11 +949,11 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	       //////////////////////////////
 
 	       if ( vName == "GEN_pt_trg" )
-		 var_vals.at(iVar) = min(mu_pt, PTMAX_TRG);
+		 var_vals.at(iVar) = fmin(mu_pt, PTMAX_TRG);
 	       if ( vName == "inv_GEN_pt_trg" )
-		 var_vals.at(iVar) = 1. / min(mu_pt, PTMAX_TRG);
+		 var_vals.at(iVar) = 1. / fmin(mu_pt, PTMAX_TRG);
 	       if ( vName == "log2_GEN_pt_trg" )
-		 var_vals.at(iVar) = log2(min(mu_pt, PTMAX_TRG));
+		 var_vals.at(iVar) = log2(fmin(mu_pt, PTMAX_TRG));
 	       if ( vName == "GEN_charge_trg" )
 		 var_vals.at(iVar) = mu_charge * dPhSign;
 
@@ -939,7 +1021,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	     } // End loop: for (UInt_t iVar = 0; iVar < var_names.size(); iVar++)
 	     
 	     // Load values into event
-	     if ( (iEvt % 2) == 0 && isMC && trainEvt && nTrain < (MAX_TR - (iFact == 0)) ) { 
+	     if ( (iEvt % 2) == 0 && isMC && trainEvt && nTrain < (MAX_TR - (iFact == 0)) && (MODE > 0 || (iEvt % 1000) == 0) ) { 
 	       std::get<1>(factories.at(iFact))->AddTrainingEvent( "Regression", var_vals, evt_weight );
 	       if (iFact == 0) nTrain += 1;
 	       // std::cout << "Added train event " << nTrain << std::endl;
@@ -1083,6 +1165,11 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB", (string)
 			  "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
+     // AWB settings - Huber
+     if (Use["BDTG_AWB_Hub"]) // Optimized settings
+       factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_Hub", (string)
+			  "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:"+
+			  "RegressionLossFunctionBDTG=Huber" );
      // AWB settings - LeastSquares
      if (Use["BDTG_AWB_Sq"]) // Optimized settings
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_Sq", (string)
@@ -1117,7 +1204,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
      
      if (Use["BDTG_AWB_3_deep"])
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_3_deep", (string)
-			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=4:MinNodeSize=0.001:"+
+			  "!H:!V:NTrees=100::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=3:MinNodeSize=0.001:"+
 			  "RegressionLossFunctionBDTG=AbsoluteDeviation" );
      if (Use["BDTG_AWB_4_deep"])
        factX->BookMethod( loadX, TMVA::Types::kBDT, "BDTG_AWB_4_deep", (string)

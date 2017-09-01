@@ -1,8 +1,8 @@
 
 #include "../interface/TrackBuilder.h"
 
-void BuildTracks( std::vector< std::vector<int> >& trks_hits,  // Vector of tracks, with hit indices by station
-		  std::vector< std::vector<int> >& trks_modes, // Mode, CSC mode, RPC mode, and sumAbsDPhi/Theta of tracks
+void BuildTracks( std::vector< std::array<int, 4> >& trks_hits,  // Vector of tracks, with hit indices by station
+		  std::vector< std::array<int, 5> >& trks_modes, // Mode, CSC mode, RPC mode, and sumAbsDPhi/Theta of tracks
 		  const std::array< std::array< std::vector<int>, 4>, 12> id, // All hit index values, by sector and station
 		  const std::array< std::array< std::vector<int>, 4>, 12> ph, // All full-precision integer phi values
 		  const std::array< std::array< std::vector<int>, 4>, 12> th, // All full-precision integer theta values
@@ -17,11 +17,11 @@ void BuildTracks( std::vector< std::vector<int> >& trks_hits,  // Vector of trac
   trks_hits.clear();
   trks_modes.clear();
 
-  std::vector<int> phs, ths, dts; // Phi, theta, and detector by station
+  std::array<int, 4> phs, ths, dts; // Phi, theta, and detector by station
   for (int i = 0; i < 4; i++) {
-    phs.push_back(-99);
-    ths.push_back(-99);
-    dts.push_back(0);
+    phs.at(i) = -99;
+    ths.at(i) = -99;
+    dts.at(i) =   0;
   }
 
   // Loop over the sectors
@@ -48,8 +48,8 @@ void BuildTracks( std::vector< std::vector<int> >& trks_hits,  // Vector of trac
     }
 
     // Create new vectors of tracks for this sector
-    std::vector< std::vector<int> > s_trks_hits;
-    std::vector< std::vector<int> > s_trks_modes;
+    std::vector< std::array<int, 4> > s_trks_hits;
+    std::vector< std::array<int, 5> > s_trks_modes;
 
     // Loop over station 1 hits
     for (UInt_t i1 = 0; i1 < max(int(id.at(iSc).at(0).size()), 1); i1++) {
@@ -96,19 +96,19 @@ void BuildTracks( std::vector< std::vector<int> >& trks_hits,  // Vector of trac
 	    // 	      << ", RPC = " << _mode_RPC << ", sumAbsDPh = " << _sumAbsDPh << std::endl;
 	    // std::cout << "    - i1 = " << i1 << ", i2 = " << i2 << ", i3 = " << i3 << ", i4 = " << i4 << std::endl;
 	    if (_mode == mode) {
-	      std::vector<int> trk_hits;
-	      std::vector<int> trk_modes;
+	      std::array<int, 4> trk_hits;
+	      std::array<int, 5> trk_modes;
 	      
-	      trk_hits.push_back(dts.at(0) > 0 ? id.at(iSc).at(0).at(i1) : -99);
-	      trk_hits.push_back(dts.at(1) > 0 ? id.at(iSc).at(1).at(i2) : -99);
-	      trk_hits.push_back(dts.at(2) > 0 ? id.at(iSc).at(2).at(i3) : -99);
-	      trk_hits.push_back(dts.at(3) > 0 ? id.at(iSc).at(3).at(i4) : -99);
+	      trk_hits.at(0) = (dts.at(0) > 0 ? id.at(iSc).at(0).at(i1) : -99);
+	      trk_hits.at(1) = (dts.at(1) > 0 ? id.at(iSc).at(1).at(i2) : -99);
+	      trk_hits.at(2) = (dts.at(2) > 0 ? id.at(iSc).at(2).at(i3) : -99);
+	      trk_hits.at(3) = (dts.at(3) > 0 ? id.at(iSc).at(3).at(i4) : -99);
 
-	      trk_modes.push_back(_mode);
-	      trk_modes.push_back(_mode_CSC);
-	      trk_modes.push_back(_mode_RPC);
-	      trk_modes.push_back(_sumAbsDPh);
-	      trk_modes.push_back(_sumAbsDTh);
+	      trk_modes.at(0) = (_mode);
+	      trk_modes.at(1) = (_mode_CSC);
+	      trk_modes.at(2) = (_mode_RPC);
+	      trk_modes.at(3) = (_sumAbsDPh);
+	      trk_modes.at(4) = (_sumAbsDTh);
 	      
 	      s_trks_hits.push_back(trk_hits);
 	      s_trks_modes.push_back(trk_modes);
@@ -133,9 +133,9 @@ void BuildTracks( std::vector< std::vector<int> >& trks_hits,  // Vector of trac
 
 
 void BuiltTrackMode( int& mode, int& mode_CSC, int& mode_RPC, int& sumAbsDPh, int& sumAbsDTh,
-		     const std::vector<int> phs, // Full-precision integer phi by station
-		     const std::vector<int> ths, // Full-precision integer theta by station
-		     const std::vector<int> dts, // Detector by station (0 for none, 1 for CSC, 2 for RPC)
+		     const std::array<int, 4> phs, // Full-precision integer phi by station
+		     const std::array<int, 4> ths, // Full-precision integer theta by station
+		     const std::array<int, 4> dts, // Detector by station (0 for none, 1 for CSC, 2 for RPC)
 		     const int maxRPC, const int minCSC,
 		     const int max_dPh, const int max_dTh
 		     ) {
@@ -200,8 +200,8 @@ void BuiltTrackMode( int& mode, int& mode_CSC, int& mode_RPC, int& sumAbsDPh, in
 } // End function: int BuiltTrackMode()
 
 
-void SelectTracks( std::vector< std::vector<int> >& s_trks_hits,  // Vector of tracks, with hit indices by station
-		   std::vector< std::vector<int> >& s_trks_modes  // Mode, CSC mode, RPC mode, and sumAbsDPh/Th of tracks
+void SelectTracks( std::vector< std::array<int, 4> >& s_trks_hits,  // Vector of tracks, with hit indices by station
+		   std::vector< std::array<int, 5> >& s_trks_modes  // Mode, CSC mode, RPC mode, and sumAbsDPh/Th of tracks
 		   ) {
 
   // Indices of selected tracks
@@ -237,8 +237,8 @@ void SelectTracks( std::vector< std::vector<int> >& s_trks_hits,  // Vector of t
     } // End loop over RPC modes
   } // End loop over CSC modes
   
-  std::vector< std::vector<int> > s_trks_hits_sel;
-  std::vector< std::vector<int> > s_trks_modes_sel;
+  std::vector< std::array<int, 4> > s_trks_hits_sel;
+  std::vector< std::array<int, 5> > s_trks_modes_sel;
 
   // Save the best tracks from all CSC/RPC modes
   for (int iIdx = 0; iIdx < trk_idxs.size(); iIdx++) {
