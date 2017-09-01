@@ -853,10 +853,15 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	     Double_t evt_weight = 1.0;
 	     
 	     // Weight by 1/pT or (1/pT)^2 so overall distribution is (1/pT)^2 or (1/pT)^3
+	     //add more weights forms to study the effect
 	     if      ( std::get<2>(factories.at(iFact)).Contains("_invPtWgt") )
 	       evt_weight = 1. / mu_pt;
 	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtSqWgt") )
 	       evt_weight = 1. / pow(mu_pt, 2);
+             else if ( std::get<2>(factories.at(iFact)).Contains("_invPtCubWgt") )
+	       evt_weight = 1. / pow(mu_pt, 3);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtQuadWgt") )
+	       evt_weight = 1. / pow(mu_pt, 4);
 	     else
 	       assert( std::get<2>(factories.at(iFact)).Contains("_noWgt") );
 	     
