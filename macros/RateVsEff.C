@@ -526,6 +526,8 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
     // Access trigger pT
     double TRG_pt = algo.MVA_val;
     if ( not isEMTF ) {
+      if ( algo.fact_name.Contains("ptTarg") )
+	TRG_pt = TRG_pt;
       if ( algo.fact_name.Contains("invPtTarg") )
 	TRG_pt = 1. / fmax(0.001, TRG_pt); // Protect against negative 1/pT values
       if ( algo.fact_name.Contains("logPtTarg") )
