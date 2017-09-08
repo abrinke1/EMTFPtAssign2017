@@ -532,6 +532,8 @@ void LoopOverEvents( PtAlgo& algo, const TString tr_te ) {
 	TRG_pt = 1. / fmax(0.001, TRG_pt); // Protect against negative 1/pT values
       if ( algo.fact_name.Contains("logPtTarg") )
 	TRG_pt = pow(2, TRG_pt);
+      if ( algo.fact_name.Contains("sqrtPtTarg") )
+	TRG_pt = pow(TRG_pt, 2);
     }
     TRG_pt *= algo.trg_pt_scale;
     TRG_pt += BIT; // Small value to offset EMTF trigger pT right on 0.0/0.5 GeV boundaries 
