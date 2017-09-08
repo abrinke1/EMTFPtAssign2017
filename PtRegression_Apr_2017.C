@@ -854,10 +854,18 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	     
 	     // Weight by 1/pT or (1/pT)^2 so overall distribution is (1/pT)^2 or (1/pT)^3
 	     //add more weights forms to study the effect
-	     if      ( std::get<2>(factories.at(iFact)).Contains("_invPt0p5Wgt") )
+	     if      ( std::get<2>(factories.at(iFact)).Contains("_Pt0p5Wgt") )
+	       evt_weight = pow(mu_pt,0.5);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_log2PtWgt") )
+	       evt_weight = log2(mu_pt + BIT);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_PtWgt") )
+	       evt_weight = mu_pt;  
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_PtSqWgt") )
+	       evt_weight = pow(mu_pt, 2);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPt0p5Wgt") )
 	       evt_weight = 1. / pow(mu_pt, 0.5);
              else if ( std::get<2>(factories.at(iFact)).Contains("_invlog2PtWgt") )
-	       evt_weight = 1. / log2(mu_pt+1);//mu_pt+1 in case of negative weight
+	       evt_weight = 1. / log2(mu_pt + BIT); //mu_pt+ BIT offset in case of zero weight
 	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtWgt") )
 	       evt_weight = 1. / mu_pt;
 	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtSqWgt") )
