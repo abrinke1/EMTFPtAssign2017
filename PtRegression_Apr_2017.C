@@ -363,6 +363,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    targ_vars.push_back( MVA_var( "GEN_pt_trg",      "GEN p_{T} for trigger",               "GeV",      'F', -99 ) );
    targ_vars.push_back( MVA_var( "inv_GEN_pt_trg",  "1 / GEN muon p_{T} for trigger",      "GeV^{-1}", 'F', -99 ) );
    targ_vars.push_back( MVA_var( "log2_GEN_pt_trg", "log_{2}(GEN muon p_{T} for trigger)", "GeV",      'F', -99 ) );
+   targ_vars.push_back( MVA_var( "sqrt_GEN_pt_trg", "sqrt GEN muon p_{T} for trigger",     "GeV^{0.5}",'F', -99 ) );
    targ_vars.push_back( MVA_var( "GEN_charge_trg",  "Muon charge x dPhi sign for trigger", "",         'I', -99 ) );
 
    /////////////////////////////////////////////////////////////////////////////
@@ -430,6 +431,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
        if ( (v.name == "GEN_pt_trg"      && std::get<2>(factories.at(iFact)).Contains("_ptTarg"))    ||
 	    (v.name == "inv_GEN_pt_trg"  && std::get<2>(factories.at(iFact)).Contains("_invPtTarg")) ||
 	    (v.name == "log2_GEN_pt_trg" && std::get<2>(factories.at(iFact)).Contains("_logPtTarg")) ||
+	    (v.name == "sqrt_GEN_pt_trg" && std::get<2>(factories.at(iFact)).Contains("_sqrtPtTarg")) ||
 	    (v.name == "GEN_charge_trg"  && std::get<2>(factories.at(iFact)).Contains("_chargeTarg")) ) {
 	 std::cout << v.name << std::endl;
 	 targ_str = v.name;
@@ -973,6 +975,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 		 var_vals.at(iVar) = 1. / fmin(mu_pt, PTMAX_TRG);
 	       if ( vName == "log2_GEN_pt_trg" )
 		 var_vals.at(iVar) = log2(fmin(mu_pt, PTMAX_TRG));
+	       if ( vName == "sqrt_GEN_pt_trg" )
+		 var_vals.at(iVar) = sqrt(fmin(mu_pt, PTMAX_TRG));
 	       if ( vName == "GEN_charge_trg" )
 		 var_vals.at(iVar) = mu_charge * dPhSign;
 
