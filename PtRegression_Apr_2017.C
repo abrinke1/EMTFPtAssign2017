@@ -870,6 +870,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	       evt_weight = 1. / log2(mu_pt + BIT); //mu_pt+ BIT offset in case of zero weight
 	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtWgt") )
 	       evt_weight = 1. / mu_pt;
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPt1p5Wgt") )
+	       evt_weight = 1. / pow(mu_pt, 1.5);
 	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtSqWgt") )
 	       evt_weight = 1. / pow(mu_pt, 2);
 	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPt2p5Wgt") )
