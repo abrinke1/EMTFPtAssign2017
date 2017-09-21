@@ -363,6 +363,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
    targ_vars.push_back( MVA_var( "GEN_pt_trg",      "GEN p_{T} for trigger",               "GeV",      'F', -99 ) );
    targ_vars.push_back( MVA_var( "inv_GEN_pt_trg",  "1 / GEN muon p_{T} for trigger",      "GeV^{-1}", 'F', -99 ) );
    targ_vars.push_back( MVA_var( "log2_GEN_pt_trg", "log_{2}(GEN muon p_{T} for trigger)", "GeV",      'F', -99 ) );
+   targ_vars.push_back( MVA_var( "sqrt_GEN_pt_trg", "sqrt GEN muon p_{T} for trigger",     "GeV^{0.5}",'F', -99 ) );
    targ_vars.push_back( MVA_var( "GEN_charge_trg",  "Muon charge x dPhi sign for trigger", "",         'I', -99 ) );
 
    /////////////////////////////////////////////////////////////////////////////
@@ -430,6 +431,7 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
        if ( (v.name == "GEN_pt_trg"      && std::get<2>(factories.at(iFact)).Contains("_ptTarg"))    ||
 	    (v.name == "inv_GEN_pt_trg"  && std::get<2>(factories.at(iFact)).Contains("_invPtTarg")) ||
 	    (v.name == "log2_GEN_pt_trg" && std::get<2>(factories.at(iFact)).Contains("_logPtTarg")) ||
+	    (v.name == "sqrt_GEN_pt_trg" && std::get<2>(factories.at(iFact)).Contains("_sqrtPtTarg")) ||
 	    (v.name == "GEN_charge_trg"  && std::get<2>(factories.at(iFact)).Contains("_chargeTarg")) ) {
 	 std::cout << v.name << std::endl;
 	 targ_str = v.name;
@@ -853,10 +855,31 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 	     Double_t evt_weight = 1.0;
 	     
 	     // Weight by 1/pT or (1/pT)^2 so overall distribution is (1/pT)^2 or (1/pT)^3
-	     if      ( std::get<2>(factories.at(iFact)).Contains("_invPtWgt") )
+	     //add more weights forms to study the effect
+	     if      ( std::get<2>(factories.at(iFact)).Contains("_Pt0p5Wgt") )
+	       evt_weight = pow(mu_pt,0.5);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_log2PtWgt") )
+	       evt_weight = log2(mu_pt + BIT);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_PtWgt") )
+	       evt_weight = mu_pt;  
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_PtSqWgt") )
+	       evt_weight = pow(mu_pt, 2);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPt0p5Wgt") )
+	       evt_weight = 1. / pow(mu_pt, 0.5);
+             else if ( std::get<2>(factories.at(iFact)).Contains("_invlog2PtWgt") )
+	       evt_weight = 1. / log2(mu_pt + BIT); //mu_pt+ BIT offset in case of zero weight
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtWgt") )
 	       evt_weight = 1. / mu_pt;
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPt1p5Wgt") )
+	       evt_weight = 1. / pow(mu_pt, 1.5);
 	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtSqWgt") )
 	       evt_weight = 1. / pow(mu_pt, 2);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPt2p5Wgt") )
+	       evt_weight = 1. / pow(mu_pt, 2.5);
+             else if ( std::get<2>(factories.at(iFact)).Contains("_invPtCubWgt") )
+	       evt_weight = 1. / pow(mu_pt, 3);
+	     else if ( std::get<2>(factories.at(iFact)).Contains("_invPtQuadWgt") )
+	       evt_weight = 1. / pow(mu_pt, 4);
 	     else
 	       assert( std::get<2>(factories.at(iFact)).Contains("_noWgt") );
 	     
@@ -954,6 +977,8 @@ void PtRegression_Apr_2017 ( TString myMethodList = "" ) {
 		 var_vals.at(iVar) = 1. / fmin(mu_pt, PTMAX_TRG);
 	       if ( vName == "log2_GEN_pt_trg" )
 		 var_vals.at(iVar) = log2(fmin(mu_pt, PTMAX_TRG));
+	       if ( vName == "sqrt_GEN_pt_trg" )
+		 var_vals.at(iVar) = sqrt(fmin(mu_pt, PTMAX_TRG));
 	       if ( vName == "GEN_charge_trg" )
 		 var_vals.at(iVar) = mu_charge * dPhSign;
 
