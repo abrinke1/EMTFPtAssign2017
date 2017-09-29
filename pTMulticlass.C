@@ -53,10 +53,11 @@ void pTMulticlass( TString myMethodList = "" ){
     std::cout << "==> Start pTMulticlass" << std::endl;
     
     // Select methods (don't look at this code - not of interest)
+    std::vector<TString> mlist;
     if (myMethodList != "") {
         for (std::map<std::string,int>::iterator it = Use.begin(); it != Use.end(); it++) it->second = 0;
         
-        std::vector<TString> mlist = TMVA::gTools().SplitString( myMethodList, ',' );
+        mlist = TMVA::gTools().SplitString( myMethodList, ',' );
         for (UInt_t i=0; i<mlist.size(); i++) {
             std::string regMethod(mlist[i]);
             
@@ -337,7 +338,6 @@ void pTMulticlass( TString myMethodList = "" ){
     std::cout << "*** Spectator ***" << std::endl;
      for (UInt_t i = 0; i < spec_vars.size(); i++) {
        MVA_var v = spec_vars.at(i);
-       if (v.name == targ_str) continue; // Don't add target variable
        std::cout << v.name << std::endl;
        std::get<1>(factories.at(iFact))->AddSpectator( v.name, v.descr, v.unit, v.type );
        std::get<3>(factories.at(iFact)).push_back( v.name );
@@ -984,8 +984,7 @@ void pTMulticlass( TString myMethodList = "" ){
 	   
     // Book MVA methods
     if (Use["BDTG"]) // gradient boosted decision trees
-        factX->BookMethod( loadX,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:"+
-			  "RegressionLossFunctionBDTG=LeastSquares");
+        factX->BookMethod( loadX,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:RegressionLossFunctionBDTG=LeastSquares");
     if (Use["MLP"]) // neural network
         factX->BookMethod( loadX,  TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=1000:HiddenLayers=N+5,5:TestRate=5:EstimatorType=MSE");
     if (Use["DNN"]) {
