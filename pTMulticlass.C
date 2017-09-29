@@ -30,10 +30,10 @@
 #include "src/PtLutVarCalc.cc"
 
 // Configuration settings
-#include "configs/PtRegression_Apr_2017/Standard.h" // Settings that are not likely to change
-#include "configs/PtRegression_Apr_2017/General.h"  // General settings relevant for all modes
-#include "configs/PtRegression_Apr_2017/User.h"     // Specific settings for each user
-#include "configs/PtRegression_Apr_2017/Modes.h"    // Specific settigns for each mode
+#include "configs/pTMulticlass/Standard.h" // Settings that are not likely to change
+#include "configs/pTMulticlass/General.h"  // General settings relevant for all modes
+#include "configs/pTMulticlass/User.h"     // Specific settings for each user
+#include "configs/pTMulticlass/Modes.h"    // Specific settigns for each mode
 
 using namespace TMVA;
 void pTMulticlass( TString myMethodList = "" ){
@@ -72,8 +72,8 @@ void pTMulticlass( TString myMethodList = "" ){
     }
     
     // Configure settings for this mode and user
-    PtRegression_Apr_2017_cfg::ConfigureMode( MODE );
-    PtRegression_Apr_2017_cfg::ConfigureUser( USER );
+    pTMulticlass_cfg::ConfigureMode( MODE );
+    pTMulticlass_cfg::ConfigureUser( USER );
 
     // Create a new root output file
     TString out_file_str;
