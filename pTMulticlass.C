@@ -160,7 +160,7 @@ void pTMulticlass( TString myMethodList = "" ){
           nChains_ZB = i + 1;
     }
     
-    TString fact_set = "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=multiclass";
+    TString fact_set = "!V:!Silent:Color:DrawProgressBar:AnalysisType=multiclass";
     std::vector<TString> var_names; // Holds names of variables for a given factory and permutation
     std::vector<Double_t> var_vals; // Holds values of variables for a given factory and permutation
     TMVA::Factory* nullF = new TMVA::Factory("NULL", out_file, fact_set); // Placeholder factory
