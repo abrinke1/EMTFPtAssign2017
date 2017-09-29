@@ -3,7 +3,7 @@
 int MIN_CSC = 2;  // Minimum number of CSC LCTs per track
 int MAX_RPC = 2;  // Maximum number of RPC hits per track
 
-namespace PtRegression_Apr_2017_cfg {
+namespace pTMulticlass_cfg {
 
   inline void ConfigureMode( const int MODE ) {
     
