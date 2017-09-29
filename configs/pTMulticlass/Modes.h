@@ -51,4 +51,4 @@ namespace pTMulticlass_cfg {
     
   }  // End function: inline void ConfigureMode( const int MODE )
 
-} // End namespace PtRegression_Apr_2017_cfg
+} // End namespace pTMulticlass_cfg
