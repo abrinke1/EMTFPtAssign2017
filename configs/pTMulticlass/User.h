@@ -1,23 +1,21 @@
 
 // *** Default user settings *** //
 TString OUT_DIR_NAME  = ".";  // Directory for output ROOT file
-TString OUT_FILE_NAME = "PtRegression_Apr_2017";  // Name base for output ROOT file
+TString OUT_FILE_NAME = "pTMulticlass";  // Name base for output ROOT file
 TString EOS_DIR_NAME  = "root://eoscms.cern.ch//store/user/abrinke1/EMTF/Emulator/ntuples";  // Input directory in eos
 
-namespace PtRegression_Apr_2017_cfg {
+namespace pTMulticlass_cfg {
   
   inline void ConfigureUser( const TString USER ) {
     
-    std::cout << "\nConfiguring PtRegression_Apr_2017 code for user " << USER << std::endl;
+    std::cout << "\nConfiguring pTMulticlass code for user " << USER << std::endl;
     
-    if (USER == "AWB") {
+    if (USER == "WEI") {
       EOS_DIR_NAME = "root://eoscms.cern.ch//store/user/abrinke1/EMTF/Emulator/ntuples";  // Input directory in eos
-      OUT_DIR_NAME = "/afs/cern.ch/work/a/abrinke1/public/EMTF/PtAssign2017/files";
-      OUT_FILE_NAME = "PtRegression_Apr_2017_06_05_invPtTarg_invPtWgt";
-    }
-    if (USER == "JTR") {
+      OUT_DIR_NAME = "/afs/cern.ch/work/w/wshi/public/TMVA_2017/TMVA/EMTFPtAssign2017/";
+      OUT_FILE_NAME = "pTMulticlass";
     }
     
   } // End function: inline void ConfigureUser()    
   
-} // End namespace PtRegression_Apr_2017_cfg
+} // End namespace pTMulticlass_cfg
