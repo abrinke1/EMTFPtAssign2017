@@ -11,43 +11,56 @@
 #include <iostream>
 #include <map>
 #include <string>
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
+#include "TObjString.h"
 #include "TSystem.h"
 #include "TROOT.h"
+
 #include "TMVA/Tools.h"
 #include "TMVA/Factory.h"
 #include "TMVA/DataLoader.h"
 #include "TMVA/TMVAMultiClassGui.h"
+
+// Extra tools
+#include "interface/MVA_helper.h"
+#include "src/TrackBuilder.cc"
+#include "src/PtLutVarCalc.cc"
+
+// Configuration settings
+#include "configs/PtRegression_Apr_2017/Standard.h" // Settings that are not likely to change
+#include "configs/PtRegression_Apr_2017/General.h"  // General settings relevant for all modes
+#include "configs/PtRegression_Apr_2017/User.h"     // Specific settings for each user
+#include "configs/PtRegression_Apr_2017/Modes.h"    // Specific settigns for each mode
+
 using namespace TMVA;
-void pTMulticlass( TString myMethodList = "" )
-{
+void pTMulticlass( TString myMethodList = "" ){
+    
     // This loads the library
     TMVA::Tools::Instance();
-    // to get access to the GUI and all tmva macros
-    //
-    //     TString tmva_dir(TString(gRootDir) + "/tmva");
-    //     if(gSystem->Getenv("TMVASYS"))
-    //        tmva_dir = TString(gSystem->Getenv("TMVASYS"));
-    //     gROOT->SetMacroPath(tmva_dir + "/test/:" + gROOT->GetMacroPath() );
-    //     gROOT->ProcessLine(".L TMVAMultiClassGui.C");
-    //---------------------------------------------------------------
+    
     // Default MVA methods to be trained + tested
     std::map<std::string,int> Use;
-    Use["MLP"]             = 1;
+    Use["SVM"]             = 0;
+    Use["MLP"]             = 0;
     Use["BDTG"]            = 1;
     Use["DNN"]             = 0;
     Use["FDA_GA"]          = 0;
     Use["PDEFoam"]         = 0;
-    //---------------------------------------------------------------
+    
     std::cout << std::endl;
     std::cout << "==> Start pTMulticlass" << std::endl;
+    
+    // Select methods (don't look at this code - not of interest)
     if (myMethodList != "") {
         for (std::map<std::string,int>::iterator it = Use.begin(); it != Use.end(); it++) it->second = 0;
+        
         std::vector<TString> mlist = TMVA::gTools().SplitString( myMethodList, ',' );
         for (UInt_t i=0; i<mlist.size(); i++) {
             std::string regMethod(mlist[i]);
+            
             if (Use.find(regMethod) == Use.end()) {
                 std::cout << "Method \"" << regMethod << "\" not known in TMVA under this name. Choose among the following:" << std::endl;
                 for (std::map<std::string,int>::iterator it = Use.begin(); it != Use.end(); it++) std::cout << it->first << " ";
@@ -57,9 +70,19 @@ void pTMulticlass( TString myMethodList = "" )
             Use[regMethod] = 1;
         }
     }
-    // Create a new root output file.
-    TString outfileName = "pTMulticlass.root";
-    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
+    
+    // Configure settings for this mode and user
+    PtRegression_Apr_2017_cfg::ConfigureMode( MODE );
+    PtRegression_Apr_2017_cfg::ConfigureUser( USER );
+
+    // Create a new root output file
+    TString out_file_str;
+    TString bit_str = (BIT_COMP ? "bitCompr" : "noBitCompr");
+    TString RPC_str = (USE_RPC  ? "RPC"      : "noRPC");
+
+    out_file_str.Form( "%s/%s_MODE_%d_%s_%s.root", OUT_DIR_NAME.Data(), OUT_FILE_NAME.Data(), MODE, bit_str.Data(), RPC_str.Data() );
+    TFile* out_file = TFile::Open( out_file_str, "RECREATE" );
+    
     TMVA::Factory *factory = new TMVA::Factory( "pTMulticlass", outputFile,
                                                "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=multiclass" );
     TMVA::DataLoader *dataloader=new TMVA::DataLoader("dataset");
