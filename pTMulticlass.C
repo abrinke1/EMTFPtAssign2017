@@ -984,10 +984,10 @@ void pTMulticlass( TString myMethodList = "" ){
 	   
     // Book MVA methods
     if (Use["BDTG"]) // gradient boosted decision trees
-        factory->BookMethod( dataloader,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:"+
+        factX->BookMethod( loadX,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:"+
 			  "RegressionLossFunctionBDTG=LeastSquares");
     if (Use["MLP"]) // neural network
-        factory->BookMethod( dataloader,  TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=1000:HiddenLayers=N+5,5:TestRate=5:EstimatorType=MSE");
+        factX->BookMethod( loadX,  TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=1000:HiddenLayers=N+5,5:TestRate=5:EstimatorType=MSE");
     if (Use["DNN"]) {
         TString layoutString ("Layout=TANH|100,TANH|50,TANH|10,LINEAR");
         TString training0 ("LearningRate=1e-1, Momentum=0.5, Repetitions=1, ConvergenceSteps=10,"
@@ -1000,7 +1000,7 @@ void pTMulticlass( TString myMethodList = "" ){
                            "WeightInitialization=XAVIERUNIFORM:Architecture=STANDARD");
         nnOptions.Append (":"); nnOptions.Append (layoutString);
         nnOptions.Append (":"); nnOptions.Append (trainingStrategyString);
-        factory->BookMethod(dataloader, TMVA::Types::kDNN, "DNN", nnOptions );
+        factX->BookMethod(loadX, TMVA::Types::kDNN, "DNN", nnOptions );
     }
     
     // Train MVAs using the set of training events
@@ -1008,7 +1008,7 @@ void pTMulticlass( TString myMethodList = "" ){
     // Evaluate all MVAs using the set of test events
     factX->TestAllMethods();
     // Evaluate and compare performance of all configured MVAs
-    //factory->EvaluateAllMethods();
+    //factX->EvaluateAllMethods();
 	  
     // Instead of "EvaluateAllMethods()", just write out the training and testing trees
      // Skip unnecessary evaluatioh histograms, which take time on large datasets 
