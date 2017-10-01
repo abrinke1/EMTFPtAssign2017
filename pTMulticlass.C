@@ -46,8 +46,8 @@ void pTMulticlass( TString myMethodList = "" ){
     std::map<std::string,int> Use;
     Use["SVM"]             = 0;
     Use["MLP"]             = 0;
-    Use["BDTG"]            = 1;
-    Use["DNN"]             = 0;
+    Use["BDTG"]            = 0;
+    Use["DNN"]             = 1;
     
     std::cout << std::endl;
     std::cout << "==> Start pTMulticlass" << std::endl;
