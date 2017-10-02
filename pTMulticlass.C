@@ -983,10 +983,12 @@ void pTMulticlass( TString myMethodList = "" ){
      loadX->PrepareTrainingAndTestTree( "", "", numTrainStr+"SplitMode=Random:NormMode=NumEvents:!V" );   
 	   
     // Book MVA methods
-    if (Use["BDTG"]) // gradient boosted decision trees
-        factX->BookMethod( loadX,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:RegressionLossFunctionBDTG=LeastSquares");
-    if (Use["MLP"]) // neural network
+    if (Use["SVM"]) // Support Vector Machine
+        factX->BookMethod( loadX,  TMVA::Types::kSVM, "SVM", "!H:!V:Gamma=0.25:Tol=0.001:VarTransform=Norm" );
+    if (Use["MLP"]) // Multilayer Perceptron
         factX->BookMethod( loadX,  TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=1000:HiddenLayers=N+5,5:TestRate=5:EstimatorType=MSE");
+    if (Use["BDTG"]) // Gradient Boosted Decision Trees
+        factX->BookMethod( loadX,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:RegressionLossFunctionBDTG=LeastSquares");
     if (Use["DNN"]) {
         TString layoutString ("Layout=TANH|100,TANH|50,TANH|10,LINEAR");
         TString training0 ("LearningRate=1e-1, Momentum=0.5, Repetitions=1, ConvergenceSteps=10,"
