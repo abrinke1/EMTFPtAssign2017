@@ -44,10 +44,9 @@ void pTMulticlass( TString myMethodList = "" ){
     
     // Default MVA methods to be trained + tested
     std::map<std::string,int> Use;
-    Use["SVM"]             = 0;
-    Use["MLP"]             = 0;
-    Use["BDTG"]            = 0;
-    Use["DNN"]             = 1;
+    Use["SVM"]             = 1;
+    Use["MLP"]             = 1;
+    Use["BDTG"]            = 1;
     
     std::cout << std::endl;
     std::cout << "==> Start pTMulticlass" << std::endl;
@@ -989,20 +988,6 @@ void pTMulticlass( TString myMethodList = "" ){
         factX->BookMethod( loadX,  TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=1000:HiddenLayers=N+5,5:Sampling=0.7:SamplingEpoch=500:SamplingImportance=0.8:TestRate=5:EstimatorType=MSE:ConvergenceTests=10:UseRegulator=True:VarTransform=Norm");
     if (Use["BDTG"]) // Gradient Boosted Decision Trees
         factX->BookMethod( loadX,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:RegressionLossFunctionBDTG=LeastSquares");
-    if (Use["DNN"]) {
-        TString layoutString ("Layout=TANH|100,TANH|50,TANH|10,LINEAR");
-        TString training0 ("LearningRate=1e-1, Momentum=0.5, Repetitions=1, ConvergenceSteps=10,"
-                           " BatchSize=256, TestRepetitions=10, Multithreading=True");
-        TString training1 ("LearningRate=1e-2, Momentum=0.0, Repetitions=1, ConvergenceSteps=10,"
-                           " BatchSize=256, TestRepetitions=7, Multithreading=True");
-        TString trainingStrategyString ("TrainingStrategy=");
-        trainingStrategyString += training0 + "|" + training1;
-        TString nnOptions ("!H:V:ErrorStrategy=CROSSENTROPY:VarTransform=N:"
-                           "WeightInitialization=XAVIERUNIFORM:Architecture=STANDARD");
-        nnOptions.Append (":"); nnOptions.Append (layoutString);
-        nnOptions.Append (":"); nnOptions.Append (trainingStrategyString);
-        factX->BookMethod(loadX, TMVA::Types::kDNN, "DNN", nnOptions );
-    }
     
     // Train MVAs using the set of training events
     factX->TrainAllMethods();
