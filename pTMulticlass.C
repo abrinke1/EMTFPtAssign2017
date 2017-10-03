@@ -985,7 +985,7 @@ void pTMulticlass( TString myMethodList = "" ){
     if (Use["SVM"]) // Support Vector Machine
         factX->BookMethod( loadX,  TMVA::Types::kSVM, "SVM", "!H:!V:Gamma=0.25:Tol=0.001:VarTransform=Norm" );
     if (Use["MLP"]) // Multilayer Perceptron
-        factX->BookMethod( loadX,  TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=500:HiddenLayers=N,5:Sampling=0.7:SamplingEpoch=250:SamplingImportance=0.8:TestRate=5:LearningRate=0.01:DecayRate=0.005:EstimatorType=MSE:ConvergenceTests=10:UseRegulator=True:VarTransform=Norm");
+        factX->BookMethod( loadX,  TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=500:HiddenLayers=N,5:Sampling=0.7:SamplingEpoch=250:SamplingImportance=0.8:TestRate=5:LearningRate=0.01:DecayRate=0.005:EstimatorType=MSE:ConvergenceTests=10:UseRegulator=True:VarTransform=N,D");
     if (Use["BDTG"]) // Gradient Boosted Decision Trees
         factX->BookMethod( loadX,  TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=400::BoostType=Grad:Shrinkage=0.1:nCuts=1000:MaxDepth=5:MinNodeSize=0.000001:RegressionLossFunctionBDTG=LeastSquares");
     
