@@ -45,7 +45,7 @@ void pTMulticlass( TString myMethodList = "" ){
     // Default MVA methods to be trained + tested
     std::map<std::string,int> Use;
     Use["MLP"]             = 1;
-    Use["BDTG"]            = 0;
+    Use["BDTG"]            = 1;
     
     std::cout << std::endl;
     std::cout << "==> Start pTMulticlass" << std::endl;
