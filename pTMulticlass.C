@@ -122,7 +122,7 @@ void pTMulticlass( TString myMethodList = "" ){
       in_file_name.Form("%s/%s/tuple_%d.root", EOS_DIR_NAME.Data(), in_dir_RPC.Data(), i);
       std::cout << "Adding file " << in_file_name.Data() << std::endl;
       in_file_names.push_back(in_file_name.Data());
-      if (i*100000 > MAX_EVT) break; // ~100k events per file
+      //if (i*100000 > MAX_EVT) break; // ~100k events per file
     }
    
     // Load files without RPC hits
@@ -132,7 +132,7 @@ void pTMulticlass( TString myMethodList = "" ){
       in_file_name.Form("%s/%s/EMTF_MC_NTuple_SingleMu_noRPC_%d.root", EOS_DIR_NAME.Data(), in_dir_CSC.Data(), i);
       std::cout << "Adding file " << in_file_name.Data() << std::endl;
       in_file_names.push_back(in_file_name.Data());
-      if (i*100000 > MAX_EVT) break; // ~100k events per file
+      //if (i*100000 > MAX_EVT) break; // ~100k events per file
     }
  
     for (UInt_t i = 0; i < in_file_names.size(); i++) {
@@ -363,7 +363,8 @@ void pTMulticlass( TString myMethodList = "" ){
      std::cout << "\n******* About to enter the event loop for chain " << iCh+1 << " *******" << std::endl;
      
      for (UInt_t jEvt = 0; jEvt < in_chain->GetEntries(); jEvt++) {
-       if (iEvt > MAX_EVT) break;
+       //if (iEvt > MAX_EVT) break; 
+       //use all MC events
 
        in_chain->GetEntry(jEvt);
        
@@ -923,8 +924,8 @@ void pTMulticlass( TString myMethodList = "" ){
 	     } // End loop: for (UInt_t iVar = 0; iVar < var_names.size(); iVar++)
 	     
 	     // Load values into event
-	     if ( (iEvt % 2) == 0 && isMC && trainEvt && (nTrain_sig + nTrain_bkg) < (MAX_TR - (iFact == 0))  ) {
-	       if (mu_pt > 0 && mu_pt < 16) {
+	     if ( (iEvt % 2) == 0 && isMC && trainEvt ) {
+	       if (mu_pt < 30) {
 		 std::get<1>(factories.at(iFact))->AddBackgroundTrainingEvent( var_vals, evt_weight );
 		 if (iFact == 0) nTrain_bkg += 1;
 	       } else if (mu_pt > 64) {
@@ -933,7 +934,7 @@ void pTMulticlass( TString myMethodList = "" ){
 	       }
 	     }
 	     else {
-	       if (mu_pt < 32) {
+	       if (mu_pt < 30) {
 		 std::get<1>(factories.at(iFact))->AddBackgroundTestEvent( var_vals, evt_weight );
 		 if (iFact == 0) nTest_bkg += 1;
 	       } else {
@@ -957,6 +958,8 @@ void pTMulticlass( TString myMethodList = "" ){
 	
    string NTrS;
    string NTrB;
+   string NTeS;
+   string NTeB;
 
    ostringstream convertTrS;
    convertTrS << nTrain_sig;
@@ -964,9 +967,15 @@ void pTMulticlass( TString myMethodList = "" ){
    ostringstream convertTrB;
    convertTrB << nTrain_bkg;
    NTrB = convertTrB.str();
+   ostringstream convertTeS;
+   convertTeS << nTest_sig;
+   NTeS = convertTeS.str();
+   ostringstream convertTeB;
+   convertTeB << nTest_bkg;
+   NTeB = convertTeB.str();
 
-   string numTrainStr = "nTrain_Signal="+NTrS+":nTrain_Background="+NTrB+":";
-   std::cout << "NTrS: " << NTrS << ", NTrB: " << NTrB << std::endl;
+   string numTrainStr = "nTrain_Signal="+NTrS+":nTrain_Background="+NTrB+":nTest_Signal="+NTeS+":nTest_Background="+NTeB+":";
+   std::cout << "NTrS: " << NTrS << ", NTrB: " << NTrB << ", NTeS: " << NTeS << ", NTeB: " << NTeB << std::endl;
 
    for (UInt_t iFact = 0; iFact < factories.size(); iFact++) {
      
