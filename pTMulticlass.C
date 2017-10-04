@@ -928,7 +928,7 @@ void pTMulticlass( TString myMethodList = "" ){
 	       if (mu_pt < 30) {
 		 std::get<1>(factories.at(iFact))->AddBackgroundTrainingEvent( var_vals, evt_weight );
 		 if (iFact == 0) nTrain_bkg += 1;
-	       } else if (mu_pt > 64) {
+	       } else {
 		 std::get<1>(factories.at(iFact))->AddSignalTrainingEvent( var_vals, evt_weight );
 		 if (iFact == 0) nTrain_sig += 1;
 	       }
