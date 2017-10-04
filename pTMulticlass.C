@@ -44,7 +44,6 @@ void pTMulticlass( TString myMethodList = "" ){
     
     // Default MVA methods to be trained + tested
     std::map<std::string,int> Use;
-    Use["SVM"]             = 1;
     Use["MLP"]             = 1;
     Use["BDTG"]            = 1;
     
@@ -982,8 +981,6 @@ void pTMulticlass( TString myMethodList = "" ){
      loadX->PrepareTrainingAndTestTree( "", "", numTrainStr+"SplitMode=Random:NormMode=NumEvents:!V" );   
 	   
     // Book MVA methods
-    if (Use["SVM"]) // Support Vector Machine
-        factX->BookMethod( loadX,  TMVA::Types::kSVM, "SVM", "!H:!V:Gamma=0.25:Tol=0.001:VarTransform=Norm" );
     if (Use["MLP"]) // Multilayer Perceptron
         factX->BookMethod( loadX,  TMVA::Types::kMLP, "MLP", "!H:!V:NeuronType=tanh:NCycles=500:HiddenLayers=N,5:Sampling=0.7:SamplingEpoch=250:SamplingImportance=0.8:TestRate=5:LearningRate=0.01:DecayRate=0.005:EstimatorType=MSE:ConvergenceTests=10:UseRegulator=True:VarTransform=N,P");
     if (Use["BDTG"]) // Gradient Boosted Decision Trees
