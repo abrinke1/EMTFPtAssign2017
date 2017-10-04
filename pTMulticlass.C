@@ -987,7 +987,7 @@ void pTMulticlass( TString myMethodList = "" ){
      loadX->SetWeightExpression( 1.0 );
      
      // Tell the dataloader how to use the training and testing events
-     loadX->PrepareTrainingAndTestTree( "", "", numTrainStr+"SplitMode=Random:NormMode=NumEvents:!V" );   
+     loadX->PrepareTrainingAndTestTree( "", "", numTrainStr+"NormMode=NumEvents:!V" );   
 	   
     // Book MVA methods
     if (Use["MLP"]) // Multilayer Perceptron
