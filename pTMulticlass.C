@@ -122,7 +122,7 @@ void pTMulticlass( TString myMethodList = "" ){
       in_file_name.Form("%s/%s/tuple_%d.root", EOS_DIR_NAME.Data(), in_dir_RPC.Data(), i);
       std::cout << "Adding file " << in_file_name.Data() << std::endl;
       in_file_names.push_back(in_file_name.Data());
-      //if (i*100000 > MAX_EVT) break; // ~100k events per file
+      if (i*100000 > MAX_EVT) break; // ~100k events per file
     }
    
     // Load files without RPC hits
@@ -132,7 +132,7 @@ void pTMulticlass( TString myMethodList = "" ){
       in_file_name.Form("%s/%s/EMTF_MC_NTuple_SingleMu_noRPC_%d.root", EOS_DIR_NAME.Data(), in_dir_CSC.Data(), i);
       std::cout << "Adding file " << in_file_name.Data() << std::endl;
       in_file_names.push_back(in_file_name.Data());
-      //if (i*100000 > MAX_EVT) break; // ~100k events per file
+      if (i*100000 > MAX_EVT) break; // ~100k events per file
     }
  
     for (UInt_t i = 0; i < in_file_names.size(); i++) {
@@ -363,7 +363,7 @@ void pTMulticlass( TString myMethodList = "" ){
      std::cout << "\n******* About to enter the event loop for chain " << iCh+1 << " *******" << std::endl;
      
      for (UInt_t jEvt = 0; jEvt < in_chain->GetEntries(); jEvt++) {
-       //if (iEvt > MAX_EVT) break; 
+       if (iEvt > MAX_EVT) break; 
        //use all MC events
 
        in_chain->GetEntry(jEvt);
