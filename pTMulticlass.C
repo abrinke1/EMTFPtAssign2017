@@ -958,7 +958,7 @@ void pTMulticlass( TString myMethodList = "" ){
      TMVA::DataLoader* loadX = std::get<1>(factories.at(iFact));
          
      // Tell the dataloader how to use the training and testing events
-     loadX->PrepareTrainingAndTestTree( "", "", "NormMode=None:!V" );   
+     loadX->PrepareTrainingAndTestTree( "", "NormMode=None:!V" );   
 	   
     // Book MVA methods
     if (Use["MLP"]) // Multilayer Perceptron
