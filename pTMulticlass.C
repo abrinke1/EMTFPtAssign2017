@@ -924,7 +924,7 @@ void pTMulticlass( TString myMethodList = "" ){
 	     } // End loop: for (UInt_t iVar = 0; iVar < var_names.size(); iVar++)
 	     
 	     // Load values into event
-	     if ( (iEvt % 2) == 0 && isMC && trainEvt ) {
+	     if ( (iEvt % 2) == 0 && isMC && trainEvt && (nTrain_sig + nTrain_bkg) < (MAX_TR - (iFact == 0)) ) {
 	       if (mu_pt < 30) {
 		 std::get<1>(factories.at(iFact))->AddBackgroundTrainingEvent( var_vals, evt_weight );
 		 if (iFact == 0) nTrain_bkg += 1;
