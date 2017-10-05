@@ -347,10 +347,6 @@ void pTMulticlass( TString myMethodList = "" ){
    
    UInt_t iEvt = 0;
    UInt_t iEvtZB = 0;
-   UInt_t nTrain_sig = 0;
-   UInt_t nTrain_bkg = 0;
-   UInt_t nTest_sig  = 0;
-   UInt_t nTest_bkg  = 0;
 
    for (int iCh = 0; iCh < in_chains.size(); iCh++) {
      TChain *in_chain = in_chains.at(iCh);
@@ -927,22 +923,17 @@ void pTMulticlass( TString myMethodList = "" ){
 	     if ( (iEvt % 2) == 0 && isMC && trainEvt ) {
 	       if (mu_pt > 30) {
 		 std::get<1>(factories.at(iFact))->AddTrainingEvent( "class1", var_vals, evt_weight );
-		 if (iFact == 0) nTrain_bkg += 1;
 	       } else if (mu_pt<30 && mu_pt>20) {
 		 std::get<1>(factories.at(iFact))->AddTrainingEvent( "class2", var_vals, evt_weight );
-		 if (iFact == 0) nTrain_sig += 1;
 	       } else {
 		 std::get<1>(factories.at(iFact))->AddTrainingEvent( "class3", var_vals, evt_weight );
-		// if (iFact == 0) nTrain_bkg += 1;    
 	       } 
 	     }
 	     else {
 	       if (mu_pt > 30) {
 		 std::get<1>(factories.at(iFact))->AddTestEvent( "class1", var_vals, evt_weight );
-		 if (iFact == 0) nTest_bkg += 1;
 	       } else if (mu_pt<30 && mu_pt>20){
 		 std::get<1>(factories.at(iFact))->AddTestEvent( "class2", var_vals, evt_weight );
-		 if (iFact == 0) nTest_sig += 1;
 	       } else {
 		 std::get<1>(factories.at(iFact))->AddTestEvent( "class3", var_vals, evt_weight );  
 	       } 
@@ -966,10 +957,6 @@ void pTMulticlass( TString myMethodList = "" ){
      TMVA::Factory* factX = std::get<0>(factories.at(iFact));
      TMVA::DataLoader* loadX = std::get<1>(factories.at(iFact));
          
-     // This would set individual event weights (the variables defined in the
-     // expression need to exist in the original TTree)
-     loadX->SetWeightExpression( 1.0 );
-     
      // Tell the dataloader how to use the training and testing events
      loadX->PrepareTrainingAndTestTree( "", "", "NormMode=None:!V" );   
 	   
