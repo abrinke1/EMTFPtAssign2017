@@ -4,7 +4,8 @@ const TString USER = "WEI";  // Settings applied in User.h
 
 // *** Events to process *** //
 const int MAX_EVT    =  4000000;  // Number of MC events to process          (4M default for mode 15, 12M available)
-const int MAX_TR     =  2000000;  // Number of MC events to use for training (2M default for mode 15)
+//This MAX_TR constraint is removed in pTmulticlass
+//const int MAX_TR     =  2000000;  // Number of MC events to use for training (2M default for mode 15) 
 const int REPORT_EVT =    10000;  // Report every Nth event during processing
 const int MAX_ZB_FIL =       50;  // Number of ZeroBias files to include (~200 CSC-only, ~30 with RPC)
 
