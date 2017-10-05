@@ -926,25 +926,25 @@ void pTMulticlass( TString myMethodList = "" ){
 	     // Load values into event
 	     if ( (iEvt % 2) == 0 && isMC && trainEvt ) {
 	       if (mu_pt > 30) {
-		 std::get<1>(factories.at(iFact))->AddTrainingEvent( class1, var_vals, evt_weight );
+		 std::get<1>(factories.at(iFact))->AddTrainingEvent( "class1", var_vals, evt_weight );
 		 if (iFact == 0) nTrain_bkg += 1;
 	       } else if (mu_pt<30 && mu_pt>20) {
-		 std::get<1>(factories.at(iFact))->AddTrainingEvent( class2, var_vals, evt_weight );
+		 std::get<1>(factories.at(iFact))->AddTrainingEvent( "class2", var_vals, evt_weight );
 		 if (iFact == 0) nTrain_sig += 1;
 	       } else {
-		 std::get<1>(factories.at(iFact))->AddTrainingEvent( class3, var_vals, evt_weight );
+		 std::get<1>(factories.at(iFact))->AddTrainingEvent( "class3", var_vals, evt_weight );
 		// if (iFact == 0) nTrain_bkg += 1;    
 	       } 
 	     }
 	     else {
 	       if (mu_pt > 30) {
-		 std::get<1>(factories.at(iFact))->AddTestEvent( class1, var_vals, evt_weight );
+		 std::get<1>(factories.at(iFact))->AddTestEvent( "class1", var_vals, evt_weight );
 		 if (iFact == 0) nTest_bkg += 1;
 	       } else if (mu_pt<30 && mu_pt>20){
-		 std::get<1>(factories.at(iFact))->AddTestEvent( class2, var_vals, evt_weight );
+		 std::get<1>(factories.at(iFact))->AddTestEvent( "class2", var_vals, evt_weight );
 		 if (iFact == 0) nTest_sig += 1;
 	       } else {
-		 std::get<1>(factories.at(iFact))->AddTestEvent( class3, var_vals, evt_weight );  
+		 std::get<1>(factories.at(iFact))->AddTestEvent( "class3", var_vals, evt_weight );  
 	       } 
 	     }//end if else
 	     
