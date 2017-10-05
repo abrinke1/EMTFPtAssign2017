@@ -924,24 +924,29 @@ void pTMulticlass( TString myMethodList = "" ){
 	     } // End loop: for (UInt_t iVar = 0; iVar < var_names.size(); iVar++)
 	     
 	     // Load values into event
-	     if ( (iEvt % 2) == 0 && isMC && trainEvt && (nTrain_sig + nTrain_bkg) < (MAX_TR - (iFact == 0)) ) {
-	       if (mu_pt < 30) {
-		 std::get<1>(factories.at(iFact))->AddBackgroundTrainingEvent( var_vals, evt_weight );
+	     if ( (iEvt % 2) == 0 && isMC && trainEvt ) {
+	       if (mu_pt > 30) {
+		 std::get<1>(factories.at(iFact))->AddTrainingEvent( class1, var_vals, evt_weight );
 		 if (iFact == 0) nTrain_bkg += 1;
-	       } else {
-		 std::get<1>(factories.at(iFact))->AddSignalTrainingEvent( var_vals, evt_weight );
+	       } else if (mu_pt<30 && mu_pt>20) {
+		 std::get<1>(factories.at(iFact))->AddTrainingEvent( class2, var_vals, evt_weight );
 		 if (iFact == 0) nTrain_sig += 1;
-	       }
+	       } else {
+		 std::get<1>(factories.at(iFact))->AddTrainingEvent( class3, var_vals, evt_weight );
+		// if (iFact == 0) nTrain_bkg += 1;    
+	       } 
 	     }
 	     else {
-	       if (mu_pt < 30) {
-		 std::get<1>(factories.at(iFact))->AddBackgroundTestEvent( var_vals, evt_weight );
+	       if (mu_pt > 30) {
+		 std::get<1>(factories.at(iFact))->AddTestEvent( class1, var_vals, evt_weight );
 		 if (iFact == 0) nTest_bkg += 1;
-	       } else {
-		 std::get<1>(factories.at(iFact))->AddSignalTestEvent( var_vals, evt_weight );
+	       } else if (mu_pt<30 && mu_pt>20){
+		 std::get<1>(factories.at(iFact))->AddTestEvent( class2, var_vals, evt_weight );
 		 if (iFact == 0) nTest_sig += 1;
-	       }
-	     }
+	       } else {
+		 std::get<1>(factories.at(iFact))->AddTestEvent( class3, var_vals, evt_weight );  
+	       } 
+	     }//end if else
 	     
 	   } // End loop: for (UInt_t iFact = 0; iFact < factories.size(); iFact++) 
 	   
@@ -955,27 +960,6 @@ void pTMulticlass( TString myMethodList = "" ){
    } // End loop: for (int iCh = 0; iCh < in_chains.size(); iCh++) {
 
    std::cout << "******* Made it out of the event loop *******" << std::endl;
-	
-   string NTrS;
-   string NTrB;
-   string NTeS;
-   string NTeB;
-
-   ostringstream convertTrS;
-   convertTrS << nTrain_sig;
-   NTrS = convertTrS.str();
-   ostringstream convertTrB;
-   convertTrB << nTrain_bkg;
-   NTrB = convertTrB.str();
-   ostringstream convertTeS;
-   convertTeS << nTest_sig;
-   NTeS = convertTeS.str();
-   ostringstream convertTeB;
-   convertTeB << nTest_bkg;
-   NTeB = convertTeB.str();
-
-   string numTrainStr = "nTrain_Signal="+NTrS+":nTrain_Background="+NTrB+":nTest_Signal="+NTeS+":nTest_Background="+NTeB+":";
-   std::cout << "NTrS: " << NTrS << ", NTrB: " << NTrB << ", NTeS: " << NTeS << ", NTeB: " << NTeB << std::endl;
 
    for (UInt_t iFact = 0; iFact < factories.size(); iFact++) {
      
@@ -987,7 +971,7 @@ void pTMulticlass( TString myMethodList = "" ){
      loadX->SetWeightExpression( 1.0 );
      
      // Tell the dataloader how to use the training and testing events
-     loadX->PrepareTrainingAndTestTree( "", "", numTrainStr+"NormMode=NumEvents:!V" );   
+     loadX->PrepareTrainingAndTestTree( "", "", "NormMode=None:!V" );   
 	   
     // Book MVA methods
     if (Use["MLP"]) // Multilayer Perceptron
