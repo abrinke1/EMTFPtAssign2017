@@ -919,7 +919,9 @@ void pTMulticlass( TString myMethodList = "" ){
 	       
 	     } // End loop: for (UInt_t iVar = 0; iVar < var_names.size(); iVar++)
 	     
-	     // Load values into event
+	       //////////////////////////////////////////
+	       ///  Define USER Classes(>=2 classes)  ///
+	       //////////////////////////////////////////
 	     if ( (iEvt % 2) == 0 && isMC && trainEvt ) {
 	       if (mu_pt >= 32) {
 		 std::get<1>(factories.at(iFact))->AddTrainingEvent( "class1", var_vals, evt_weight );
