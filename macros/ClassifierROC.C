@@ -53,8 +53,8 @@ void ClassifierROC()
         //===================================================
         
         TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
-        TString directoryName="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree";
-        TString directoryName2="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree/BDTG";
+        TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
+        TString directoryName2="f_MODE_15_noWgt_bitCompr_RPC/TestTree/BDTG";
         TFile* myFile = new TFile(fileName);
         TTree* myTree = (TTree*) myFile->Get(directoryName);
         TTree* myTree2 = (TTree*) myFile->Get(directoryName2);
@@ -70,8 +70,10 @@ void ClassifierROC()
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
+        cout<<"Accessing directory:"<<directoryName<<endl;
         myTree2->SetBranchAddress("class1",&class1);
         myTree2->SetBranchAddress("class2",&class2);
+        cout<<"Accessing directory:"<<directoryName2<<endl;
         
         ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",100,0,1,100,0,1,0,1);
