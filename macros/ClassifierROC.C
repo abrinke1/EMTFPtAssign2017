@@ -44,9 +44,12 @@ using namespace std;
 //B=S1+B1
 void ClassifierROC()
 {
+        //USER modify here ONLY//
+        //====================================================
         int PT_CUT = 32;//the classifier trained on this cut
         Float_t EFF_REF = 0.95;//compare rate with BDT Regression
         TString eff_ref = "0.95";//string format of EFF_REF
+        //===================================================
         
         TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC.root";
         TString directoryName="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree";
