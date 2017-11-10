@@ -47,11 +47,12 @@ void ClassifierROC()
         //USER modify here ONLY//
         //====================================================
         int PT_CUT = 32;//the classifier trained on this cut
+        TString pt_cut = "32";//string format of PT_CUT
         Float_t EFF_REF = 0.95;//compare rate with BDT Regression
         TString eff_ref = "0.95";//string format of EFF_REF
         //===================================================
         
-        TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC.root";
+        TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
         TString directoryName="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree";
         TString directoryName2="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree/BDTG";
         TFile* myFile = new TFile(fileName);
@@ -74,7 +75,7 @@ void ClassifierROC()
         
         ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",100,0,1,100,0,1,0,1);
-        RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > "+eff_ref+")",100,0,1,100,0,1,0,1000);
+        RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",100,0,1,100,0,1,0,1000);
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -168,7 +169,7 @@ void ClassifierROC()
         }//end loop over cut on class1     
          
         //write to output file
-        TFile myPlot("/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC.root","RECREATE");
+        TFile myPlot("/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_" + pt_cut + ".root","RECREATE");
         ROC->Write();
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
