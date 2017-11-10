@@ -89,13 +89,13 @@ void ClassifierROC()
           //loop over cut on class2
           for(int j = 1; j < 101; j++){
             
-            Long64_t S1=0;
-            Long64_t S2=0;
-            Long64_t B1=0;
-            Long64_t B2=0;
+            Float_t S1=0;
+            Float_t S2=0;
+            Float_t B1=0;
+            Float_t B2=0;
             Float_t TPR=-1.0;
             Float_t FPR=-1.0;
-            Long64_t RATE=0;
+            Float_t RATE=0;
             
             
             for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
