@@ -100,7 +100,6 @@ void ClassifierROC()
             for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
               myTree->GetEntry(iEntry);
-              myTree2->GetEntry(iEntry);
                      
               //MC events
               if(GEN_charge > -2){
@@ -145,7 +144,6 @@ void ClassifierROC()
               for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
                 myTree->GetEntry(iEntry);
-                myTree2->GetEntry(iEntry);
                      
                 //ZB events
                 if(GEN_charge < -2){
