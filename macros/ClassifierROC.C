@@ -58,7 +58,6 @@ void ClassifierROC()
         TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
         TFile* myFile = new TFile(fileName);
         TTree* myTree = (TTree*) myFile->Get(directoryName);
-        TTree* myTree2 = (TTree*) myFile->Get(directoryName2);
         
         cout<<"Accessing file:"<<fileName<<endl;
         
@@ -71,8 +70,8 @@ void ClassifierROC()
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
-        myTree2->SetBranchAddress("BDTG",&BDTG_class1);
-        myTree2->SetBranchAddress("BDTG",&BDTG_class2);
+        myTree->SetBranchAddress("BDTG",&BDTG_class1);
+        myTree->SetBranchAddress("BDTG",&BDTG_class2);
         cout<<"Accessing directory:"<<directoryName<<endl;
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
