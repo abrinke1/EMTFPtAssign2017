@@ -56,7 +56,6 @@ void ClassifierROC()
         
         TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
         TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
-        TString directoryName2="f_MODE_15_noWgt_bitCompr_RPC/TestTree/BDTG";
         TFile* myFile = new TFile(fileName);
         TTree* myTree = (TTree*) myFile->Get(directoryName);
         TTree* myTree2 = (TTree*) myFile->Get(directoryName2);
@@ -65,17 +64,16 @@ void ClassifierROC()
         
         Float_t GEN_pt;
         Float_t GEN_charge;
-        Float_t class1;
-        Float_t class2;
+        Float_t BDTG_class1;
+        Float_t BDTG_class2;
         Float_t a=0.0;
         Float_t b=0.0;
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
+        myTree2->SetBranchAddress("BDTG",&BDTG_class1);
+        myTree2->SetBranchAddress("BDTG",&BDTG_class2);
         cout<<"Accessing directory:"<<directoryName<<endl;
-        myTree2->SetBranchAddress("class1",&class1);
-        myTree2->SetBranchAddress("class2",&class2);
-        cout<<"Accessing directory:"<<directoryName2<<endl;
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",100,0,1,100,0,1,0,1);
@@ -109,7 +107,7 @@ void ClassifierROC()
               if(GEN_charge > -2){
                 
                 //predict signal
-                if(class1 >= a && class2 < b){
+                if(BDTG_class1 >= a && BDTG_class2 < b){
                   if(GEN_pt >= PT_CUT){
                     S2++;
                   }
@@ -153,7 +151,7 @@ void ClassifierROC()
                 //ZB events
                 if(GEN_charge < -2){
                   //rate
-                  if(class1 >= a && class2 < b){
+                  if(BDTG_class1 >= a && BDTG_class2 < b){
                     RATE++;
                   }//after cut
                 
