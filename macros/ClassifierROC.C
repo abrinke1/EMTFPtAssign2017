@@ -6,6 +6,8 @@ using namespace std;
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
 #include "TAttFill.h"
 #include "TCanvas.h"
 #include <vector>
@@ -75,9 +77,9 @@ void ClassifierROC()
         myTree2->SetBranchAddress("class2",&class2);
         cout<<"Accessing directory:"<<directoryName2<<endl;
         
-        ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
-        EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",100,0,1,100,0,1,0,1);
-        RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",100,0,1,100,0,1,0,1000);
+        auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
+        auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",100,0,1,100,0,1,0,1);
+        auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",100,0,1,100,0,1,0,1000);
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
