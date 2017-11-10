@@ -44,8 +44,10 @@ using namespace std;
 //B=S1+B1
 void ClassifierROC()
 {
-        PT_CUT=32;//the classifier trained on this cut
-  
+        int PT_CUT = 32;//the classifier trained on this cut
+        Float_t EFF_REF = 0.95;//compare rate with BDT Regression
+        TString eff_ref = "0.95";//string format of EFF_REF
+        
         TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC.root";
         TString directoryName="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree";
         TString directoryName2="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree/BDTG";
@@ -59,8 +61,8 @@ void ClassifierROC()
         Float_t GEN_charge;
         Float_t class1;
         Float_t class2;
-        Float_t a=0.00;
-        Float_t b=0.00;
+        Float_t a=0.0;
+        Float_t b=0.0;
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
@@ -68,7 +70,8 @@ void ClassifierROC()
         myTree2->SetBranchAddress("class2",&class2);
         
         ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
-        EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs class1>=a && class2<b",100,0,1,100,0,1,0,1);
+        EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",100,0,1,100,0,1,0,1);
+        RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > "+eff_ref+")",100,0,1,100,0,1,0,1000);
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -84,8 +87,10 @@ void ClassifierROC()
             Long64_t S2=0;
             Long64_t B1=0;
             Long64_t B2=0;
-            Float_t TPR=-1;
-            Float_t FPR=-1;
+            Float_t TPR=-1.0;
+            Float_t FPR=-1.0;
+            Long64_t RATE=0;
+            
             
             for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
@@ -116,26 +121,55 @@ void ClassifierROC()
                   }
                 
                 }//end if else prediction
-                
-              }//end loop over events
               
-              //Fill ROC curve
-              TPR=S2/(S2+B2);
-              FPR=S1/(S1+B1);
-              ROC->Fill(FPR,TPR);
-                
-              //Fill Signal efficiency vs cut
-              EFFvsCUTs->Fill(a,b,TPR);
+              }//end if MC
+            
+            }//end loop over events
               
+            //Fill ROC curve
+            TPR=S2/(S2+B2);
+            FPR=S1/(S1+B1);
+            ROC->Fill(FPR,TPR);
+                
+            //Fill Signal efficiency vs cut
+            EFFvsCUTs->Fill(a,b,TPR);
+            
+            //keep note of the rate whenever efficiency is higher than EFF_REF
+            if(TPR >= EFF_REF){
+                    
+              for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
+              
+                myTree->GetEntry(iEntry);
+                myTree2->GetEntry(iEntry);
+                     
+                //ZB events
+                if(GEN_charge < -2){
+                  //rate
+                  if(class1 >= a && class2 < b){
+                    RATE++;
+                  }//after cut
+                
+                }//end ZB
+              
+              }//end loop over events for rate
+                    
+            }//end if TPR higher than reference
+                  
+            //fill rate vs cuts
+            RATEvsCUTs->Fill(a,b,RATE);
+                    
             b = b + 1.0*j/100;//update cut on class2
           }//end loop over cut on class2
           
           a = a + 1.0*i/100;//update cut on class1
         }//end loop over cut on class1     
-          
+         
         //write to output file
         TFile myPlot("/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC.root","RECREATE");
         ROC->Write();
         EFFvsCUTs->Write();
+        RATEvsCUTs->Write();
+        
+        myPlot.Close();
           
 }//end macro
