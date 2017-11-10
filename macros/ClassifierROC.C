@@ -20,13 +20,122 @@ using namespace std;
 #include "THStack.h"
 #include "TFitResultPtr.h"
 
-
 //=***************************************************************************************
 //=Study the pT classifier performance and compare with BDT regression normally used at P5
-//=including ROC cureve, signal-to-background ratio
+//=including ROC cureve, signal-to-background ratio, etc
 //=
 //=Wei Shi @ Nov 11, 2017 CERN Geneva
-//=**************************************************************************************
+//=***************************************************************************************
+//=Reference Table
+//========================================================================================
+//=         Test MC Events   #                     |  GEN < PT_CUT    |    GEN >= PT_CUT
+//========================================================================================
+//=MC True: Signal (class1)                        |       NO         |         S
+//=---------------------------------------------------------------------------------------
+//=MC True: Background (class2)                    |       B          |         NO
+//========================================================================================
+//=Cut: class1 >= a && class2 < b (Signal)         |       S1         |         S2
+//=---------------------------------------------------------------------------------------
+//=Cut: complementary cut to signal (Background)   |       B1         |         B2
+//========================================================================================
+//=True Postive Rate: S2/(S2+B2), i.e. S2/S, signal efficiency/plateau trigger efficiency
+//=False Positive Rate: S1/(S1+B1)
+//S=S2+B2
+//B=S1+B1
 void ClassifierROC()
 {
-}
+        PT_CUT=32;//the classifier trained on this cut
+  
+        TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC.root";
+        TString directoryName="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree";
+        TString directoryName2="f_MODE_15_invPtTarg_bitCompr_RPC/TestTree/BDTG";
+        TFile* myFile = new TFile(fileName);
+        TTree* myTree = (TTree*) myFile->Get(directoryName);
+        TTree* myTree2 = (TTree*) myFile->Get(directoryName2);
+        
+        cout<<"Accessing file:"<<fileName<<endl;
+        
+        Float_t GEN_pt;
+        Float_t GEN_charge;
+        Float_t class1;
+        Float_t class2;
+        Float_t a=0.00;
+        Float_t b=0.00;
+      
+        myTree->SetBranchAddress("GEN_pt",&GEN_pt);
+        myTree->SetBranchAddress("GEN_charge",&GEN_charge);
+        myTree2->SetBranchAddress("class1",&class1);
+        myTree2->SetBranchAddress("class2",&class2);
+        
+        ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
+        EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs class1>=a && class2<b",100,0,1,100,0,1,0,1);
+  
+        Long64_t numEvents = myTree->GetEntries();
+        cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
+        cout<<numEvents<<" events to process..."<<endl;
+      
+        //loop over cut on class1
+        for(int i = 1; i < 101; i++){
+          
+          //loop over cut on class2
+          for(int j = 1; j < 101; j++){
+            
+            Long64_t S1=0;
+            Long64_t S2=0;
+            Long64_t B1=0;
+            Long64_t B2=0;
+            Float_t TPR=-1;
+            Float_t FPR=-1;
+            
+            for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
+              
+              myTree->GetEntry(iEntry);
+              myTree2->GetEntry(iEntry);
+                     
+              //MC events
+              if(GEN_charge > -2){
+                
+                //predict signal
+                if(class1 >= a && class2 < b){
+                  if(GEN_pt >= PT_CUT){
+                    S2++;
+                  }
+                  else{
+                    S1++;
+                  }
+                }
+                
+                //predict bkg
+                else{
+                
+                  if(GEN_pt >= PT_CUT){
+                    B2++;
+                  }
+                  else{
+                    B1++;
+                  }
+                
+                }//end if else prediction
+                
+              }//end loop over events
+              
+              //Fill ROC curve
+              TPR=S2/(S2+B2);
+              FPR=S1/(S1+B1);
+              ROC->Fill(FPR,TPR);
+                
+              //Fill Signal efficiency vs cut
+              EFFvsCUTs->Fill(a,b,TPR);
+              
+            b = b + 1.0*j/100;//update cut on class2
+          }//end loop over cut on class2
+          
+          a = a + 1.0*i/100;//update cut on class1
+        }//end loop over cut on class1     
+          
+        //write to output file
+        TFile myPlot("/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC.root","RECREATE");
+        ROC->Write();
+        EFFvsCUTs->Write();
+          
+}//end macro
