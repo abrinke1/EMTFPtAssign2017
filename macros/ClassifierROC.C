@@ -161,10 +161,10 @@ void ClassifierROC()
             //fill rate vs cuts
             RATEvsCUTs->Fill(a,b,RATE);
                     
-            b = b + 1.0*j/100;//update cut on class2
+            b = b + 1.0/100;//update cut on class2
           }//end loop over cut on class2
           
-          a = a + 1.0*i/100;//update cut on class1
+          a = a + 1.0/100;//update cut on class1
         }//end loop over cut on class1     
          
         //write to output file
