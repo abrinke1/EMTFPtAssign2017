@@ -113,10 +113,10 @@ void ClassifierROC()
               }
                     
               //MC events
-              if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S2++;}
-              if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S1++;}
-              if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 >= a || BDTG_class2 < b)){B2++;}
-              if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 >= a || BDTG_class2 < b)){B1++;}
+              if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S2=S2+1;}
+              if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S1=S1+1;}
+              if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B2=B2+1;}
+              if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B1=B1+1;}
             
             }//end loop over events
                
