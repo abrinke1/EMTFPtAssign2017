@@ -68,6 +68,7 @@ void ClassifierROC()
         Float_t BDTG_class2;
         Float_t a=0.0;
         Float_t b=1.0;//use b <= 1-a
+        Int_t W=1;
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
@@ -78,6 +79,7 @@ void ClassifierROC()
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
         auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",Bins,0,1,Bins,0,1,0,10000);
+        TH1F *SUM = new TH1F("SUM", "SUM", 20, 0, 2);
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -100,10 +102,15 @@ void ClassifierROC()
             Float_t FPR=-1.0;
             Float_t RATE=0;
             
-            for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
+            for(Long64_t iEntry = 0; iEntry <10000; iEntry++){
               
               myTree->GetEntry(iEntry);
-                     
+                    
+                //@@@Debug if accesses classes right
+              if(W==1){
+                      SUM->Fill(BDTG_class1+BDTG_class1);
+              }
+                    
               //MC events
               if(GEN_charge > -2){
                 
@@ -166,6 +173,8 @@ void ClassifierROC()
             b = b - 1./Bins;//update b
                   
           }//end while for class 2 cut
+                //@@@debug
+                W++;
           
         }//end loop over cut on class1     
          
