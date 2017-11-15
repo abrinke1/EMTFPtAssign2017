@@ -48,10 +48,11 @@ void ClassifierROC()
 {
         //USER modify here ONLY//
         //====================================================
-        int PT_CUT = 32;//the classifier trained on this cut
+        Int_t PT_CUT = 32;//the classifier trained on this cut
         TString pt_cut = "32";//string format of PT_CUT
         Float_t EFF_REF = 0.95;//compare rate with BDT Regression
         TString eff_ref = "0.95";//string format of EFF_REF
+        Int_t Bins=10;//bins on class cut
         //===================================================
         
         TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
@@ -67,7 +68,6 @@ void ClassifierROC()
         Float_t BDTG_class2;
         Float_t a=0.0;
         Float_t b=1.0;//use b <= 1-a
-        Float_t Bins=10;
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
@@ -76,8 +76,8 @@ void ClassifierROC()
         cout<<"Accessing directory:"<<directoryName<<endl;
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
-        auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",10,0,1,10,0,1,0,1);
-        auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",10,0,1,10,0,1,0,10000);
+        auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
+        auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",Bins,0,1,Bins,0,1,0,10000);
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -86,8 +86,8 @@ void ClassifierROC()
         //loop over cut on class1
         for(int i = 1; i < Bins; i++){
           
-          a = 0.1*i;//update cut on class1
-          b = 1-a;//update cut on class2
+          a = i*1.0/Bins;//update cut on class1
+          b = 1 - a;//update cut on class2
                 
           //loop over cut on class2
           while(b > 0){
