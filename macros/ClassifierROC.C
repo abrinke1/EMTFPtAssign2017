@@ -66,7 +66,8 @@ void ClassifierROC()
         Float_t BDTG_class1;
         Float_t BDTG_class2;
         Float_t a=0.0;
-        Float_t b=0.0;
+        Float_t b=1.0;//use b <= 1-a
+        Float_t Bins=10;
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
@@ -83,11 +84,13 @@ void ClassifierROC()
         cout<<numEvents<<" events to process..."<<endl;
       
         //loop over cut on class1
-        for(int i = 1; i < 10; i++){
+        for(int i = 1; i < Bins; i++){
           
-          
+          a = 0.1*i;//update cut on class1
+          b = 1-a;//update cut on class2
+                
           //loop over cut on class2
-          for(int j = 1; j < 10; j++){
+          while(b > 0){
             
             Float_t S1=0;
             Float_t S2=0;
@@ -96,8 +99,6 @@ void ClassifierROC()
             Float_t TPR=-1.0;
             Float_t FPR=-1.0;
             Float_t RATE=0;
-            a = 0.1*i;//update cut on class1
-            b = 0.1*j;//update cut on class2
             
             for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
@@ -162,8 +163,9 @@ void ClassifierROC()
                   
             //fill rate vs cuts
             RATEvsCUTs->Fill(a,b,RATE);
-
-          }//end loop over cut on class2
+            b = b - 1./Bins;//update b
+                  
+          }//end while for class 2 cut
           
         }//end loop over cut on class1     
          
