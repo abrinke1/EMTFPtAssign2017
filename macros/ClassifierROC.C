@@ -83,11 +83,11 @@ void ClassifierROC()
         cout<<numEvents<<" events to process..."<<endl;
       
         //loop over cut on class1
-        for(int i = 0; i < 101; i++){
+        for(int i = 1; i < 10; i++){
           
           
           //loop over cut on class2
-          for(int j = 0; j < 101; j++){
+          for(int j = 1; j < 10; j++){
             
             Float_t S1=0;
             Float_t S2=0;
@@ -96,8 +96,8 @@ void ClassifierROC()
             Float_t TPR=-1.0;
             Float_t FPR=-1.0;
             Float_t RATE=0;
-            a = 0.01*i;//update cut on class1
-            b = 0.01*j;//update cut on class2
+            a = 0.1*i;//update cut on class1
+            b = 0.1*j;//update cut on class2
             
             for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
