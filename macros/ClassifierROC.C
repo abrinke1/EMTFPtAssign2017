@@ -129,8 +129,8 @@ void ClassifierROC()
             //end debug
                   
             //Fill ROC curve
-            TPR=S2/(S2+B2);
-            FPR=S1/(S1+B1);
+            TPR=1.0*S2/(S2+B2);
+            FPR=1.0*S1/(S1+B1);
             ROC->Fill(FPR,TPR);
                   
             //Fill Signal efficiency vs cut
