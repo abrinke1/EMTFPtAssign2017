@@ -75,8 +75,8 @@ void ClassifierROC()
         cout<<"Accessing directory:"<<directoryName<<endl;
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
-        auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",100,0,1,100,0,1,0,1);
-        auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",100,0,1,100,0,1,0,1000);
+        auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",10,0,1,10,0,1,0,1);
+        auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",10,0,1,10,0,1,0,10000);
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
