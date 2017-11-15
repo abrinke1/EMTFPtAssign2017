@@ -139,6 +139,9 @@ void ClassifierROC()
               }//end if MC
             
             }//end loop over events
+            
+            //@@@debug
+            W++;
               
             //Fill ROC curve
             TPR=S2/(S2+B2);
@@ -173,8 +176,6 @@ void ClassifierROC()
             b = b - 1./Bins;//update b
                   
           }//end while for class 2 cut
-                //@@@debug
-                W++;
           
         }//end loop over cut on class1     
          
@@ -183,6 +184,7 @@ void ClassifierROC()
         ROC->Write();
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
+        SUM->Write();
         
         myPlot.Close();
           
