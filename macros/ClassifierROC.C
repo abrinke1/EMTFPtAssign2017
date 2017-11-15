@@ -108,7 +108,7 @@ void ClassifierROC()
                     
                 //@@@Debug if accesses classes right
               if(W==1){
-                      SUM->Fill(BDTG_class1+BDTG_class1);
+                      SUM->Fill(BDTG_class1+BDTG_class2);
               }
                     
               //MC events
