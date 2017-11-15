@@ -95,6 +95,11 @@ void ClassifierROC()
           //loop over cut on class2
           while(b > 0){
             
+            Long64_t Z=0;
+            Long64_t C1=0;
+            Long64_t C2=0;
+            Long64_t C3=0;
+            Long64_t C4=0;
             Long64_t S=0;
             Long64_t B=0;
             Long64_t S1=0;
@@ -114,9 +119,15 @@ void ClassifierROC()
                       SUM->Fill(BDTG_class1+BDTG_class2);
               }
                     
+              //ZB events
+              if(GEN_charge < -2){Z=Z+1;}
               //MC events
               if(GEN_charge > -2 && GEN_pt >= PT_CUT){S=S+1;}
               if(GEN_charge > -2 && GEN_pt < PT_CUT){B=B+1;}
+              if(BDTG_class1 >= a && BDTG_class2 < b){C1=C1+1;}
+              if(BDTG_class1 < a || BDTG_class2 >= b){C2=C2+1;}
+              if(GEN_charge > -2 && BDTG_class1 >= a && BDTG_class2 < b){C3=C3+1;}
+              if(GEN_charge > -2 && (BDTG_class1 < a || BDTG_class2 >= b)){C4=C4+1;}
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S2=S2+1;}
               if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S1=S1+1;}
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B2=B2+1;}
@@ -139,14 +150,23 @@ void ClassifierROC()
             //@@@debug 
             cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
             cout<<"a: "<<a<<" b: "<<b<<endl;
+            cout<<"Z: "<<Z<<endl;
             cout<<"S: "<<S<<endl;
             cout<<"B: "<<B<<endl;
+            cout<<"S+B+Z: "<<S+B+Z<<endl;
+            cout<<"C1: "<<C1<<endl;
+            cout<<"C2: "<<C2<<endl;
+            cout<<"C1+C2: "<<C1+C2<<endl;
             cout<<"S1: "<<S1<<endl;
             cout<<"S2: "<<S2<<endl;
             cout<<"B1: "<<B1<<endl;
             cout<<"B2: "<<B2<<endl;
             cout<<"S2+B2: "<<S2+B2<<endl;
             cout<<"S1+B1: "<<S1+B1<<endl;
+            cout<<"C3: "<<C3<<endl;
+            cout<<"C4: "<<C4<<endl;
+            cout<<"S1+S2: "<<S1+S2<<endl;
+            cout<<"B1+B2: "<<B1+B2<<endl;
             cout<<"TPR: "<<TPR<<endl;
             cout<<"FPR: "<<FPR<<endl;
             //end debug
