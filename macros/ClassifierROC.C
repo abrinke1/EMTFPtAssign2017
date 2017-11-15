@@ -79,7 +79,7 @@ void ClassifierROC()
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
         auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",Bins,0,1,Bins,0,1,0,10000);
-        TH1F *SUM = new TH1F("SUM", "SUM", 20, 0, 2);
+        TH1F *SUM = new TH1F("SUM", "SUM", 100, 0, 2);
         
   
         Long64_t numEvents = myTree->GetEntries();
