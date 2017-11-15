@@ -68,6 +68,7 @@ void ClassifierROC()
         Float_t BDTG_class2;
         double a=0.0;
         double b=1.0;//use b <= 1-a
+        double BIT=0.00001;
         Int_t W=1;
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
@@ -90,10 +91,10 @@ void ClassifierROC()
         for(int i = 1; i < Bins; i++){
           
           a = i*1.0/Bins;//update cut on class1
-          b = 1 - a;//update cut on class2
+          b = 1.0 - a;//update cut on class2
                 
           //loop over cut on class2
-          while(b > 0){
+          while(b > BIT){
             
             Long64_t Z=0;
             Long64_t C1=0;
@@ -189,7 +190,7 @@ void ClassifierROC()
                   
             //fill rate vs cuts
             RATEvsCUTs->Fill(a,b,RATE);
-            b = b - 1./Bins;//update b
+            b = b - 1.0/Bins;//update b
                   
           }//end while for class 2 cut
           
