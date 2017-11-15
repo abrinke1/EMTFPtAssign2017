@@ -80,6 +80,7 @@ void ClassifierROC()
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
         auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",Bins,0,1,Bins,0,1,0,10000);
         TH1F *SUM = new TH1F("SUM", "SUM", 20, 0, 2);
+        
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -102,7 +103,7 @@ void ClassifierROC()
             Float_t FPR=-1.0;
             Float_t RATE=0;
             
-            for(Long64_t iEntry = 0; iEntry <10000; iEntry++){
+            for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
               myTree->GetEntry(iEntry);
                     
@@ -112,37 +113,15 @@ void ClassifierROC()
               }
                     
               //MC events
-              if(GEN_charge > -2){
-                
-                //predict signal
-                if(BDTG_class1 >= a && BDTG_class2 < b){
-                  if(GEN_pt >= PT_CUT){
-                    S2++;
-                  }
-                  else{
-                    S1++;
-                  }
-                }
-                
-                //predict bkg
-                else{
-                
-                  if(GEN_pt >= PT_CUT){
-                    B2++;
-                  }
-                  else{
-                    B1++;
-                  }
-                
-                }//end if else prediction
-              
-              }//end if MC
+              if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S2++;}
+              if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S1++;}
+              if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 >= a || BDTG_class2 < b)){B2++;}
+              if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 >= a || BDTG_class2 < b)){B1++;}
             
             }//end loop over events
-            
-            //@@@debug
-            W++;
-              
+                  
+                W=0;
+                  
             //Fill ROC curve
             TPR=S2/(S2+B2);
             FPR=S1/(S1+B1);
@@ -157,15 +136,9 @@ void ClassifierROC()
               for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
                 myTree->GetEntry(iEntry);
-                     
+                  
                 //ZB events
-                if(GEN_charge < -2){
-                  //rate
-                  if(BDTG_class1 >= a && BDTG_class2 < b){
-                    RATE++;
-                  }//after cut
-                
-                }//end ZB
+                if(GEN_charge < -2 && BDTG_class1 >= a && BDTG_class2 < b){RATE++;}//after cut
               
               }//end loop over events for rate
                     
