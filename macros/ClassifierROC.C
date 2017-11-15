@@ -119,16 +119,31 @@ void ClassifierROC()
               if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 >= a || BDTG_class2 < b)){B1++;}
             
             }//end loop over events
-                  
-                W=0;
+               
+            //@@@debug
+            W=0;
+            //end debug
                   
             //Fill ROC curve
             TPR=S2/(S2+B2);
             FPR=S1/(S1+B1);
             ROC->Fill(FPR,TPR);
-                
+                  
             //Fill Signal efficiency vs cut
             EFFvsCUTs->Fill(a,b,TPR);
+            
+            //@@@debug 
+            cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
+            cout<<"a: "<<a<<" b: "<<b<<endl;
+            cout<<"S1: "<<S1<<endl;
+            cout<<"S2: "<<S2<<endl;
+            cout<<"B1: "<<B1<<endl;
+            cout<<"B2: "<<B2<<endl;
+            cout<<"S2+B2: "<<S2+B2<<endl;
+            cout<<"S1+B1: "<<S1+B1<<endl;
+            cout<<"TPR: "<<TPR<<endl;
+            cout<<"FPR: "<<FPR<<endl;
+            //end debug
             
             //keep note of the rate whenever efficiency is higher than EFF_REF
             if(TPR >= EFF_REF){
