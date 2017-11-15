@@ -95,13 +95,15 @@ void ClassifierROC()
           //loop over cut on class2
           while(b > 0){
             
-            Float_t S1=0;
-            Float_t S2=0;
-            Float_t B1=0;
-            Float_t B2=0;
-            Float_t TPR=-1.0;
-            Float_t FPR=-1.0;
-            Float_t RATE=0;
+            Long64_t S=0;
+            Long64_t B=0;
+            Long64_t S1=0;
+            Long64_t S2=0;
+            Long64_t B1=0;
+            Long64_t B2=0;
+            double TPR=-1.0;
+            double FPR=-1.0;
+            Long64_t RATE=0;
             
             for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
@@ -113,6 +115,8 @@ void ClassifierROC()
               }
                     
               //MC events
+              if(GEN_charge > -2 && GEN_pt >= PT_CUT){S=S+1;}
+              if(GEN_charge > -2 && GEN_pt < PT_CUT){B=B+1;}
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S2=S2+1;}
               if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S1=S1+1;}
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B2=B2+1;}
@@ -135,6 +139,8 @@ void ClassifierROC()
             //@@@debug 
             cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
             cout<<"a: "<<a<<" b: "<<b<<endl;
+            cout<<"S: "<<S<<endl;
+            cout<<"B: "<<B<<endl;
             cout<<"S1: "<<S1<<endl;
             cout<<"S2: "<<S2<<endl;
             cout<<"B1: "<<B1<<endl;
@@ -153,11 +159,13 @@ void ClassifierROC()
                 myTree->GetEntry(iEntry);
                   
                 //ZB events
-                if(GEN_charge < -2 && BDTG_class1 >= a && BDTG_class2 < b){RATE++;}//after cut
+                if(GEN_charge < -2 && BDTG_class1 >= a && BDTG_class2 < b){RATE=RATE+1;}//after cut
               
               }//end loop over events for rate
                     
             }//end if TPR higher than reference
+             
+            cout<<"RATE: "<<RATE<<endl;
                   
             //fill rate vs cuts
             RATEvsCUTs->Fill(a,b,RATE);
