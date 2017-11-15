@@ -66,8 +66,8 @@ void ClassifierROC()
         Float_t GEN_charge;
         Float_t BDTG_class1;
         Float_t BDTG_class2;
-        Float_t a=0.0;
-        Float_t b=1.0;//use b <= 1-a
+        double a=0.0;
+        double b=1.0;//use b <= 1-a
         Int_t W=1;
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
