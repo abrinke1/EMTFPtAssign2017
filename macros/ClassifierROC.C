@@ -196,7 +196,7 @@ void ClassifierROC()
                     
             }//end if TPR higher than reference
              
-            cout<<"RATE: "<<RATE<<endl;
+            cout<<"a:"<<a<<" b:"<<b<<" TPR:"<<TPR<<" FPR:"<<FPR<<" RATE:"<<RATE<<" S1:"<<S1<<" S2:"<<S2<<" S3:"<<S3<<" S4:"<<S4<<endl;
                   
             //fill rate vs cuts
             RATEvsCUTs->Fill(a,b,RATE);
