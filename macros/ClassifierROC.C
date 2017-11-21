@@ -72,8 +72,8 @@ void ClassifierROC()
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
-        myTree->SetBranchAddress("BDTG",&BDTG_class2);//first is allocating class2 in the branch
-        myTree->SetBranchAddress("BDTG",&BDTG_class1);
+        myTree->SetBranchAddress("BDTG",&BDTG_class1);//first is allocating class2 in the branch
+        myTree->SetBranchAddress("BDTG",&BDTG_class2);
         cout<<"Accessing directory:"<<directoryName<<endl;
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
