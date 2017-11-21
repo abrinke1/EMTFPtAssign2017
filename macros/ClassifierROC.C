@@ -52,7 +52,7 @@ void ClassifierROC()
         TString pt_cut = "32";//string format of PT_CUT
         Float_t EFF_REF = 0.95;//compare rate with BDT Regression
         TString eff_ref = "0.95";//string format of EFF_REF
-        Int_t Bins=2;//bins on class cut
+        Int_t Bins=10;//bins on class cut
         //===================================================
         
         TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
@@ -61,32 +61,21 @@ void ClassifierROC()
         TTree* myTree = (TTree*) myFile->Get(directoryName);
         
         cout<<"Accessing file:"<<fileName<<endl;
-        /*
-        Float_t GEN_pt;
-        Float_t GEN_charge;
-        Float_t BDTG_class1;
-        Float_t BDTG_class2;
-        */
+        cout<<"Accessing directory:"<<directoryName<<endl;
+        
         TBranch *GEN_pt_br = myTree->GetBranch("GEN_pt");
         TBranch *GEN_charge_br = myTree->GetBranch("GEN_charge");
         TBranch *BDTG_br = myTree->GetBranch("BDTG");
+        
         double a=0.0;
         double b=1.0;//use b <= 1-a
         double BIT=0.00001;
-      
-        /*
-        myTree->SetBranchAddress("GEN_pt",&GEN_pt);
-        myTree->SetBranchAddress("GEN_charge",&GEN_charge);
-        myTree->SetBranchAddress("BDTG",&BDTG_class1);//first is allocating class2 in the branch
-        myTree->SetBranchAddress("BDTG",&BDTG_class2);
-        */
-        cout<<"Accessing directory:"<<directoryName<<endl;
-        
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
         auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",Bins,0,1,Bins,0,1,0,10000);
         
+        /* //debug plots
         TH1F *SUM = new TH1F("SUM", "SUM", 100, 0, 2);
         TH1F *CLASSONE = new TH1F("CLASSONE", "CLASSONE", 200, 0, 1);
         TH1F *CLASSTWO = new TH1F("CLASSTWO", "CLASSTWO", 200, 0, 1);
@@ -94,6 +83,7 @@ void ClassifierROC()
         TH1F *CUTB = new TH1F("CUTB", "CUTB", 200, 0, 1);
         TH1F *CHARGE = new TH1F("CHARGE", "CHARGE", 200, -100, 100);
         TH1F *PT = new TH1F("PT", "PT", 1000, 0, 1000);
+        */
         
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -126,13 +116,14 @@ void ClassifierROC()
             for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
               myTree->GetEntry(iEntry);
-              
+                    
+              //access leaves under branch
               Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
               Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
               Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
               Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();
                     
-              //@@@Debug if accesses classes right
+              /* //@@@Debug if accesses classes right
               SUM->Fill(BDTG_class1+BDTG_class2);
               CLASSONE->Fill(BDTG_class1);
               CLASSTWO->Fill(BDTG_class2);
@@ -152,7 +143,8 @@ void ClassifierROC()
               if(BDTG_class1 < a || BDTG_class2 >= b){C2=C2+1;}
               if(GEN_charge > -2 && BDTG_class1 >= a && BDTG_class2 < b){C3=C3+1;}
               if(GEN_charge > -2 && (BDTG_class1 < a || BDTG_class2 >= b)){C4=C4+1;}
-              
+              */
+                    
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S2=S2+1;}
               if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S1=S1+1;}
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B2=B2+1;}
@@ -168,7 +160,7 @@ void ClassifierROC()
             //Fill Signal efficiency vs cut
             EFFvsCUTs->Fill(a,b,TPR);
                   
-            
+            /*
             //@@@debug 
             cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
             cout<<"a: "<<a<<" b: "<<b<<endl;
@@ -192,7 +184,7 @@ void ClassifierROC()
             cout<<"TPR: "<<TPR<<endl;
             cout<<"FPR: "<<FPR<<endl;
             //end debug
-            
+            */
                   
             //keep note of the rate whenever efficiency is higher than EFF_REF
             if(TPR >= EFF_REF){
@@ -228,6 +220,7 @@ void ClassifierROC()
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
         
+        /*
         SUM->Write();
         CLASSONE->Write();
         CLASSTWO->Write();
@@ -235,6 +228,7 @@ void ClassifierROC()
         CUTB->Write();
         CHARGE->Write();
         PT->Write();
+        */
         
         myPlot.Close();
           
