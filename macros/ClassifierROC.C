@@ -49,13 +49,12 @@ void ClassifierROC()
         //USER modify here ONLY//
         //====================================================
         Int_t PT_CUT = 32;//the classifier trained on this cut
-        TString pt_cut = "32";//string format of PT_CUT
         Float_t EFF_REF = 0.95;//compare rate with BDT Regression
-        TString eff_ref = "0.95";//string format of EFF_REF
         Int_t Bins=10;//bins on class cut
         //===================================================
         
-        TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
+        TString fileName="";
+        TString fileName=fileName+"/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ Form("%d", PT_CUT) +".root";
         TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
         TFile* myFile = new TFile(fileName);
         TTree* myTree = (TTree*) myFile->Get(directoryName);
@@ -73,7 +72,10 @@ void ClassifierROC()
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
-        auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",Bins,0,1,Bins,0,1,0,10000);
+        S=S+"RATE vs Cuts (Eff > "+Form("%0.2lf", EFF_REF);
+        TString RATEvsCUTsTitle="";
+        RATEvsCUTsTitle = RATEvsCUTsTitle + "RATE vs Cuts (Eff > "+Form("%0.2lf", EFF_REF) + ")";
+        auto RATEvsCUTs = new TProfile2D("RATE", RATEvsCUTsTitle, Bins, 0, 1, Bins, 0, 1, 0, 10000);
         
         /* //debug plots
         TH1F *SUM = new TH1F("SUM", "SUM", 100, 0, 2);
@@ -216,7 +218,9 @@ void ClassifierROC()
         }//end loop over cut on class1     
          
         //write to output file
-        TFile myPlot("/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_" + pt_cut + ".root","RECREATE");
+        TString outFile="";
+        TString outFile=outFile+"/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_"+ Form("%d", PT_CUT) +".root";
+        TFile myPlot(outFile,"RECREATE");
         ROC->Write();
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
