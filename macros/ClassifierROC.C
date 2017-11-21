@@ -97,7 +97,7 @@ void ClassifierROC()
                 
           //loop over cut on class2
           while(b > BIT){
-            
+            /*
             Long64_t Z=0;
             Long64_t C1=0;
             Long64_t C2=0;
@@ -105,6 +105,7 @@ void ClassifierROC()
             Long64_t C4=0;
             Long64_t S=0;
             Long64_t B=0;
+            */
             Long64_t S1=0;
             Long64_t S2=0;
             Long64_t B1=0;
