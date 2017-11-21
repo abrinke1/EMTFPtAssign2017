@@ -54,8 +54,8 @@ void ClassifierROC()
         //===================================================
         
         TString fileName = "";
-        TString fileName = fileName + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_" + Form("%d", PT_CUT) + ".root";
-        TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
+        fileName = fileName + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_" + Form("%d", PT_CUT) + ".root";
+        TString directoryName = "f_MODE_15_noWgt_bitCompr_RPC/TestTree";
         TFile* myFile = new TFile(fileName);
         TTree* myTree = (TTree*) myFile->Get(directoryName);
         
@@ -218,7 +218,7 @@ void ClassifierROC()
          
         //write to output file
         TString outFile = "";
-        TString outFile = outFile + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
+        outFile = outFile + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
         TFile myPlot(outFile,"RECREATE");
         ROC->Write();
         EFFvsCUTs->Write();
