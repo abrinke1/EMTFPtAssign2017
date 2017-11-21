@@ -52,7 +52,7 @@ void ClassifierROC()
         TString pt_cut = "32";//string format of PT_CUT
         Float_t EFF_REF = 0.95;//compare rate with BDT Regression
         TString eff_ref = "0.95";//string format of EFF_REF
-        Int_t Bins=2;//bins on class cut
+        Int_t Bins=10;//bins on class cut
         //===================================================
         
         TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
@@ -72,8 +72,8 @@ void ClassifierROC()
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
+        myTree->SetBranchAddress("BDTG",&BDTG_class2);//first is allocating class2 in the branch
         myTree->SetBranchAddress("BDTG",&BDTG_class1);
-        myTree->SetBranchAddress("BDTG",&BDTG_class2);
         cout<<"Accessing directory:"<<directoryName<<endl;
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
