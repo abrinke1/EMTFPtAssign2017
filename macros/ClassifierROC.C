@@ -69,7 +69,6 @@ void ClassifierROC()
         double a=0.0;
         double b=1.0;//use b <= 1-a
         double BIT=0.00001;
-        Int_t W=1;
       
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
@@ -144,10 +143,6 @@ void ClassifierROC()
               if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B1=B1+1;}
             
             }//end loop over events
-               
-            //@@@debug
-            W=0;
-            //end debug
                   
             //Fill ROC curve
             TPR=1.0*S2/(S2+B2);
