@@ -50,7 +50,7 @@ void ClassifierROC()
         //====================================================
         Int_t PT_CUT = 32;//the classifier trained on this cut
         Float_t EFF_REF = 0.95;//compare rate with BDT Regression
-        Int_t Bins=10;//bins on class cut
+        Int_t Bins=100;//bins on class cut
         //===================================================
         
         TString fileName = "";
@@ -66,15 +66,20 @@ void ClassifierROC()
         TBranch *GEN_charge_br = myTree->GetBranch("GEN_charge");
         TBranch *BDTG_br = myTree->GetBranch("BDTG");
         
-        double a=0.0;
-        double b=1.0;//use b <= 1-a
-        double BIT=0.00001;
+        double a=1.0;
+        double b=0.0;//use b <= 1-a
+        double BIT=0.000001;
+        Long64_t MinRATE=9999;
+        double OptA=a;//best cut with min rate while high efficiency(>reference eff)
+        double OptB=b;
+        Int_t fill=0;//only fill 2class topology one time
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
         TString RATEvsCUTsTitle="";
         RATEvsCUTsTitle = RATEvsCUTsTitle + "RATE vs Cuts (Eff > "+Form("%0.2lf", EFF_REF) + ")";
         auto RATEvsCUTs = new TProfile2D("RATE", RATEvsCUTsTitle, Bins, 0, 1, Bins, 0, 1, 0, 10000);
+        TH2F *Topology = new TH2F("Topology", "Class2 vs Class1", 100, 0, 1, 100, 0, 1);
         
         /* //debug plots
         TH1F *SUM = new TH1F("SUM", "SUM", 100, 0, 2);
@@ -93,7 +98,7 @@ void ClassifierROC()
         //loop over cut on class1
         for(int i = 1; i < Bins; i++){
           
-          a = i*1.0/Bins;//update cut on class1
+          a = (Bins-i)*1.0/Bins;//update cut on class1
           b = 1.0 - a;//update cut on class2
                 
           //loop over cut on class2
@@ -124,7 +129,10 @@ void ClassifierROC()
               Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
               Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
               Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();
-                    
+                
+              if(fill==0){
+                Topology->Fill(BDTG_class1,BDTG_class2);   
+              }
               /* //@@@Debug if accesses classes right
               SUM->Fill(BDTG_class1+BDTG_class2);
               CLASSONE->Fill(BDTG_class1);
@@ -153,7 +161,8 @@ void ClassifierROC()
               if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B1=B1+1;}
             
             }//end loop over events
-                  
+            
+            fill=1;
             //Fill ROC curve
             TPR=1.0*S2/(S2+B2);
             FPR=1.0*S1/(S1+B1);
@@ -203,6 +212,13 @@ void ClassifierROC()
                 if(GEN_charge < -2 && BDTG_class1 >= a && BDTG_class2 < b){RATE=RATE+1;}//after cut
               
               }//end loop over events for rate
+              
+              //keep note of low rate and cuts, prefer larger OptA, so "<" is used,
+              if(RATE < MinRATE){
+                MinRATE=RATE;
+                OptA=a;
+                OptB=b;
+              }
                     
             }//end if TPR higher than reference
              
@@ -210,12 +226,15 @@ void ClassifierROC()
                   
             //fill rate vs cuts
             RATEvsCUTs->Fill(a,b,RATE);
-            b = b - 1.0/Bins;//update b
+            b = b - 1.0/Bins;//update b, b is decreasing
                   
           }//end while for class 2 cut
           
         }//end loop over cut on class1     
-         
+        
+        cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
+        cout<<"OptA:"<<OptA<<" OptB:"<<OptB<<" MinRATE:"<<MinRATE<<endl;
+        
         //write to output file
         TString outFile = "";
         outFile = outFile + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
@@ -223,6 +242,7 @@ void ClassifierROC()
         ROC->Write();
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
+        Topology->Write();
         
         /*
         SUM->Write();
