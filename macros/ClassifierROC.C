@@ -94,6 +94,10 @@ void ClassifierROC()
         TH1F *CUTB = new TH1F("CUTB", "CUTB", 200, 0, 1);
         TH1F *CHARGE = new TH1F("CHARGE", "CHARGE", 200, -100, 100);
         TH1F *PT = new TH1F("PT", "PT", 1000, 0, 1000);
+        
+        Long64_t numEvents = myTree->GetEntries();
+        cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
+        cout<<numEvents<<" events to process..."<<endl;
       
         //loop over cut on class1
         for(int i = 1; i < Bins; i++){
