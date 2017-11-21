@@ -122,7 +122,7 @@ void ClassifierROC()
               //@@@Debug if accesses classes right
               SUM->Fill(BDTG_class1+BDTG_class2);
               CLASSONE->Fill(BDTG_class1);
-              CLASSONE->Fill(BDTG_class2);
+              CLASSTWO->Fill(BDTG_class2);
               CUTA->Fill(a);
               CUTB->Fill(b);
               CHARGE->Fill(GEN_charge);
