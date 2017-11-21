@@ -79,6 +79,7 @@ void ClassifierROC()
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
         auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",Bins,0,1,Bins,0,1,0,10000);
+        /*
         TH1F *SUM = new TH1F("SUM", "SUM", 100, 0, 2);
         TH1F *CLASSONE = new TH1F("CLASSONE", "CLASSONE", 200, 0, 1);
         TH1F *CLASSTWO = new TH1F("CLASSTWO", "CLASSTWO", 200, 0, 1);
@@ -86,6 +87,7 @@ void ClassifierROC()
         TH1F *CUTB = new TH1F("CUTB", "CUTB", 200, 0, 1);
         TH1F *CHARGE = new TH1F("CHARGE", "CHARGE", 200, -100, 100);
         TH1F *PT = new TH1F("PT", "PT", 1000, 0, 1000);
+        */
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -118,7 +120,7 @@ void ClassifierROC()
             for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
               myTree->GetEntry(iEntry);
-                    
+              /*      
               //@@@Debug if accesses classes right
               SUM->Fill(BDTG_class1+BDTG_class2);
               CLASSONE->Fill(BDTG_class1);
@@ -127,16 +129,18 @@ void ClassifierROC()
               CUTB->Fill(b);
               CHARGE->Fill(GEN_charge);
               PT->Fill(GEN_pt);
+              */
                     
               //ZB events
-              if(GEN_charge < -2){Z=Z+1;}
+              //if(GEN_charge < -2){Z=Z+1;}
+                    
               //MC events
-              if(GEN_charge > -2 && GEN_pt >= PT_CUT){S=S+1;}
-              if(GEN_charge > -2 && GEN_pt < PT_CUT){B=B+1;}
-              if(BDTG_class1 >= a && BDTG_class2 < b){C1=C1+1;}
-              if(BDTG_class1 < a || BDTG_class2 >= b){C2=C2+1;}
-              if(GEN_charge > -2 && BDTG_class1 >= a && BDTG_class2 < b){C3=C3+1;}
-              if(GEN_charge > -2 && (BDTG_class1 < a || BDTG_class2 >= b)){C4=C4+1;}
+              //if(GEN_charge > -2 && GEN_pt >= PT_CUT){S=S+1;}
+              //if(GEN_charge > -2 && GEN_pt < PT_CUT){B=B+1;}
+              //if(BDTG_class1 >= a && BDTG_class2 < b){C1=C1+1;}
+              //if(BDTG_class1 < a || BDTG_class2 >= b){C2=C2+1;}
+              //if(GEN_charge > -2 && BDTG_class1 >= a && BDTG_class2 < b){C3=C3+1;}
+              //if(GEN_charge > -2 && (BDTG_class1 < a || BDTG_class2 >= b)){C4=C4+1;}
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S2=S2+1;}
               if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S1=S1+1;}
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B2=B2+1;}
@@ -151,7 +155,8 @@ void ClassifierROC()
                   
             //Fill Signal efficiency vs cut
             EFFvsCUTs->Fill(a,b,TPR);
-            
+                  
+            /*
             //@@@debug 
             cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
             cout<<"a: "<<a<<" b: "<<b<<endl;
@@ -175,7 +180,8 @@ void ClassifierROC()
             cout<<"TPR: "<<TPR<<endl;
             cout<<"FPR: "<<FPR<<endl;
             //end debug
-            
+            */
+                  
             //keep note of the rate whenever efficiency is higher than EFF_REF
             if(TPR >= EFF_REF){
                     
@@ -205,6 +211,7 @@ void ClassifierROC()
         ROC->Write();
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
+        /*
         SUM->Write();
         CLASSONE->Write();
         CLASSTWO->Write();
@@ -212,7 +219,7 @@ void ClassifierROC()
         CUTB->Write();
         CHARGE->Write();
         PT->Write();
-        
+        */
         myPlot.Close();
           
 }//end macro
