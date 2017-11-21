@@ -53,8 +53,8 @@ void ClassifierROC()
         Int_t Bins=10;//bins on class cut
         //===================================================
         
-        TString fileName="";
-        TString fileName=fileName+"/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ Form("%d", PT_CUT) +".root";
+        TString fileName = "";
+        TString fileName = fileName + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_" + Form("%d", PT_CUT) + ".root";
         TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
         TFile* myFile = new TFile(fileName);
         TTree* myTree = (TTree*) myFile->Get(directoryName);
@@ -72,7 +72,6 @@ void ClassifierROC()
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
-        S=S+"RATE vs Cuts (Eff > "+Form("%0.2lf", EFF_REF);
         TString RATEvsCUTsTitle="";
         RATEvsCUTsTitle = RATEvsCUTsTitle + "RATE vs Cuts (Eff > "+Form("%0.2lf", EFF_REF) + ")";
         auto RATEvsCUTs = new TProfile2D("RATE", RATEvsCUTsTitle, Bins, 0, 1, Bins, 0, 1, 0, 10000);
@@ -218,8 +217,8 @@ void ClassifierROC()
         }//end loop over cut on class1     
          
         //write to output file
-        TString outFile="";
-        TString outFile=outFile+"/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_"+ Form("%d", PT_CUT) +".root";
+        TString outFile = "";
+        TString outFile = outFile + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
         TFile myPlot(outFile,"RECREATE");
         ROC->Write();
         EFFvsCUTs->Write();
