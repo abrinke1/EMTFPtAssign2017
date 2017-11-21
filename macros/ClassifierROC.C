@@ -52,7 +52,7 @@ void ClassifierROC()
         TString pt_cut = "32";//string format of PT_CUT
         Float_t EFF_REF = 0.95;//compare rate with BDT Regression
         TString eff_ref = "0.95";//string format of EFF_REF
-        Int_t Bins=10;//bins on class cut
+        Int_t Bins=2;//bins on class cut
         //===================================================
         
         TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
@@ -81,7 +81,12 @@ void ClassifierROC()
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
         auto RATEvsCUTs = new TProfile2D("RATE","RATE vs Cuts (Eff > " + eff_ref +")",Bins,0,1,Bins,0,1,0,10000);
         TH1F *SUM = new TH1F("SUM", "SUM", 100, 0, 2);
-        
+        TH1F *CLASSONE = new TH1F("CLASSONE", "CLASSONE", 200, 0, 1);
+        TH1F *CLASSTWO = new TH1F("CLASSTWO", "CLASSTWO", 200, 0, 1);
+        TH1F *CUTA = new TH1F("CUTA", "CUTA", 200, 0, 1);
+        TH1F *CUTB = new TH1F("CUTB", "CUTB", 200, 0, 1);
+        TH1F *CHARGE = new TH1F("CHARGE", "CHARGE", 200, -100, 100);
+        TH1F *PT = new TH1F("PT", "PT", 1000, 0, 1000);
   
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -115,10 +120,14 @@ void ClassifierROC()
               
               myTree->GetEntry(iEntry);
                     
-                //@@@Debug if accesses classes right
-              if(W==1){
-                      SUM->Fill(BDTG_class1+BDTG_class2);
-              }
+              //@@@Debug if accesses classes right
+              SUM->Fill(BDTG_class1+BDTG_class2);
+              CLASSONE->Fill(BDTG_class1);
+              CLASSONE->Fill(BDTG_class2);
+              CUTA->Fill(a);
+              CUTB->Fill(b);
+              CHARGE->Fill(GEN_charge);
+              PT->Fill(GEN_pt);
                     
               //ZB events
               if(GEN_charge < -2){Z=Z+1;}
@@ -202,6 +211,12 @@ void ClassifierROC()
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
         SUM->Write();
+        CLASSONE->Write();
+        CLASSTWO->Write();
+        CUTA->Write();
+        CUTB->Write();
+        CHARGE->Write();
+        PT->Write();
         
         myPlot.Close();
           
