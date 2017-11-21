@@ -55,7 +55,7 @@ void ClassifierROC()
         Int_t Bins=2;//bins on class cut
         //===================================================
         
-        TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
+       /* TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
         TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
         TFile* myFile = new TFile(fileName);
         TTree* myTree = (TTree*) myFile->Get(directoryName);
@@ -66,15 +66,18 @@ void ClassifierROC()
         Float_t GEN_charge;
         Float_t BDTG_class1;
         Float_t BDTG_class2;
+        */
         double a=0.0;
         double b=1.0;//use b <= 1-a
         double BIT=0.00001;
       
+        /*
         myTree->SetBranchAddress("GEN_pt",&GEN_pt);
         myTree->SetBranchAddress("GEN_charge",&GEN_charge);
-        myTree->SetBranchAddress("BDTG",&BDTG_class1);//first is allocating class2 in the branch
-        myTree->SetBranchAddress("BDTG",&BDTG_class2);
+        //myTree->SetBranchAddress("BDTG",&BDTG_class1);//first is allocating class2 in the branch
+        //myTree->SetBranchAddress("BDTG",&BDTG_class2);
         cout<<"Accessing directory:"<<directoryName<<endl;
+        */
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
@@ -87,11 +90,6 @@ void ClassifierROC()
         TH1F *CUTB = new TH1F("CUTB", "CUTB", 200, 0, 1);
         TH1F *CHARGE = new TH1F("CHARGE", "CHARGE", 200, -100, 100);
         TH1F *PT = new TH1F("PT", "PT", 1000, 0, 1000);
-        
-  
-        Long64_t numEvents = myTree->GetEntries();
-        cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
-        cout<<numEvents<<" events to process..."<<endl;
       
         //loop over cut on class1
         for(int i = 1; i < Bins; i++){
@@ -101,6 +99,27 @@ void ClassifierROC()
                 
           //loop over cut on class2
           while(b > BIT){
+                  
+            TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
+            TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
+            TFile* myFile = new TFile(fileName);
+            TTree* myTree = (TTree*) myFile->Get(directoryName);
+        
+            cout<<"Accessing file:"<<fileName<<endl;
+        
+            Float_t GEN_pt;
+            Float_t GEN_charge; 
+            Float_t BDTG_class1;
+            Float_t BDTG_class2;
+                  
+            myTree->SetBranchAddress("GEN_pt",&GEN_pt);
+            myTree->SetBranchAddress("GEN_charge",&GEN_charge);
+            myTree->SetBranchAddress("BDTG",&BDTG_class2);//first is allocating class2 in the branch
+            myTree->SetBranchAddress("BDTG",&BDTG_class1);
+             
+            Long64_t numEvents = myTree->GetEntries();
+            cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
+            cout<<numEvents<<" events to process..."<<endl;
             
             Long64_t Z=0;
             Long64_t C1=0;
@@ -185,6 +204,27 @@ void ClassifierROC()
                   
             //keep note of the rate whenever efficiency is higher than EFF_REF
             if(TPR >= EFF_REF){
+              
+            TString fileName="/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_"+ pt_cut +".root";
+            TString directoryName="f_MODE_15_noWgt_bitCompr_RPC/TestTree";
+            TFile* myFile = new TFile(fileName);
+            TTree* myTree = (TTree*) myFile->Get(directoryName);
+        
+            cout<<"Accessing file:"<<fileName<<endl;
+        
+            Float_t GEN_pt;
+            Float_t GEN_charge; 
+            Float_t BDTG_class1;
+            Float_t BDTG_class2;
+                  
+            myTree->SetBranchAddress("GEN_pt",&GEN_pt);
+            myTree->SetBranchAddress("GEN_charge",&GEN_charge);
+            myTree->SetBranchAddress("BDTG",&BDTG_class2);//first is allocating class2 in the branch
+            myTree->SetBranchAddress("BDTG",&BDTG_class1);
+             
+            Long64_t numEvents = myTree->GetEntries();
+            cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
+            cout<<numEvents<<" events to process..."<<endl;
                     
               for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
