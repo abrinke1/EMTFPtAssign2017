@@ -301,7 +301,6 @@ void ClassifierROC()
         ROC->Write();
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
-        C1->Write();
         Topology->Write();
         /*
         SUM->Write();
