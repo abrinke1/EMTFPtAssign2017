@@ -65,6 +65,7 @@ void ClassifierROC()
         TBranch *GEN_pt_br = myTree->GetBranch("GEN_pt");
         TBranch *GEN_charge_br = myTree->GetBranch("GEN_charge");
         TBranch *BDTG_br = myTree->GetBranch("BDTG");
+        TBranch *TRK_mode_RPC_br = myTree->GetBranch("TRK_mode_RPC");
         
         double a=1.0;
         double b=0.0;//use b <= 1-a
@@ -79,6 +80,10 @@ void ClassifierROC()
         TString RATEvsCUTsTitle="";
         RATEvsCUTsTitle = RATEvsCUTsTitle + "RATE vs Cuts (Eff > "+Form("%0.2lf", EFF_REF) + ")";
         auto RATEvsCUTs = new TProfile2D("RATE", RATEvsCUTsTitle, Bins, 0, 1, Bins, 0, 1, 0, 10000);
+        TH1F *RegCSConlyMC = new TH1F("RegCSConlyMC", "RegCSConlyMC", 50, 0, 10);
+        TH1F *RegCSConlyMCCut = new TH1F("RegCSConlyMCCut", "RegCSConlyMCCut", 50, 0, 10);
+        TH1F *CSConlyMC = new TH1F("CSConlyMC", "CSConlyMC", 50, 0, 10);
+        TH1F *CSConlyMCCut = new TH1F("CSConlyMCCut", "CSConlyMCCut", 50, 0, 10);
         TH2F *Topology = new TH2F("Topology", "Class2 vs Class1", 100, 0, 1, 100, 0, 1);
         
         /* //debug plots
@@ -232,6 +237,59 @@ void ClassifierROC()
           
         }//end loop over cut on class1     
         
+        //==========================================
+        //compare eff b/t regression and classifier
+        //==========================================
+        //regression 
+        TString RegfileName = "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/Regression.root";
+        TString RegdirectoryName = "f_MODE_15_invPtTarg_invPtWgt_bitCompr_RPC/TestTree";
+        TFile* myRegFile = new TFile(RegfileName);
+        TTree* myRegTree = (TTree*) myRegFile->Get(RegdirectoryName);
+        
+        Long64_t RegnumEvents = myRegTree->GetEntries();
+        
+        TBranch *RegGEN_pt_br = myRegTree->GetBranch("GEN_pt");
+        TBranch *RegGEN_charge_br = myRegTree->GetBranch("GEN_charge");
+        TBranch *RegBDTG_br = myRegTree->GetBranch("BDTG_AWB_Sq");
+        TBranch *RegTRK_mode_RPC_br = myRegTree->GetBranch("TRK_mode_RPC");
+        
+        for(Long64_t iEntry = 0; iEntry <RegnumEvents; iEntry++){
+              
+                myRegTree->GetEntry(iEntry);
+                Float_t GEN_pt = (RegGEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
+                Float_t GEN_charge = (RegGEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
+                Float_t BDTG = (RegBDTG_br->GetLeaf("inv_GEN_pt_trg"))->GetValue();
+                Float_t TRK_mode_RPC = (RegTRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
+                  
+                //CSC-only GEN pT distributions
+                if(GEN_charge > -2 && TRK_mode_RPC == 0){
+                        RegCSConlyMC->Fill(TMath::Log2(GEN_pt));
+                        if(1./BDTG > 16){
+                                RegCSConlyMCCut->Fill(TMath::Log2(GEN_pt));
+                        }
+                }
+                
+        }//end loop over Regression events
+        
+        //classifier with OptA and OptB
+        for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
+              
+                myTree->GetEntry(iEntry);
+                Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
+                Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
+                Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
+                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();
+                Float_t TRK_mode_RPC = (TRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
+                  
+                //CSC-only GEN pT distributions
+                if(GEN_charge > -2 && TRK_mode_RPC == 0){
+                        CSConlyMC->Fill(TMath::Log2(GEN_pt));
+                        if(BDTG_class1 >= OptA && BDTG_class2 < OptB){
+                                CSConlyMCCut->Fill(TMath::Log2(GEN_pt));
+                        }
+                }
+        }//end loop over events for rate
+        
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
         cout<<"OptA:"<<OptA<<" OptB:"<<OptB<<" MinRATE:"<<MinRATE<<endl;
         
@@ -239,11 +297,12 @@ void ClassifierROC()
         TString outFile = "";
         outFile = outFile + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
         TFile myPlot(outFile,"RECREATE");
+        
         ROC->Write();
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
+        C1->Write();
         Topology->Write();
-        
         /*
         SUM->Write();
         CLASSONE->Write();
@@ -253,6 +312,46 @@ void ClassifierROC()
         CHARGE->Write();
         PT->Write();
         */
+        
+        TCanvas *C1=new TCanvas("C1","C1",700,500);
+        THStack *CSConlyEff = new THStack("CSConlyEff","CSC only Efficiency: Regression vs Classifier");
+        
+        C1->cd();
+        RegCSConlyMC->SetLineColor(1);//black
+        RegCSConlyMC->SetLineStyle(1);//solid
+        RegCSConlyMC->SetLineWidth(2);
+        gStyle->SetOptStat(0);
+        
+        RegCSConlyMCCut->SetLineColor(2);//red
+        RegCSConlyMCCut->SetLineStyle(2);//dash
+        RegCSConlyMCCut->SetLineWidth(2);
+        gStyle->SetOptStat(0);
+        
+        CSConlyMC->SetLineColor(1);//black
+        CSConlyMC->SetLineStyle(1);//solid
+        CSConlyMC->SetLineWidth(2);
+        gStyle->SetOptStat(0);
+        
+        CSConlyMCCut->SetLineColor(2);//red
+        CSConlyMCCut->SetLineStyle(2);//dash
+        CSConlyMCCut->SetLineWidth(2);
+        gStyle->SetOptStat(0);
+        
+        CSConlyEff->Add(RegCSConlyMC);
+        CSConlyEff->Add(RegCSConlyMCCut);
+        CSConlyEff->Add(CSConlyMC);
+        CSConlyEff->Add(CSConlyMCCut);
+        CSConlyEff->Draw("nostack");
+        CSConlyEff->GetXaxis()->SetTitle("log2(GEN pT)");
+        C1->Modified();
+        
+        TLegend* L1 = new TLegend(0.4,0.4,0.9,0.9);
+        L1->AddEntry(RegCSConlyMC, "Regression: CSC-only GEN pT");
+        L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only GEN pT(trigger pT > 16 GeV)");
+        L1->AddEntry(CSConlyMC, "Classifier: CSC-only GEN pT");
+        L1->AddEntry(CSConlyMCCut,"Classifier: CSC-only GEN pT(optimal cut)");
+        L1->Draw(); 
+        C1->Write();
         
         myPlot.Close();
           
