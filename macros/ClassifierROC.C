@@ -345,7 +345,7 @@ void ClassifierROC()
         CSConlyEff->GetXaxis()->SetTitle("log2(GEN pT)");
         C1->Modified();
         
-        TLegend* L1 = new TLegend(0.4,0.4,0.9,0.9);
+        TLegend* L1 = new TLegend(0.0,0.7,0.7,0.9);
         L1->AddEntry(RegCSConlyMC, "Regression: CSC-only GEN pT");
         L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only GEN pT(trigger pT > 16 GeV)");
         L1->AddEntry(CSConlyMC, "Classifier: CSC-only GEN pT");
