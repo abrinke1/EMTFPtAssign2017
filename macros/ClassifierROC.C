@@ -346,10 +346,12 @@ void ClassifierROC()
         C1->Modified();
         
         TLegend* L1 = new TLegend(0.0,0.7,0.7,0.9);
+        TString ClassifierCut="";
+        ClassifierCut = ClassifierCut + "Classifier: CSC-only GEN pT(class1 >= " + Form("%0.4lf", OptA)+ " && class2 < "+ Form("%0.4lf", OptB) + ")";
         L1->AddEntry(RegCSConlyMC, "Regression: CSC-only GEN pT");
         L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only GEN pT(trigger pT > 16 GeV)");
         L1->AddEntry(CSConlyMC, "Classifier: CSC-only GEN pT");
-        L1->AddEntry(CSConlyMCCut,"Classifier: CSC-only GEN pT(optimal cut)");
+        L1->AddEntry(CSConlyMCCut, ClassifierCut);
         L1->Draw(); 
         C1->Write();
         
