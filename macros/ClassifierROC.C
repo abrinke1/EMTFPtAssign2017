@@ -322,12 +322,12 @@ void ClassifierROC()
         gStyle->SetOptStat(0);
         
         RegCSConlyMCCut->SetLineColor(2);//red
-        RegCSConlyMCCut->SetLineStyle(2);//dash
+        RegCSConlyMCCut->SetLineStyle(1);
         RegCSConlyMCCut->SetLineWidth(2);
         gStyle->SetOptStat(0);
         
         CSConlyMC->SetLineColor(1);//black
-        CSConlyMC->SetLineStyle(1);//solid
+        CSConlyMC->SetLineStyle(2);//dash
         CSConlyMC->SetLineWidth(2);
         gStyle->SetOptStat(0);
         
@@ -344,13 +344,15 @@ void ClassifierROC()
         CSConlyEff->GetXaxis()->SetTitle("log2(GEN pT)");
         C1->Modified();
         
-        TLegend* L1 = new TLegend(0.0,0.7,0.7,0.9);
+        TLegend* L1 = new TLegend(0.2,0.7,0.7,0.9);
         TString ClassifierCut="";
         ClassifierCut = ClassifierCut + "Classifier: CSC-only GEN pT(class1 >= " + Form("%0.4lf", OptA)+ " && class2 < "+ Form("%0.4lf", OptB) + ")";
         L1->AddEntry(RegCSConlyMC, "Regression: CSC-only GEN pT");
         L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only GEN pT(trigger pT > 16 GeV)");
         L1->AddEntry(CSConlyMC, "Classifier: CSC-only GEN pT");
         L1->AddEntry(CSConlyMCCut, ClassifierCut);
+        L1->SetFillStyle(0);
+        L1->SetBorderSize(0);
         L1->Draw(); 
         C1->Write();
         
