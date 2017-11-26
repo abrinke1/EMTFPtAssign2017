@@ -478,7 +478,7 @@ void ClassifierROC()
         
         //calculate Reg eff under all Reg pT Cut for CRBin
         Delta=1;
-        for (Int_t i=0;i<50;i++){
+        for (Int_t i=0;i<49;i++){
                 if(fabs(CRRBinnu[i]*1.0/CRRBinGENde-0.9) <= Delta){
                         Delta = fabs(CRRBinnu[i]*1.0/CRRBinGENde-0.9);
                         CRRBin = i;//take note of bin number
