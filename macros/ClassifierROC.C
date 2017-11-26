@@ -274,7 +274,7 @@ void ClassifierROC()
                 //CSC-only GEN pT distributions
                 if(GEN_charge > -2 && TRK_mode_RPC == 0){
                         RegCSConlyMC->Fill(TMath::Log2(GEN_pt));
-                        if(1./BDTG > 16){
+                        if(1./BDTG >= 16){
                                 RegCSConlyMCCut->Fill(TMath::Log2(GEN_pt));
                         }
                 }
