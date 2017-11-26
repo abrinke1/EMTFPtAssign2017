@@ -368,8 +368,8 @@ void ClassifierROC()
         //divide histograms for eff
         TCanvas *C2=new TCanvas("C2","C2",700,500);
         THStack *CSConlyEff = new THStack("CSConlyEff","CSC only Efficiency: Regression vs Classifier");
-        RegCSConlyMCCut.Divide(RegCSConlyMC);
-        CSConlyMCCut.Divide(CSConlyMC);
+        RegCSConlyMCCut->Divide(RegCSConlyMC);
+        CSConlyMCCut->Divide(CSConlyMC);
         CSConlyEff->Add(RegCSConlyMCCut);
         CSConlyEff->Add(CSConlyMCCut);
         CSConlyEff->Draw("nostack");
