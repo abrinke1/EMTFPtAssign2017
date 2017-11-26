@@ -55,10 +55,17 @@ void ClassifierROC()
         Int_t PT_CUT = 32;//the classifier trained on this cut
         Float_t EFF_REF = 0.95;//the eff beyond which classifier cut stops
         Int_t Bins=100;//bins on class cut
+        Int_t lxplus=1;//machine: lxplus(1) or bonner(0)?
         //================================================================
         
-        TString fileName = "";
-        fileName = fileName + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_" + Form("%d", PT_CUT) + ".root";
+        if(lxplus==1){
+                TString Cluster = "/afs/cern.ch/work/w/wshi/public/TMVA_2017/TMVA/";
+        }
+        else{
+                TString Cluster = "/home/ws13/TMVA/TMVA/";//bonner
+        }
+       
+        TString fileName = Cluster + "EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_" + Form("%d", PT_CUT) + ".root";
         TString directoryName = "f_MODE_15_noWgt_bitCompr_RPC/TestTree";
         TFile* myFile = new TFile(fileName);
         TTree* myTree = (TTree*) myFile->Get(directoryName);
@@ -242,7 +249,7 @@ void ClassifierROC()
         //compare eff b/t regression and classifier
         //==========================================
         //regression 
-        TString RegfileName = "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/Regression.root";
+        TString RegfileName = Cluster + "EMTFPtAssign2017/Regression.root";
         TString RegdirectoryName = "f_MODE_15_invPtTarg_invPtWgt_bitCompr_RPC/TestTree";
         TFile* myRegFile = new TFile(RegfileName);
         TTree* myRegTree = (TTree*) myRegFile->Get(RegdirectoryName);
@@ -295,8 +302,7 @@ void ClassifierROC()
         cout<<"OptA:"<<OptA<<" (OptB:"<<OptB<<") MinRATE:"<<MinRATE<<endl;
         
         //write to output file
-        TString outFile = "";
-        outFile = outFile + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
+        TString outFile = Cluster + "EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
         TFile myPlot(outFile,"RECREATE");
         
         ROC->Write();
