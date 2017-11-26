@@ -373,6 +373,8 @@ void ClassifierROC()
         CSConlyEff->Add(RegCSConlyMCCut);
         CSConlyEff->Add(CSConlyMCCut);
         CSConlyEff->Draw("nostack");
+        CSConlyEff->GetXaxis()->SetTitle("log2(GEN pT)");
+        CSConlyEff->GetYaxis()->SetTitle("efficiency");
         C2->Modified();
         
         TLegend* L2 = new TLegend(0.1,0.7,0.7,0.9);
