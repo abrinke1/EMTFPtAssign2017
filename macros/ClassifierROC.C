@@ -22,39 +22,39 @@ using namespace std;
 #include "THStack.h"
 #include "TFitResultPtr.h"
 
-//=***************************************************************************************
-//=Study the pT classifier performance and compare with BDT regression normally used at P5
-//=including ROC cureve, signal-to-background ratio, etc
-//=
-//=Wei Shi @ Nov 11, 2017 CERN Geneva
-//=***************************************************************************************
-//=Reference Table
-//========================================================================================
-//=         Test MC Events   #                     |  GEN < PT_CUT    |    GEN >= PT_CUT
-//========================================================================================
-//=MC True: Signal (class1)                        |       NO         |         S
-//=---------------------------------------------------------------------------------------
-//=MC True: Background (class2)                    |       B          |         NO
-//========================================================================================
-//=Cut: class1 >= a (Signal)                       |       S1         |         S2
-//=---------------------------------------------------------------------------------------
-//=Cut: complementary cut to signal (Background)   |       B1         |         B2
-//========================================================================================
-//=In binary classifier, two classes cut "class1>=a && class2<=b" is redundant. Since it 
-//=only make sense to have b<=1-a, a>=1-b, this implies "a+b=1", ie, cut on one class is 
-//=sufficienct. As "a" decreases, efficiency increase as well as rate(monotonic increase)
-//=Use Eff_REF as the stop point for further decreasing "a";
-//=True Postive Rate: S2/(S2+B2), i.e. S2/S, signal efficiency/plateau trigger efficiency
-//=False Positive Rate: S1/(S1+B1)
-//S=S2+B2
-//B=S1+B1
+//****************************************************************************************
+//*Study the pT classifier performance and compare with BDT regression normally used at P5
+//*including ROC cureve, signal-to-background ratio, etc
+//*
+//*Wei Shi @ Nov 11, 2017 CERN Geneva
+//****************************************************************************************
+//*Reference Table
+//*=======================================================================================
+//*         Test MC Events   #                     |  GEN < PT_CUT    |    GEN >= PT_CUT
+//*======================================================================================
+//*MC True: Signal (class1)                        |       NO         |         S
+//*---------------------------------------------------------------------------------------
+//*MC True: Background (class2)                    |       B          |         NO
+//*=======================================================================================
+//*Cut: class1 >= a (Signal)                       |       S1         |         S2
+//*---------------------------------------------------------------------------------------
+//*Cut: class1 < a (Background)                    |       B1         |         B2
+//*=======================================================================================
+//*In binary classifier, two classes cut "class1>=a && class2<=b" is redundant. Since it 
+//*only make sense to have b<=1-a, a>=1-b, this implies "a+b=1", ie, cut on one class is 
+//*sufficienct. As "a" decreases, efficiency increase as well as rate(monotonic increase)
+//*Use Eff_REF as the stop point for further decreasing "a";
+//*True Postive Rate: S2/(S2+B2), i.e. S2/S, signal efficiency/plateau trigger efficiency
+//*False Positive Rate: S1/(S1+B1)
+//*S=S2+B2
+//*B=S1+B1
 void ClassifierROC()
 {
         //USER modify here ONLY//
         //================================================================
         Int_t PT_CUT = 32;//the classifier trained on this cut
         Float_t EFF_REF = 0.95;//the eff beyond which classifier cut stops
-        Int_t Bins=1000;//bins on class cut
+        Int_t Bins=100;//bins on class cut
         //================================================================
         
         TString fileName = "";
@@ -77,13 +77,13 @@ void ClassifierROC()
         Long64_t MinRATE=9999;
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
         double OptB=b;
-        Int_t fill=0;//only fill 2class topology one time
+        Int_t fill=0;//only fill 2 classes topology one time
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
-        auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,Bins,0,1,0,1);
+        auto EFFvsCUTs = new TProfile("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,0,1);
         TString RATEvsCUTsTitle="";
         RATEvsCUTsTitle = RATEvsCUTsTitle + "RATE vs Cuts (Eff > "+Form("%0.2lf", EFF_REF) + ")";
-        auto RATEvsCUTs = new TProfile2D("RATE", RATEvsCUTsTitle, Bins, 0, 1, Bins, 0, 1, 0, 10000);
+        auto RATEvsCUTs = new TProfile("RATE", RATEvsCUTsTitle, Bins, 0, 1, 0, 10000);
         TH1F *RegCSConlyMC = new TH1F("RegCSConlyMC", "RegCSConlyMC", 50, 0, 10);
         TH1F *RegCSConlyMCCut = new TH1F("RegCSConlyMCCut", "RegCSConlyMCCut", 50, 0, 10);
         TH1F *CSConlyMC = new TH1F("CSConlyMC", "CSConlyMC", 50, 0, 10);
@@ -108,28 +108,27 @@ void ClassifierROC()
         for(int i = 1; i < Bins; i++){
           
           a = (Bins-i)*1.0/Bins;//update cut on class1
-          b = 1.0 - a;//update cut on class2
+          b = 1.0 - a;//store b, b is not used in cut
+          
+          /*
+          Long64_t Z=0;
+          Long64_t C1=0;
+          Long64_t C2=0;
+          Long64_t C3=0;
+          Long64_t C4=0;
+          Long64_t S=0;
+          Long64_t B=0;
+          */
                 
-          //loop over cut on class2
-          while(b > BIT){
-            /*
-            Long64_t Z=0;
-            Long64_t C1=0;
-            Long64_t C2=0;
-            Long64_t C3=0;
-            Long64_t C4=0;
-            Long64_t S=0;
-            Long64_t B=0;
-            */
-            Long64_t S1=0;
-            Long64_t S2=0;
-            Long64_t B1=0;
-            Long64_t B2=0;
-            double TPR=-1.0;
-            double FPR=-1.0;
-            Long64_t RATE=0;
-            
-            for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
+          Long64_t S1=0;
+          Long64_t S2=0;
+          Long64_t B1=0;
+          Long64_t B2=0;
+          double TPR=-1.0;
+          double FPR=-1.0;
+          Long64_t RATE=0;
+          
+          for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
               myTree->GetEntry(iEntry);
                     
@@ -137,12 +136,14 @@ void ClassifierROC()
               Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
               Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
               Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-              Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();
+              Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();//not used in the cut
                 
               if(fill==0){
-                Topology->Fill(BDTG_class1,BDTG_class2);   
+                Topology->Fill(BDTG_class1,BDTG_class2);//sanity check off diagnoal: class2=1-class1;
               }
-              /* //@@@Debug if accesses classes right
+                  
+              /* 
+              //@@@Debug if accesses classes right
               SUM->Fill(BDTG_class1+BDTG_class2);
               CLASSONE->Fill(BDTG_class1);
               CLASSTWO->Fill(BDTG_class2);
@@ -150,8 +151,7 @@ void ClassifierROC()
               CUTB->Fill(b);
               CHARGE->Fill(GEN_charge);
               PT->Fill(GEN_pt);
-              
-                    
+                   
               //ZB events
               if(GEN_charge < -2){Z=Z+1;}
                     
@@ -164,10 +164,10 @@ void ClassifierROC()
               if(GEN_charge > -2 && (BDTG_class1 < a || BDTG_class2 >= b)){C4=C4+1;}
               */
                     
-              if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S2=S2+1;}
-              if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class2 < b){S1=S1+1;}
-              if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B2=B2+1;}
-              if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 < a || BDTG_class2 >= b)){B1=B1+1;}
+              if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a){S2=S2+1;}
+              if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a){S1=S1+1;}
+              if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 < a){B2=B2+1;}
+              if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 < a){B1=B1+1;}
             
             }//end loop over events
             
@@ -178,7 +178,7 @@ void ClassifierROC()
             ROC->Fill(FPR,TPR);
                   
             //Fill Signal efficiency vs cut
-            EFFvsCUTs->Fill(a,b,TPR);
+            EFFvsCUTs->Fill(a,TPR);
                   
             /*
             //@@@debug 
@@ -206,38 +206,35 @@ void ClassifierROC()
             //end debug
             */
                   
-            //keep note of the rate whenever efficiency is higher than EFF_REF
+            //stop the loop once signal eff higher than EFF_REF
             if(TPR >= EFF_REF){
                     
               for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
                 myTree->GetEntry(iEntry);
-                Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
+                Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();//not used in rate counts
                 Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
                 Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();
+                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();//not used in cuts
                   
                 //ZB events
-                if(GEN_charge < -2 && BDTG_class1 >= a && BDTG_class2 < b){RATE=RATE+1;}//after cut
+                if(GEN_charge < -2 && BDTG_class1 >= a){RATE=RATE+1;}//after cut
               
               }//end loop over events for rate
               
-              //keep note of low rate and cuts, prefer larger OptA, so "<" is used,
+              //keep note of rate 
               if(RATE < MinRATE){
                 MinRATE=RATE;
                 OptA=a;
-                OptB=b;
+                OptB=1-OptA;
               }
                     
             }//end if TPR higher than reference
              
-            cout<<"a:"<<a<<" b:"<<b<<" TPR:"<<TPR<<" FPR:"<<FPR<<" RATE:"<<RATE<<" S1:"<<S1<<" S2:"<<S2<<" B1:"<<B1<<" B2:"<<B2<<endl;
+            cout<<"a:"<<a<<" (b:"<<b<<") TPR:"<<TPR<<" FPR:"<<FPR<<" RATE:"<<RATE<<" S1:"<<S1<<" S2:"<<S2<<" B1:"<<B1<<" B2:"<<B2<<endl;
                   
-            //fill rate vs cuts
-            RATEvsCUTs->Fill(a,b,RATE);
-            b = b - 1.0/Bins;//update b, b is decreasing
-                  
-          }//end while for class 2 cut
+            //fill rate vs cuts only for eff > ref_eff
+            RATEvsCUTs->Fill(a,RATE);
           
         }//end loop over cut on class1     
         
@@ -282,20 +279,20 @@ void ClassifierROC()
                 Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
                 Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
                 Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();
+                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();//not used here
                 Float_t TRK_mode_RPC = (TRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
                   
                 //CSC-only GEN pT distributions
                 if(GEN_charge > -2 && TRK_mode_RPC == 0){
                         CSConlyMC->Fill(TMath::Log2(GEN_pt));
-                        if(BDTG_class1 >= OptA && BDTG_class2 < OptB){
+                        if(BDTG_class1 >= OptA){
                                 CSConlyMCCut->Fill(TMath::Log2(GEN_pt));
                         }
                 }
         }//end loop over events for rate
         
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
-        cout<<"OptA:"<<OptA<<" OptB:"<<OptB<<" MinRATE:"<<MinRATE<<endl;
+        cout<<"OptA:"<<OptA<<" (OptB:"<<OptB<<") MinRATE:"<<MinRATE<<endl;
         
         //write to output file
         TString outFile = "";
@@ -306,6 +303,7 @@ void ClassifierROC()
         EFFvsCUTs->Write();
         RATEvsCUTs->Write();
         Topology->Write();
+        
         /*
         SUM->Write();
         CLASSONE->Write();
@@ -350,7 +348,7 @@ void ClassifierROC()
         
         TLegend* L1 = new TLegend(0.2,0.7,0.7,0.9);
         TString ClassifierCut="";
-        ClassifierCut = ClassifierCut + "Classifier: CSC-only GEN pT(class1 >= " + Form("%0.4lf", OptA)+ " && class2 < "+ Form("%0.4lf", OptB) + ")";
+        ClassifierCut = ClassifierCut + "Classifier: CSC-only GEN pT(class1 >= " + Form("%0.4lf", OptA) + ")";
         L1->AddEntry(RegCSConlyMC, "Regression: CSC-only GEN pT");
         L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only GEN pT(trigger pT > 16 GeV)");
         L1->AddEntry(CSConlyMC, "Classifier: CSC-only GEN pT");
