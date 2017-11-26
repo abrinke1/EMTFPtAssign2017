@@ -507,8 +507,8 @@ void ClassifierROC()
         //----------------------------------------------------------
         //find classifier cut which gives 90% at same GEN pT as reg
         //----------------------------------------------------------
-        Double_t RegBins[50]={0};//50 bins under Log2
-        for (Int_t i=0;i<RegCSConlyMCCut.GetNbinsX();i++) RegBins[i] = RegCSConlyMCCut.GetBinContent(i);
+        //Double_t RegBins[50]={0};//50 bins under Log2
+        //for (Int_t i=0;i<RegCSConlyMCCut.GetNbinsX();i++) RegBins[i] = RegCSConlyMCCut.GetBinContent(i);
         
         myPlot.Close();
           
