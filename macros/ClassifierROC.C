@@ -378,11 +378,11 @@ void ClassifierROC()
         TLegend* L2 = new TLegend(0.1,0.7,0.7,0.9);
         TString ClassifierL2="";
         ClassifierL2 = ClassifierL2 + "Classifier: CSC-only(class1 >= " + Form("%0.4lf", OptA) + ")";
-        L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only(trigger pT > 16 GeV)");
-        L1->AddEntry(CSConlyMCCut, ClassifierL2);
-        L1->SetFillStyle(0);
-        L1->SetBorderSize(0);
-        L1->Draw(); 
+        L2->AddEntry(RegCSConlyMCCut,"Regression: CSC-only(trigger pT > 16 GeV)");
+        L2->AddEntry(CSConlyMCCut, ClassifierL2);
+        L2->SetFillStyle(0);
+        L2->SetBorderSize(0);
+        L2->Draw(); 
         C2->Write();
         
         myPlot.Close();
