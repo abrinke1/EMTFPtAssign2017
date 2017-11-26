@@ -391,9 +391,9 @@ void ClassifierROC()
         
         TLegend* L2 = new TLegend(0.1,0.7,0.7,0.9);
         TString RegL2="";
-        RegL2=RegL2 + "Regression:trigger pT>16GeV" + " Rate:"+ Form("%d", RATE16);
+        RegL2=RegL2 + "Regression:trigger pT>16GeV" + " Rate:"+ Form("%lld", RATE16);
         TString ClassifierL2="";
-        ClassifierL2 = ClassifierL2 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%d", MinRATE);
+        ClassifierL2 = ClassifierL2 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%lld", MinRATE);
         L2->AddEntry(RegCSConlyMCCut,RegL2);
         L2->AddEntry(CSConlyMCCut, ClassifierL2);
         L2->SetFillStyle(0);
@@ -413,16 +413,16 @@ void ClassifierROC()
         //----------------------------------------------------------
         //find reg cut which gives 90% at same GEN pT as classifier 
         //----------------------------------------------------------
-        Double_t Bins[50]={0};//50 bins under Log2
-        for (Int_t i=0;i<CSConlyMCCut.GetNbinsX();i++) {
-                Bins[i] = CSConlyMCCut.GetBinContent(i);
-                if(fabs(Bins[i]-0.9) <= Delta){
-                        Delta = fabs(Bins[i] - 0.9);
+        Double_t CBins[50]={0};//50 bins under Log2
+        for (Int_t i=0;i<CSConlyMCCut->GetNbinsX();i++) {
+                CBins[i] = CSConlyMCCut->GetBinContent(i);
+                if(fabs(CBins[i]-0.9) <= Delta){
+                        Delta = fabs(CBins[i] - 0.9);
                         CRBin = i;//take note of bin number
                 }
         }//loop over classifier bins
         
-        cout<<"CR Bin#:"<<CRBin<<" CR GEN pT:"<<pow(2,CRBin*0.2)<<" log2(CR GEN pT):"<<CRBin*0.2<<" Eff:"<<Bins[CRBin]<<endl;
+        cout<<"CR Bin#:"<<CRBin<<" CR GEN pT:"<<pow(2,CRBin*0.2)<<" log2(CR GEN pT):"<<CRBin*0.2<<" Eff:"<<CBins[CRBin]<<endl;
         
         //loop over Regression events to find 90% at CRBin
         for(Long64_t iEntry = 0; iEntry <RegnumEvents; iEntry++){
@@ -494,9 +494,9 @@ void ClassifierROC()
         
         TLegend* L3 = new TLegend(0.1,0.7,0.7,0.9);
         TString RegL3="";
-        RegL3 = RegL3 + "Regression:trigger pT>" + Form("%0.4lf", pow(2,RBin*0.2)) + "GeV Rate:"+ Form("%d", RRATE);
+        RegL3 = RegL3 + "Regression:trigger pT>" + Form("%0.4lf", pow(2,RBin*0.2)) + "GeV Rate:"+ Form("%lld", RRATE);
         TString ClassifierL3="";
-        ClassifierL3 = ClassifierL3 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%d", MinRATE);
+        ClassifierL3 = ClassifierL3 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%lld", MinRATE);
         L3->AddEntry(CRRegCSConlyMCCut,RegL3);
         L3->AddEntry(CSConlyMCCut, ClassifierL3);
         L3->SetFillStyle(0);
