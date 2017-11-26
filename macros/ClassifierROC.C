@@ -306,9 +306,17 @@ void ClassifierROC()
         TString outFile = Cluster + "EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
         TFile myPlot(outFile,"RECREATE");
         
+        ROC->GetXaxis()->SetTitle("FPR");
+        ROC->GetYaxis()->SetTitle("TPR");
         ROC->Write();
+        EFFvsCUTs->GetXaxis()->SetTitle("class1 cut");
+        EFFvsCUTs->GetYaxis()->SetTitle("efficiency");
         EFFvsCUTs->Write();
+        RATEvsCUTs->GetXaxis()->SetTitle("class1 cut");
+        RATEvsCUTs->GetYaxis()->SetTitle("ZeroBias rate");
         RATEvsCUTs->Write();
+        Topology->GetXaxis()->SetTitle("class1");
+        Topology->GetYaxis()->SetTitle("class2");
         Topology->Write();
         
         /*
