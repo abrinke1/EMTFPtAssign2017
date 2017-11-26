@@ -369,7 +369,7 @@ void ClassifierROC()
         TString ClassifierL1="";
         ClassifierL1 = ClassifierL1 + "Classifier:GEN pT(class1>=" + Form("%0.4lf", OptA) + ")";
         L1->AddEntry(RegCSConlyMC, "Regression:GEN pT");
-        L1->AddEntry(RegCSConlyMCCut,"Regression:GEN pT(trigger pT>16 GeV)");
+        L1->AddEntry(RegCSConlyMCCut,"Regression:GEN pT(trigger pT>=16 GeV)");
         L1->AddEntry(CSConlyMC, "Classifier:GEN pT");
         L1->AddEntry(CSConlyMCCut, ClassifierL1);
         L1->SetFillStyle(0);
@@ -391,7 +391,7 @@ void ClassifierROC()
         
         TLegend* L2 = new TLegend(0.1,0.7,0.7,0.9);
         TString RegL2="";
-        RegL2=RegL2 + "Regression:trigger pT>16GeV" + " Rate:"+ Form("%lld", RATE16);
+        RegL2=RegL2 + "Regression:trigger pT>=16GeV" + " Rate:"+ Form("%lld", RATE16);
         TString ClassifierL2="";
         ClassifierL2 = ClassifierL2 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%lld", MinRATE);
         L2->AddEntry(RegCSConlyMCCut,RegL2);
