@@ -36,10 +36,14 @@ using namespace std;
 //=---------------------------------------------------------------------------------------
 //=MC True: Background (class2)                    |       B          |         NO
 //========================================================================================
-//=Cut: class1 >= a && class2 < b (Signal)         |       S1         |         S2
+//=Cut: class1 >= a (Signal)                       |       S1         |         S2
 //=---------------------------------------------------------------------------------------
 //=Cut: complementary cut to signal (Background)   |       B1         |         B2
 //========================================================================================
+//=In binary classifier, two classes cut "class1>=a && class2<=b" is redundant. Since it 
+//=only make sense to have b<=1-a, a>=1-b, this implies "a+b=1", ie, cut on one class is 
+//=sufficienct. As "a" decreases, efficiency increase as well as rate(monotonic increase)
+//=Use Eff_REF as the stop point for further decreasing "a";
 //=True Postive Rate: S2/(S2+B2), i.e. S2/S, signal efficiency/plateau trigger efficiency
 //=False Positive Rate: S1/(S1+B1)
 //S=S2+B2
@@ -47,11 +51,11 @@ using namespace std;
 void ClassifierROC()
 {
         //USER modify here ONLY//
-        //====================================================
+        //================================================================
         Int_t PT_CUT = 32;//the classifier trained on this cut
-        Float_t EFF_REF = 0.95;//compare rate with BDT Regression
-        Int_t Bins=100;//bins on class cut
-        //===================================================
+        Float_t EFF_REF = 0.95;//the eff beyond which classifier cut stops
+        Int_t Bins=1000;//bins on class cut
+        //================================================================
         
         TString fileName = "";
         fileName = fileName + "/home/ws13/TMVA/TMVA/EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_" + Form("%d", PT_CUT) + ".root";
@@ -68,7 +72,7 @@ void ClassifierROC()
         TBranch *TRK_mode_RPC_br = myTree->GetBranch("TRK_mode_RPC");
         
         double a=1.0;
-        double b=0.0;//use b <= 1-a
+        double b=0.0;//b is defined but not used in the cut, b==1-a;
         double BIT=0.000001;
         Long64_t MinRATE=9999;
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
