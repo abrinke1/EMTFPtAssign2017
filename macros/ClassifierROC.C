@@ -90,10 +90,6 @@ void ClassifierROC()
         TString RATEvsCUTsTitle="";
         RATEvsCUTsTitle = RATEvsCUTsTitle + "RATE vs Cuts (Eff > "+Form("%0.2lf", EFF_REF) + ")";
         auto RATEvsCUTs = new TProfile("RATE", RATEvsCUTsTitle, Bins, 0, 1, 0, 10000);
-        TH1F *RegCSConlyMC = new TH1F("RegCSConlyMC", "RegCSConlyMC", 50, 0, 10);
-        TH1F *RegCSConlyMCCut = new TH1F("RegCSConlyMCCut", "RegCSConlyMCCut", 50, 0, 10);
-        TH1F *CSConlyMC = new TH1F("CSConlyMC", "CSConlyMC", 50, 0, 10);
-        TH1F *CSConlyMCCut = new TH1F("CSConlyMCCut", "CSConlyMCCut", 50, 0, 10);
         TH2F *Topology = new TH2F("Topology", "Class2 vs Class1", 100, 0, 1, 100, 0, 1);
         
         /* //debug plots
@@ -259,6 +255,14 @@ void ClassifierROC()
         TBranch *RegGEN_charge_br = myRegTree->GetBranch("GEN_charge");
         TBranch *RegBDTG_br = myRegTree->GetBranch("BDTG_AWB_Sq");
         TBranch *RegTRK_mode_RPC_br = myRegTree->GetBranch("TRK_mode_RPC");
+
+        //GEN pt distribution
+        TH1F *RegCSConlyMC = new TH1F("RegCSConlyMC", "RegCSConlyMC", 50, 0, 10);
+        TH1F *RegCSConlyMCCut = new TH1F("RegCSConlyMCCut", "RegCSConlyMCCut", 50, 0, 10);
+        TH1F *CSConlyMC = new TH1F("CSConlyMC", "CSConlyMC", 50, 0, 10);
+        TH1F *CSConlyMCCut = new TH1F("CSConlyMCCut", "CSConlyMCCut", 50, 0, 10);
+        
+        //eff curve
         
         for(Long64_t iEntry = 0; iEntry <RegnumEvents; iEntry++){
               
