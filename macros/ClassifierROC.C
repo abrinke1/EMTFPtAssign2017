@@ -81,6 +81,7 @@ void ClassifierROC()
         double b=0.0;//b is defined but not used in the cut, b==1-a;
         double BIT=0.000001;
         Long64_t MinRATE=9999;
+        Long64_t RATE16=0;//reg pT cut 16 GeV rate
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
         double OptB=b;
         Int_t fill=0;//only fill 2 classes topology one time
@@ -129,7 +130,6 @@ void ClassifierROC()
           double TPR=-1.0;
           double FPR=-1.0;
           Long64_t RATE=0;
-          Long64_t RATE16=0;//reg pT cut 16 GeV rate
           
           for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
               
