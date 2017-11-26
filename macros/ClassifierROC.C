@@ -206,7 +206,7 @@ void ClassifierROC()
             //end debug
             */
                   
-            //stop the loop once signal eff higher than EFF_REF
+            //calculate ratr once signal eff higher than EFF_REF
             if(TPR >= EFF_REF){
                     
               for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
