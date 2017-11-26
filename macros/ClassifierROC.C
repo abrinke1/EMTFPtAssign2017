@@ -278,7 +278,7 @@ void ClassifierROC()
                                 RegCSConlyMCCut->Fill(TMath::Log2(GEN_pt));
                         }
                 }
-                if(GEN_charge < -2 && 1./BDTG > 16){
+                if(GEN_charge < -2 && 1./BDTG >= 16){
                         RATE16 = RATE16 + 1;
                 }
                 
@@ -465,7 +465,7 @@ void ClassifierROC()
                         if( GEN_pt >= CRCBin+1 && GEN_pt < CRCBin+2 ){//90% eff at same place as Classifier
                                 CRRBinGENde = CRRBinGENde +1;
                                 for (Int_t i=0;i<49;i++){
-                                        if(1./BDTG > (i+1) ){
+                                        if(1./BDTG >= (i+1) ){
                                                 CRRBinnu[i] = CRRBinnu[i] +1;
                                         }
                                 }//end for loop over pT cut
@@ -500,10 +500,10 @@ void ClassifierROC()
                 Float_t TRK_mode_RPC = (RegTRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
                   
                 //CSC-only GEN pT distributions
-                if(GEN_charge > -2 && TRK_mode_RPC == 0 && 1./BDTG > (CRRBin+1) ){
+                if(GEN_charge > -2 && TRK_mode_RPC == 0 && 1./BDTG >= (CRRBin+1) ){
                                 CRRegCSConlyMCCut->Fill(TMath::Log2(GEN_pt));
                 }
-                if(GEN_charge < -2 && 1./BDTG > (CRRBin+1) ){
+                if(GEN_charge < -2 && 1./BDTG >= (CRRBin+1) ){
                         CRRATE = CRRATE + 1;
                 }
                 
@@ -522,7 +522,7 @@ void ClassifierROC()
         
         TLegend* L3 = new TLegend(0.1,0.7,0.7,0.9);
         TString RegL3="";
-        RegL3 = RegL3 + "Regression:trigger pT>" + Form("%0.4lf", RBin+1) + "GeV Rate:"+ Form("%lld", CRRATE);
+        RegL3 = RegL3 + "Regression:trigger pT>=" + Form("%0.4lf", CRRBin+1) + "GeV Rate:"+ Form("%lld", CRRATE);
         TString ClassifierL3="";
         ClassifierL3 = ClassifierL3 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%lld", MinRATE);
         L3->AddEntry(CRRegCSConlyMCCut,RegL3);
