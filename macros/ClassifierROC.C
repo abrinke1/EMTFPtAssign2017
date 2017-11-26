@@ -262,9 +262,6 @@ void ClassifierROC()
         TH1F *CSConlyMC = new TH1F("CSConlyMC", "CSConlyMC", 50, 0, 10);
         TH1F *CSConlyMCCut = new TH1F("CSConlyMCCut", "CSConlyMCCut", 50, 0, 10);
         
-        //eff curve
-        double GEN_pT[60]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,55,60,65,70,75,80,85,90,95,100};
-        
         for(Long64_t iEntry = 0; iEntry <RegnumEvents; iEntry++){
               
                 myRegTree->GetEntry(iEntry);
@@ -325,7 +322,7 @@ void ClassifierROC()
         */
         
         TCanvas *C1=new TCanvas("C1","C1",700,500);
-        THStack *CSConlyEff = new THStack("CSConlyEff","CSC only Efficiency: Regression vs Classifier");
+        THStack *CSConlyGENpt = new THStack("CSConlyGENpt","CSC only GEN pt: Regression vs Classifier");
         
         C1->cd();
         RegCSConlyMC->SetLineColor(1);//black
@@ -348,12 +345,12 @@ void ClassifierROC()
         CSConlyMCCut->SetLineWidth(2);
         gStyle->SetOptStat(0);
         
-        CSConlyEff->Add(RegCSConlyMC);
-        CSConlyEff->Add(RegCSConlyMCCut);
-        CSConlyEff->Add(CSConlyMC);
-        CSConlyEff->Add(CSConlyMCCut);
-        CSConlyEff->Draw("nostack");
-        CSConlyEff->GetXaxis()->SetTitle("log2(GEN pT)");
+        CSConlyGENpt->Add(RegCSConlyMC);
+        CSConlyGENpt->Add(RegCSConlyMCCut);
+        CSConlyGENpt->Add(CSConlyMC);
+        CSConlyGENpt->Add(CSConlyMCCut);
+        CSConlyGENpt->Draw("nostack");
+        CSConlyGENpt->GetXaxis()->SetTitle("log2(GEN pT)");
         C1->Modified();
         
         TLegend* L1 = new TLegend(0.2,0.7,0.7,0.9);
@@ -367,6 +364,16 @@ void ClassifierROC()
         L1->SetBorderSize(0);
         L1->Draw(); 
         C1->Write();
+        
+        //divide histograms for eff
+        TCanvas *C2=new TCanvas("C2","C2",700,500);
+        THStack *CSConlyEff = new THStack("CSConlyEff","CSC only Efficiency: Regression vs Classifier");
+        RegCSConlyMCCut.Divide(RegCSConlyMC);
+        CSConlyMCCut.Divide(CSConlyMC);
+        CSConlyEff->Add(RegCSConlyMCCut);
+        CSConlyEff->Add(CSConlyMCCut);
+        CSConlyEff->Draw("nostack");
+        C2->Modified();
         
         myPlot.Close();
           
