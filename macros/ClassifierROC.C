@@ -353,13 +353,13 @@ void ClassifierROC()
         CSConlyGENpt->GetXaxis()->SetTitle("log2(GEN pT)");
         C1->Modified();
         
-        TLegend* L1 = new TLegend(0.2,0.7,0.7,0.9);
-        TString ClassifierCut="";
-        ClassifierCut = ClassifierCut + "Classifier: CSC-only GEN pT(class1 >= " + Form("%0.4lf", OptA) + ")";
+        TLegend* L1 = new TLegend(0.1,0.7,0.7,0.9);
+        TString ClassifierL1="";
+        ClassifierL1 = ClassifierL1 + "Classifier: CSC-only GEN pT(class1 >= " + Form("%0.4lf", OptA) + ")";
         L1->AddEntry(RegCSConlyMC, "Regression: CSC-only GEN pT");
         L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only GEN pT(trigger pT > 16 GeV)");
         L1->AddEntry(CSConlyMC, "Classifier: CSC-only GEN pT");
-        L1->AddEntry(CSConlyMCCut, ClassifierCut);
+        L1->AddEntry(CSConlyMCCut, ClassifierL1);
         L1->SetFillStyle(0);
         L1->SetBorderSize(0);
         L1->Draw(); 
@@ -374,6 +374,16 @@ void ClassifierROC()
         CSConlyEff->Add(CSConlyMCCut);
         CSConlyEff->Draw("nostack");
         C2->Modified();
+        
+        TLegend* L2 = new TLegend(0.1,0.7,0.7,0.9);
+        TString ClassifierL2="";
+        ClassifierL2 = ClassifierL2 + "Classifier: CSC-only(class1 >= " + Form("%0.4lf", OptA) + ")";
+        L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only(trigger pT > 16 GeV)");
+        L1->AddEntry(CSConlyMCCut, ClassifierL2);
+        L1->SetFillStyle(0);
+        L1->SetBorderSize(0);
+        L1->Draw(); 
+        C2->Write();
         
         myPlot.Close();
           
