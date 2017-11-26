@@ -355,10 +355,10 @@ void ClassifierROC()
         
         TLegend* L1 = new TLegend(0.1,0.7,0.7,0.9);
         TString ClassifierL1="";
-        ClassifierL1 = ClassifierL1 + "Classifier: CSC-only GEN pT(class1 >= " + Form("%0.4lf", OptA) + ")";
-        L1->AddEntry(RegCSConlyMC, "Regression: CSC-only GEN pT");
-        L1->AddEntry(RegCSConlyMCCut,"Regression: CSC-only GEN pT(trigger pT > 16 GeV)");
-        L1->AddEntry(CSConlyMC, "Classifier: CSC-only GEN pT");
+        ClassifierL1 = ClassifierL1 + "Classifier: GEN pT(class1 >= " + Form("%0.4lf", OptA) + ")";
+        L1->AddEntry(RegCSConlyMC, "Regression: GEN pT");
+        L1->AddEntry(RegCSConlyMCCut,"Regression: GEN pT(trigger pT > 16 GeV)");
+        L1->AddEntry(CSConlyMC, "Classifier: GEN pT");
         L1->AddEntry(CSConlyMCCut, ClassifierL1);
         L1->SetFillStyle(0);
         L1->SetBorderSize(0);
@@ -379,8 +379,8 @@ void ClassifierROC()
         
         TLegend* L2 = new TLegend(0.1,0.7,0.7,0.9);
         TString ClassifierL2="";
-        ClassifierL2 = ClassifierL2 + "Classifier: CSC-only(class1 >= " + Form("%0.4lf", OptA) + ")";
-        L2->AddEntry(RegCSConlyMCCut,"Regression: CSC-only(trigger pT > 16 GeV)");
+        ClassifierL2 = ClassifierL2 + "Classifier: class1 >= " + Form("%0.4lf", OptA);
+        L2->AddEntry(RegCSConlyMCCut,"Regression: trigger pT > 16 GeV");
         L2->AddEntry(CSConlyMCCut, ClassifierL2);
         L2->SetFillStyle(0);
         L2->SetBorderSize(0);
