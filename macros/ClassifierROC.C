@@ -54,7 +54,7 @@ void ClassifierROC()
         //================================================================
         Int_t PT_CUT = 32;//the classifier trained on this cut
         Float_t EFF_REF = 0.95;//the eff beyond which classifier cut stops
-        Int_t Bins=100;//bins on class cut
+        Int_t Bins=10;//bins on class cut
         Int_t lxplus=1;//machine: lxplus(1) or bonner(0)?
         //================================================================
         TString Cluster="";
