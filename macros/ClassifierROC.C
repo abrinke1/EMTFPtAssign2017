@@ -522,7 +522,7 @@ void ClassifierROC()
         
         TLegend* L3 = new TLegend(0.1,0.7,0.7,0.9);
         TString RegL3="";
-        RegL3 = RegL3 + "Regression:trigger pT>=" + Form("%0.4d", CRRBin+1) + "GeV Rate:"+ Form("%lld", CRRATE);
+        RegL3 = RegL3 + "Regression:trigger pT>=" + Form("%d", CRRBin+1) + "GeV Rate:"+ Form("%lld", CRRATE);
         TString ClassifierL3="";
         ClassifierL3 = ClassifierL3 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%lld", MinRATE);
         L3->AddEntry(CRRegCSConlyMCCut,RegL3);
