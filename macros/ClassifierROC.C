@@ -57,14 +57,13 @@ void ClassifierROC()
         Int_t Bins=100;//bins on class cut
         Int_t lxplus=1;//machine: lxplus(1) or bonner(0)?
         //================================================================
-        
+        TString Cluster="";
         if(lxplus==1){
-                TString Cluster = "/afs/cern.ch/work/w/wshi/public/TMVA_2017/TMVA/";
+                Cluster = "/afs/cern.ch/work/w/wshi/public/TMVA_2017/TMVA/";
         }
         else{
-                TString Cluster = "/home/ws13/TMVA/TMVA/";//bonner
+                Cluster = "/home/ws13/TMVA/TMVA/";//bonner
         }
-       
         TString fileName = Cluster + "EMTFPtAssign2017/pTMulticlass_MODE_15_bitCompr_RPC_" + Form("%d", PT_CUT) + ".root";
         TString directoryName = "f_MODE_15_noWgt_bitCompr_RPC/TestTree";
         TFile* myFile = new TFile(fileName);
