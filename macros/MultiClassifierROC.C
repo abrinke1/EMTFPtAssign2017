@@ -573,7 +573,7 @@ void MultiClassifierROC()
                 
         }//end loop over classifier events
         
-        cout<<"RCC BinA#:"<<RCCBinA<<"RCC BinB#:"<<RCCBinB<<" RCC class1 cut:"<<(RCCBinA+1)*0.01<<" RCC class5 cut:"<<(RCCBinB+1)*0.01<<" Eff:"<<RCCBinnu[RCCBinA][RCCBinB]*1.0/RCCBinGENde<<" RC Rate:"<<RCRATE<<endl;
+        cout<<"RCC BinA#:"<<RCCBinA<<" RCC BinB#:"<<RCCBinB<<" RCC class1 cut:"<<(RCCBinA+1)*0.01<<" RCC class5 cut:"<<(RCCBinB+1)*0.01<<" Eff:"<<RCCBinnu[RCCBinA][RCCBinB]*1.0/RCCBinGENde<<" RC Rate:"<<RCRATE<<endl;
         
         //divide histograms for eff
         TCanvas *C4=new TCanvas("C4","RC",700,500);
