@@ -92,16 +92,6 @@ void ClassifierROC()
         auto RATEvsCUTs = new TProfile("RATE", RATEvsCUTsTitle, Bins, 0, 1, 0, 10000);
         TH2F *Topology = new TH2F("Topology", "Class2 vs Class1", 100, 0, 1, 100, 0, 1);
         
-        /* //debug plots
-        TH1F *SUM = new TH1F("SUM", "SUM", 100, 0, 2);
-        TH1F *CLASSONE = new TH1F("CLASSONE", "CLASSONE", 200, 0, 1);
-        TH1F *CLASSTWO = new TH1F("CLASSTWO", "CLASSTWO", 200, 0, 1);
-        TH1F *CUTA = new TH1F("CUTA", "CUTA", 200, 0, 1);
-        TH1F *CUTB = new TH1F("CUTB", "CUTB", 200, 0, 1);
-        TH1F *CHARGE = new TH1F("CHARGE", "CHARGE", 200, -100, 100);
-        TH1F *PT = new TH1F("PT", "PT", 1000, 0, 1000);
-        */
-        
         Long64_t numEvents = myTree->GetEntries();
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
         cout<<numEvents<<" events to process..."<<endl;
@@ -111,16 +101,6 @@ void ClassifierROC()
           
           a = (Bins-i)*1.0/Bins;//update cut on class1
           b = 1.0 - a;//store b, b is not used in cut
-          
-          /*
-          Long64_t Z=0;
-          Long64_t C1=0;
-          Long64_t C2=0;
-          Long64_t C3=0;
-          Long64_t C4=0;
-          Long64_t S=0;
-          Long64_t B=0;
-          */
                 
           Long64_t S1=0;
           Long64_t S2=0;
@@ -144,28 +124,6 @@ void ClassifierROC()
                 Topology->Fill(BDTG_class1,BDTG_class2);//sanity check off diagnoal: class2=1-class1;
               }
                   
-              /* 
-              //@@@Debug if accesses classes right
-              SUM->Fill(BDTG_class1+BDTG_class2);
-              CLASSONE->Fill(BDTG_class1);
-              CLASSTWO->Fill(BDTG_class2);
-              CUTA->Fill(a);
-              CUTB->Fill(b);
-              CHARGE->Fill(GEN_charge);
-              PT->Fill(GEN_pt);
-                   
-              //ZB events
-              if(GEN_charge < -2){Z=Z+1;}
-                    
-              //MC events
-              if(GEN_charge > -2 && GEN_pt >= PT_CUT){S=S+1;}
-              if(GEN_charge > -2 && GEN_pt < PT_CUT){B=B+1;}
-              if(BDTG_class1 >= a && BDTG_class2 < b){C1=C1+1;}
-              if(BDTG_class1 < a || BDTG_class2 >= b){C2=C2+1;}
-              if(GEN_charge > -2 && BDTG_class1 >= a && BDTG_class2 < b){C3=C3+1;}
-              if(GEN_charge > -2 && (BDTG_class1 < a || BDTG_class2 >= b)){C4=C4+1;}
-              */
-                    
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a){S2=S2+1;}
               if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a){S1=S1+1;}
               if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 < a){B2=B2+1;}
@@ -181,33 +139,7 @@ void ClassifierROC()
                   
             //Fill Signal efficiency vs cut
             EFFvsCUTs->Fill(a,TPR);
-                  
-            /*
-            //@@@debug 
-            cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
-            cout<<"a: "<<a<<" b: "<<b<<endl;
-            cout<<"Z: "<<Z<<endl;
-            cout<<"S: "<<S<<endl;
-            cout<<"B: "<<B<<endl;
-            cout<<"S+B+Z: "<<S+B+Z<<endl;
-            cout<<"C1: "<<C1<<endl;
-            cout<<"C2: "<<C2<<endl;
-            cout<<"C1+C2: "<<C1+C2<<endl;
-            cout<<"S1: "<<S1<<endl;
-            cout<<"S2: "<<S2<<endl;
-            cout<<"B1: "<<B1<<endl;
-            cout<<"B2: "<<B2<<endl;
-            cout<<"S2+B2: "<<S2+B2<<endl;
-            cout<<"S1+B1: "<<S1+B1<<endl;
-            cout<<"C3: "<<C3<<endl;
-            cout<<"C4: "<<C4<<endl;
-            cout<<"S1+S2: "<<S1+S2<<endl;
-            cout<<"B1+B2: "<<B1+B2<<endl;
-            cout<<"TPR: "<<TPR<<endl;
-            cout<<"FPR: "<<FPR<<endl;
-            //end debug
-            */
-                  
+    
             //calculate ratr once signal eff higher than EFF_REF
             if(TPR >= EFF_REF){
                     
@@ -322,16 +254,6 @@ void ClassifierROC()
         Topology->GetXaxis()->SetTitle("class1");
         Topology->GetYaxis()->SetTitle("class2");
         Topology->Write();
-        
-        /*
-        SUM->Write();
-        CLASSONE->Write();
-        CLASSTWO->Write();
-        CUTA->Write();
-        CUTB->Write();
-        CHARGE->Write();
-        PT->Write();
-        */
         
         TCanvas *C1=new TCanvas("C1","C1",700,500);
         THStack *CSConlyGENpt = new THStack("CSConlyGENpt","CSC only GEN pt: Regression vs Classifier");
