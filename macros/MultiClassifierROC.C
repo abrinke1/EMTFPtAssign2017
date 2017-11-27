@@ -526,7 +526,7 @@ void MultiClassifierROC()
                                 RCCBinGENde = RCCBinGENde +1;
                                 for (Int_t i=0;i<99;i++){//class1 cut loop
                                         for (Int_t j=0;j<99;j++){//class5 cut loop
-                                                if( (j+1)*0.01 <= 1-(i+1)*0.01 && 1-BDTG_class1 >= (i+1)*0.01 && BDTG_class5 < (j+1)*0.01 ){//require class5 cut < 1 - class1 cut
+                                                if( (j+1)*0.01 <= 1-(i+1)*0.01 && BDTG_class1 >= (i+1)*0.01 && BDTG_class5 < (j+1)*0.01 ){//require class5 cut < 1 - class1 cut
                                                         RCCBinnu[i][j] = RCCBinnu[i][j] +1;
                                                 }//end if    
                                         }//end for class5 cut
