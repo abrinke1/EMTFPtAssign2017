@@ -132,7 +132,7 @@ void MultiClassifierROC()
                           }
                     
                           if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class5 < b){S2=S2+1;}
-                          if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a BDTG_class5 < b){S1=S1+1;}
+                          if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class5 < b){S1=S1+1;}
                           if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class5 >= b) ){B2=B2+1;}
                           if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 < a || BDTG_class5 >= b) ){B1=B1+1;}
                   }//end loop over events
