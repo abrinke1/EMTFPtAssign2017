@@ -304,6 +304,7 @@ void ClassifierROC()
         }//end loop over events 
         
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
+        cout<<"Binary Classifier Settings: PT_CUT="<<PT_CUT<<" EFF_REF="<<EFF_REF<<" Bins:"<<Bins<<endl;
         cout<<"OptA:"<<OptA<<" (OptB:"<<OptB<<") RATE:"<<MinRATE<<endl;
         
         //write to output file
