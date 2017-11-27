@@ -40,9 +40,12 @@ using namespace std;
 //*---------------------------------------------------------------------------------------
 //*Cut: complementary cut (Background)             |       B1         |         B2
 //*=======================================================================================
-//*In multi-class classifier, two classes cut "class1>=a && class5<b". Here assume class1>=32 
-//*and class5<8 with other classes in between. Since it only make sense to have b<=1-a, a<=1-b 
-//*this implies "a+b<=1".(Note how this differs from only two classes, see ClassifierROC.C)
+//*Assume multiclassifier class1:GEN_pt>= 32 GeV; class2: 24=<GEN_pt<32 GeV; 
+//*class 3: 16=<GEN_pt<24 GeV; class 4: 8=<GEN_pt<16 GeV; class 5: GEN_pt< 8GeV
+//*Also can combine class2-4 into one class;
+//*In multi-class classifier, use two classes cut "class1>=a && class5<b". Since it only 
+//*make sense to have b<=1-a, a<=1-b, this implies "a+b<=1".
+//*(Note how this differs from only two classes, see ClassifierROC.C)
 //*Eff is only monotonic when either a or b is fixed, same eff can have 
 //*several a,b combinations, thus diff rates.
 //*True Postive Rate: S2/(S2+B2), i.e. S2/S, signal efficiency/plateau trigger efficiency
@@ -79,7 +82,7 @@ void MultiClassifierROC()
         TBranch *TRK_mode_RPC_br = myTree->GetBranch("TRK_mode_RPC");
         
         double a=1.0;
-        double b=0.0;//b is defined but not used in the cut, b==1-a;
+        double b=0.0;//b is initialize as b=1-a; since b<=1-a;
         double BIT=0.000001;
         Long64_t MinRATE=9999;
         Long64_t RATE16=0;//reg pT cut 16 GeV rate
