@@ -380,6 +380,7 @@ void ClassifierROC()
         //divide histograms for eff
         TCanvas *C2=new TCanvas("C2","C2",700,500);
         THStack *CSConlyEff = new THStack("CSConlyEff","CSC only Efficiency: Regression vs Classifier");
+        C2->cd();
         RegCSConlyMCCut->Divide(RegCSConlyMC);
         CSConlyMCCut->Divide(CSConlyMC);
         CSConlyEff->Add(RegCSConlyMCCut);
@@ -510,8 +511,13 @@ void ClassifierROC()
         }//end loop over Regression events
         
         //divide histograms for eff
-        TCanvas *C3=new TCanvas("C3","C3",700,500);
+        TCanvas *C3=new TCanvas("C3","CR",700,500);
         THStack *CRCSConlyEff = new THStack("CRCSConlyEff","Regression CSC-only 90% Efficiency as Classifier");
+        C3->cd();
+        CRRegCSConlyMCCut->SetLineColor(2);//red
+        CRRegCSConlyMCCut->SetLineStyle(1);//solid
+        CRRegCSConlyMCCut->SetLineWidth(2);
+        gStyle->SetOptStat(0);
         CRRegCSConlyMCCut->Divide(RegCSConlyMC);//already has RegCSConlyMC
         CRCSConlyEff->Add(CRRegCSConlyMCCut);
         CRCSConlyEff->Add(CSConlyMCCut);//alreday have
