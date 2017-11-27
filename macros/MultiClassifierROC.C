@@ -128,7 +128,7 @@ void MultiClassifierROC()
                           Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();
                 
                           if(fill==0){
-                                  Topology->Fill(BDTG_class1,BDTG_class5);//sanity check off diagnoal: class2=1-class1;
+                                  Topology->Fill(BDTG_class1,BDTG_class5);//sanity check off diagnoal triangle: class1+class5<=1;
                           }
                     
                           if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class5 < b){S2=S2+1;}
@@ -227,13 +227,13 @@ void MultiClassifierROC()
                 Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
                 Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
                 Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();//not used here
+                Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();
                 Float_t TRK_mode_RPC = (TRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
                   
                 //CSC-only GEN pT distributions
                 if(GEN_charge > -2 && TRK_mode_RPC == 0){
                         CSConlyMC->Fill(TMath::Log2(GEN_pt));
-                        if(BDTG_class1 >= OptA){
+                        if(BDTG_class1 >= OptA && BDTG_class5 < OptB){
                                 CSConlyMCCut->Fill(TMath::Log2(GEN_pt));
                         }
                 }
@@ -241,37 +241,27 @@ void MultiClassifierROC()
         
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
         cout<<"Multi-class Classifier Settings: PT_CUT"<<PT_CUT<<" EFF_REF="<<EFF_REF<<" Bins:"<<Bins<<endl;
-        cout<<"OptA:"<<OptA<<" (OptB:"<<OptB<<") RATE:"<<MinRATE<<endl;
+        cout<<"OptA:"<<OptA<<" OptB:"<<OptB<<" RATE:"<<MinRATE<<endl;
         
         //write to output file
-        TString outFile = Cluster + "EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
+        TString outFile = Cluster + "EMTFPtAssign2017/MultiClassifierROC_" + Form("%d", PT_CUT) + ".root";
         TFile myPlot(outFile,"RECREATE");
         
         ROC->GetXaxis()->SetTitle("FPR");
         ROC->GetYaxis()->SetTitle("TPR");
         ROC->Write();
         EFFvsCUTs->GetXaxis()->SetTitle("class1 cut");
-        EFFvsCUTs->GetYaxis()->SetTitle("efficiency");
+        EFFvsCUTs->GetYaxis()->SetTitle("class5 cut");
         EFFvsCUTs->Write();
         RATEvsCUTs->GetXaxis()->SetTitle("class1 cut");
-        RATEvsCUTs->GetYaxis()->SetTitle("ZeroBias rate");
+        RATEvsCUTs->GetYaxis()->SetTitle("class5 cut");
         RATEvsCUTs->Write();
         Topology->GetXaxis()->SetTitle("class1");
-        Topology->GetYaxis()->SetTitle("class2");
+        Topology->GetYaxis()->SetTitle("class5");
         Topology->Write();
         
-        /*
-        SUM->Write();
-        CLASSONE->Write();
-        CLASSTWO->Write();
-        CUTA->Write();
-        CUTB->Write();
-        CHARGE->Write();
-        PT->Write();
-        */
-        
         TCanvas *C1=new TCanvas("C1","C1",700,500);
-        THStack *CSConlyGENpt = new THStack("CSConlyGENpt","CSC only GEN pt: Regression vs Classifier");
+        THStack *CSConlyGENpt = new THStack("CSConlyGENpt","CSC only GEN pt: Regression vs Multi-classifier");
         
         C1->cd();
         RegCSConlyMC->SetLineColor(1);//black
@@ -304,10 +294,10 @@ void MultiClassifierROC()
         
         TLegend* L1 = new TLegend(0.1,0.7,0.7,0.9);
         TString ClassifierL1="";
-        ClassifierL1 = ClassifierL1 + "Classifier:GEN pT(class1>=" + Form("%0.4lf", OptA) + ")";
+        ClassifierL1 = ClassifierL1 + "Multi-classifier:GEN pT(class1>=" + Form("%0.4lf", OptA) + " && class5<" + Form("%0.4lf", OptB) + ")";
         L1->AddEntry(RegCSConlyMC, "Regression:GEN pT");
         L1->AddEntry(RegCSConlyMCCut,"Regression:GEN pT(trigger pT>=16 GeV)");
-        L1->AddEntry(CSConlyMC, "Classifier:GEN pT");
+        L1->AddEntry(CSConlyMC, "Multi-classifier:GEN pT");
         L1->AddEntry(CSConlyMCCut, ClassifierL1);
         L1->SetFillStyle(0);
         L1->SetBorderSize(0);
@@ -316,7 +306,7 @@ void MultiClassifierROC()
         
         //divide histograms for eff
         TCanvas *C2=new TCanvas("C2","C2",700,500);
-        THStack *CSConlyEff = new THStack("CSConlyEff","CSC only Efficiency: Regression vs Classifier");
+        THStack *CSConlyEff = new THStack("CSConlyEff","CSC only Efficiency: Regression vs Multi-classifier");
         C2->cd();
         RegCSConlyMCCut->Divide(RegCSConlyMC);
         CSConlyMCCut->Divide(CSConlyMC);
@@ -331,7 +321,7 @@ void MultiClassifierROC()
         TString RegL2="";
         RegL2=RegL2 + "Regression:trigger pT>=16GeV" + " Rate:"+ Form("%lld", RATE16);
         TString ClassifierL2="";
-        ClassifierL2 = ClassifierL2 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%lld", MinRATE);
+        ClassifierL2 = ClassifierL2 + "Multi-classifier:class1>=" + Form("%0.4lf", OptA) + " && class5<" + Form("%0.4lf", OptB) + " Rate:"+ Form("%lld", MinRATE);
         L2->AddEntry(RegCSConlyMCCut,RegL2);
         L2->AddEntry(CSConlyMCCut, ClassifierL2);
         L2->SetFillStyle(0);
@@ -363,7 +353,7 @@ void MultiClassifierROC()
                 Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
                 Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
                 Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();//not used here
+                Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();//not used here
                 Float_t TRK_mode_RPC = (TRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
                   
                 //CSC-only GEN pT distributions put each event into bins they belong
@@ -371,7 +361,7 @@ void MultiClassifierROC()
                         if(GEN_charge > -2 && TRK_mode_RPC == 0){
                                 if( GEN_pt >= i+1 && GEN_pt < i+2 ){
                                         CRCBinGENde[i]=CRCBinGENde[i]+1;
-                                        if(BDTG_class1 >= OptA){
+                                        if(BDTG_class1 >= OptA && BDTG_class5 < OptB){
                                                CRCBinnu[i] = CRCBinnu[i] +1;
                                         }
                                 }
@@ -400,7 +390,7 @@ void MultiClassifierROC()
                   
                 //CSC-only GEN pT distributions
                 if(GEN_charge > -2 && TRK_mode_RPC == 0){
-                        if( GEN_pt >= CRCBin+1 && GEN_pt < CRCBin+2 ){//90% eff at same place as Classifier
+                        if( GEN_pt >= CRCBin+1 && GEN_pt < CRCBin+2 ){//90% eff at same place as Multi-classifier
                                 CRRBinGENde = CRRBinGENde +1;
                                 for (Int_t i=0;i<49;i++){
                                         if(1./BDTG >= (i+1) ){
@@ -449,7 +439,7 @@ void MultiClassifierROC()
         
         //divide histograms for eff
         TCanvas *C3=new TCanvas("C3","CR",700,500);
-        THStack *CRCSConlyEff = new THStack("CRCSConlyEff","Regression CSC-only 90% Efficiency as Classifier");
+        THStack *CRCSConlyEff = new THStack("CRCSConlyEff","Regression CSC-only 90% Efficiency as Multi-classifier");
         C3->cd();
         CRRegCSConlyMCCut->SetLineColor(2);//red
         CRRegCSConlyMCCut->SetLineStyle(1);//solid
@@ -467,7 +457,7 @@ void MultiClassifierROC()
         TString RegL3="";
         RegL3 = RegL3 + "Regression:trigger pT>=" + Form("%d", CRRBin+1) + "GeV Rate:"+ Form("%lld", CRRATE);
         TString ClassifierL3="";
-        ClassifierL3 = ClassifierL3 + "Classifier:class1>=" + Form("%0.4lf", OptA) + " Rate:"+ Form("%lld", MinRATE);
+        ClassifierL3 = ClassifierL3 + "Multi-classifier:class1>=" + Form("%0.4lf", OptA) + " && class5<" + Form("%0.4lf", OptB) + " Rate:"+ Form("%lld", MinRATE);//same as ClassifierL2
         L3->AddEntry(CRRegCSConlyMCCut,RegL3);
         L3->AddEntry(CSConlyMCCut, ClassifierL3);
         L3->SetFillStyle(0);
@@ -502,7 +492,7 @@ void MultiClassifierROC()
                         if(GEN_charge > -2 && TRK_mode_RPC == 0){
                                 if( GEN_pt >= i+1 && GEN_pt < i+2 ){
                                         RCRBinGENde[i]=RCRBinGENde[i]+1;
-                                        if(1./BDTG >= 16){//16 is the reference in reg like OptA is the ref in classifier
+                                        if(1./BDTG >= 16){
                                                RCRBinnu[i] = RCRBinnu[i] +1;
                                         }
                                 }
@@ -527,13 +517,14 @@ void MultiClassifierROC()
                 Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
                 Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
                 Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();//not used here
+                Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();//not used here
                 Float_t TRK_mode_RPC = (TRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
                   
                 if(GEN_charge > -2 && TRK_mode_RPC == 0){
                         if( GEN_pt >= RCRBin+1 && GEN_pt < RCRBin+2 ){//90% eff at same place as Regression
                                 RCCBinGENde = RCCBinGENde +1;
-                                for (Int_t i=0;i<399;i++){
+                                for (Int_t i=0;i<399;i++){//class1 cut loop
+                                        
                                         if(BDTG_class1 >= (i+1)*0.0025){
                                                 RCCBinnu[i] = RCCBinnu[i] +1;
                                         }
