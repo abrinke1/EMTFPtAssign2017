@@ -79,7 +79,6 @@ void ClassifierROC()
         
         double a=1.0;
         double b=0.0;//b is defined but not used in the cut, b==1-a;
-        double BIT=0.000001;
         Long64_t MinRATE=9999;
         Long64_t RATE16=0;//reg pT cut 16 GeV rate
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
