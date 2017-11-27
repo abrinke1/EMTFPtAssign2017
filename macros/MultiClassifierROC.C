@@ -546,7 +546,8 @@ void MultiClassifierROC()
                                 Delta = fabs(RCCBinnu[i][j]*1.0/RCCBinGENde-0.9);
                                 RCCBinA = i;//take note of class1 cut
                                 RCCBinB = j;//take note of class5 cut
-                }
+                        }
+                }//end loop cuts
         }//end loop cuts 
         
         //GEN pt distribution for same 90% turn on
