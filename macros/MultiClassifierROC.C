@@ -451,7 +451,7 @@ void MultiClassifierROC()
                 }
         }//end loop for
        
-        cout<<"CRC Bin#:"<<CRCBin<<" CRC GEN pT:"<<CRCBin+1<<" log2(CRC GEN pT):"<<TMath::Log2(CRCBin+1)<<" Eff:"<<CRCBinnu[CRCBin]*1.0/CRCBinGENde[CRCBin]<<endl;
+        cout<<"CRC Bin#:"<<CRCBin<<" CRC GEN pT:"<<CRCBin+1<<" log2(CRC GEN pT):"<<TMath::Log2(CRCBin+1)<<" Eff:"<<CRCBinnu[CRCBin]*1.0/CRCBinGENde[CRCBin]<<" Rate:"<<MinRATE<<endl;
         
         //loop over Regression events to find 90% at CRCBin
         for(Long64_t iEntry = 0; iEntry <RegnumEvents; iEntry++){
@@ -487,8 +487,6 @@ void MultiClassifierROC()
                 }
         }//end loop over Reg pT cuts 
         
-        cout<<"CRR Bin#:"<<CRRBin<<" CRR pT cut:"<<CRRBin+1<<" log2(CRR pT cut):"<<TMath::Log2(CRRBin+1)<<" Eff:"<<CRRBinnu[CRRBin]*1.0/CRRBinGENde<<endl;
-        
         //GEN pt distribution for same 90% turn on
         TH1F *CRRegCSConlyMCCut = new TH1F("CRRegCSConlyMCCut", "CRRegCSConlyMCCut", 50, 0, 10);
         
@@ -510,6 +508,8 @@ void MultiClassifierROC()
                 }
                 
         }//end loop over Regression events
+        
+        cout<<"CRR Bin#:"<<CRRBin<<" CRR pT cut:"<<CRRBin+1<<" log2(CRR pT cut):"<<TMath::Log2(CRRBin+1)<<" Eff:"<<CRRBinnu[CRRBin]*1.0/CRRBinGENde<<" CR Rate:"<<CRRATE<<endl;
         
         //divide histograms for eff
         TCanvas *C3=new TCanvas("C3","CR",700,500);
@@ -543,7 +543,7 @@ void MultiClassifierROC()
         //find classifier cut which gives 90% at same GEN pT as reg
         //----------------------------------------------------------
         Double_t RCCBinGENde=0;
-        Double_t RCCBinnu[99]={0};//cut on class1 from 0-1, step is fixed here, 0.01 step size
+        Double_t RCCBinnu[399]={0};//cut on class1 from 0-1, step is fixed here, 0.0025 step size
         Int_t RCCBin=0;
         
         Long64_t RCRBinGENde[49]={0};//eff for 49 bins from 1 to 50GeV
@@ -582,7 +582,7 @@ void MultiClassifierROC()
                         RCRBin = i;//take note of bin number
                 }
         }//end loop for
-        cout<<"RCR Bin#:"<<RCRBin<<" RCR GEN pT:"<<RCRBin+1<<" log2(RCR GEN pT):"<<TMath::Log2(RCRBin+1)<<" Eff:"<<RCRBinnu[RCRBin]*1.0/RCRBinGENde[RCRBin]<<endl;
+        cout<<"RCR Bin#:"<<RCRBin<<" RCR GEN pT:"<<RCRBin+1<<" log2(RCR GEN pT):"<<TMath::Log2(RCRBin+1)<<" Eff:"<<RCRBinnu[RCRBin]*1.0/RCRBinGENde[RCRBin]<<" RATE:"<<RATE16<<endl;
         
         //loop over Classifier events to find a cut so it is 90% at RCRBin
         for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
@@ -597,8 +597,8 @@ void MultiClassifierROC()
                 if(GEN_charge > -2 && TRK_mode_RPC == 0){
                         if( GEN_pt >= RCRBin+1 && GEN_pt < RCRBin+2 ){//90% eff at same place as Regression
                                 RCCBinGENde = RCCBinGENde +1;
-                                for (Int_t i=0;i<99;i++){
-                                        if(BDTG_class1 >= (i+1)*0.01){
+                                for (Int_t i=0;i<399;i++){
+                                        if(BDTG_class1 >= (i+1)*0.0025){
                                                 RCCBinnu[i] = RCCBinnu[i] +1;
                                         }
                                 }//end for loop over pT cut
@@ -611,14 +611,12 @@ void MultiClassifierROC()
         
         //calculate classifier eff under all class1 cut for RCRBin
         Delta=1;
-        for (Int_t i=0;i<99;i++){
+        for (Int_t i=0;i<399;i++){
                 if(fabs(RCCBinnu[i]*1.0/RCCBinGENde-0.9) <= Delta){
                         Delta = fabs(RCCBinnu[i]*1.0/RCCBinGENde-0.9);
                         RCCBin = i;//take note of bin number
                 }
         }//end loop over Reg pT cuts 
-        
-        cout<<"RCC Bin#:"<<RCCBin<<" RCC class1 cut:"<<(RCCBin+1)*0.01<<" Eff:"<<RCCBinnu[RCCBin]*1.0/RCCBinGENde<<endl;
         
         //GEN pt distribution for same 90% turn on
         TH1F *RCCSConlyMCCut = new TH1F("RCCSConlyMCCut", "RCCSConlyMCCut", 50, 0, 10);
@@ -634,14 +632,16 @@ void MultiClassifierROC()
                 Float_t TRK_mode_RPC = (TRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
                   
                 //CSC-only GEN pT distributions
-                if(GEN_charge > -2 && TRK_mode_RPC == 0 && BDTG_class1 >= (RCCBin+1)*0.01 ){
+                if(GEN_charge > -2 && TRK_mode_RPC == 0 && BDTG_class1 >= (RCCBin+1)*0.0025 ){
                         RCCSConlyMCCut->Fill(TMath::Log2(GEN_pt));
                 }
-                if(GEN_charge < -2 && BDTG_class1 >= (RCCBin+1)*0.01 ){
+                if(GEN_charge < -2 && BDTG_class1 >= (RCCBin+1)*0.0025 ){
                         RCRATE = RCRATE + 1;
                 }
                 
         }//end loop over classifier events
+        
+        cout<<"RCC Bin#:"<<RCCBin<<" RCC class1 cut:"<<(RCCBin+1)*0.0025<<" Eff:"<<RCCBinnu[RCCBin]*1.0/RCCBinGENde<<" RC Rate:"<<RCRATE<<endl;
         
         //divide histograms for eff
         TCanvas *C4=new TCanvas("C4","RC",700,500);
@@ -663,7 +663,7 @@ void MultiClassifierROC()
         TString RegL4="";
         RegL4 = RegL4 + "Regression:trigger pT>=16GeV" + " Rate:"+ Form("%lld", RATE16);//this is RegL2
         TString ClassifierL4="";
-        ClassifierL4 = ClassifierL4 + "Classifier:class1>=" + Form("%0.2lf", (RCCBin+1)*0.01) + " Rate:"+ Form("%lld", RCRATE);
+        ClassifierL4 = ClassifierL4 + "Classifier:class1>=" + Form("%0.4lf", (RCCBin+1)*0.0025) + " Rate:"+ Form("%lld", RCRATE);
         L4->AddEntry(RegCSConlyMCCut,RegL4);
         L4->AddEntry(RCCSConlyMCCut, ClassifierL4);
         L4->SetFillStyle(0);
