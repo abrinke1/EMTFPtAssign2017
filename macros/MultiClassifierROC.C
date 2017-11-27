@@ -469,8 +469,9 @@ void MultiClassifierROC()
         //find classifier cut which gives 90% at same GEN pT as reg
         //----------------------------------------------------------
         Double_t RCCBinGENde=0;
-        Double_t RCCBinnu[399]={0};//cut on class1 from 0-1, step is fixed here, 0.0025 step size
-        Int_t RCCBin=0;
+        Double_t RCCBinnu[99][99]={0};//cut on class1 && class5 from 0-1, step is fixed here, 0.01 step size
+        Int_t RCCBinA=0;
+        Int_t RCCBinB=0;
         
         Long64_t RCRBinGENde[49]={0};//eff for 49 bins from 1 to 50GeV
         Long64_t RCRBinnu[49]={0};//find reg pT cut 1-50 GeV
@@ -523,12 +524,13 @@ void MultiClassifierROC()
                 if(GEN_charge > -2 && TRK_mode_RPC == 0){
                         if( GEN_pt >= RCRBin+1 && GEN_pt < RCRBin+2 ){//90% eff at same place as Regression
                                 RCCBinGENde = RCCBinGENde +1;
-                                for (Int_t i=0;i<399;i++){//class1 cut loop
-                                        
-                                        if(BDTG_class1 >= (i+1)*0.0025){
-                                                RCCBinnu[i] = RCCBinnu[i] +1;
-                                        }
-                                }//end for loop over pT cut
+                                for (Int_t i=0;i<99;i++){//class1 cut loop
+                                        for (Int_t j=0;j<99;j++){//class5 cut loop
+                                                if( (j+1)*0.01 <= 1-(i+1)*0.01 && 1-BDTG_class1 >= (i+1)*0.01 && BDTG_class5 < (j+1)*0.01 ){//require class5 cut < 1 - class1 cut
+                                                        RCCBinnu[i][j] = RCCBinnu[i][j] +1;
+                                                }//end if    
+                                        }//end for class5 cut
+                                }//end for loop over class1 cut
                                 
                         }//end if 
                         
@@ -538,10 +540,12 @@ void MultiClassifierROC()
         
         //calculate classifier eff under all class1 cut for RCRBin
         Delta=1;
-        for (Int_t i=0;i<399;i++){
-                if(fabs(RCCBinnu[i]*1.0/RCCBinGENde-0.9) <= Delta){
-                        Delta = fabs(RCCBinnu[i]*1.0/RCCBinGENde-0.9);
-                        RCCBin = i;//take note of bin number
+        for (Int_t i=0;i<99;i++){
+                for (Int_t j=0;j<99;j++){//class5 cut loop
+                        if(fabs(RCCBinnu[i][j]*1.0/RCCBinGENde-0.9) <= Delta){
+                                Delta = fabs(RCCBinnu[i][j]*1.0/RCCBinGENde-0.9);
+                                RCCBinA = i;//take note of bin number on class1
+                                RCCBinB = j;
                 }
         }//end loop over Reg pT cuts 
         
@@ -555,11 +559,11 @@ void MultiClassifierROC()
                 Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
                 Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
                 Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-                Float_t BDTG_class2 = (BDTG_br->GetLeaf("class2"))->GetValue();//not used here
+                Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();//not used here
                 Float_t TRK_mode_RPC = (TRK_mode_RPC_br->GetLeaf("TRK_mode_RPC"))->GetValue();
                   
                 //CSC-only GEN pT distributions
-                if(GEN_charge > -2 && TRK_mode_RPC == 0 && BDTG_class1 >= (RCCBin+1)*0.0025 ){
+                if(GEN_charge > -2 && TRK_mode_RPC == 0 && BDTG_class1 >= (RCCBin+1)*0.0025 && ){
                         RCCSConlyMCCut->Fill(TMath::Log2(GEN_pt));
                 }
                 if(GEN_charge < -2 && BDTG_class1 >= (RCCBin+1)*0.0025 ){
