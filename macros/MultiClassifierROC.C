@@ -40,9 +40,11 @@ using namespace std;
 //*---------------------------------------------------------------------------------------
 //*Cut: complementary cut (Background)             |       B1         |         B2
 //*=======================================================================================
-//*In multi-class classifier, two classes cut "class1>=a && class5<b". Since it 
-//*only make sense to have b<=1-a, a<=1-b, this implies "a+b<=1". As "a" decreases, efficiency increase as well as rate(monotonic increase)
-//*Use Eff_REF as the stop point for further decreasing "a";
+//*In multi-class classifier, two classes cut "class1>=a && class5<b". Here assume class1>=32 
+//*and class5<8 with other classes in between. Since it only make sense to have b<=1-a, a<=1-b 
+//*this implies "a+b<=1".(Note how this differs from only two classes)
+//*Eff is only monotonic when either a or b is fixed, same eff can have 
+//*several a,b combinations, thus diff rates.
 //*True Postive Rate: S2/(S2+B2), i.e. S2/S, signal efficiency/plateau trigger efficiency
 //*False Positive Rate: S1/(S1+B1)
 //*S=S2+B2
