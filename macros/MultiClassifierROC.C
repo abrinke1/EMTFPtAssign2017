@@ -81,10 +81,10 @@ void MultiClassifierROC()
         TBranch *BDTG_br = myTree->GetBranch("BDTG");
         TBranch *TRK_mode_RPC_br = myTree->GetBranch("TRK_mode_RPC");
         
-        Int_t Bins=pow(10,CutPrecision);//bins on class cut
         double a=1.0;
         double b=0.0;//b is initialize as b=1-a; since b<=1-a;
         double BIT=0.000001;//in case b become very small positive number
+        Int_t Bins=pow(10,CutPrecision);//bins on class cut
         Long64_t MinRATE=9999;//minRate of the classifier
         Long64_t RATE16=0;//reg pT cut 16 GeV rate
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
@@ -111,7 +111,8 @@ void MultiClassifierROC()
                 b=pow(0.1,k);
                 
                 //loop over cut on class1
-                while( a>OptA-pow(0.1,k-1) && a<OptA+pow(0.1,k-1) ){
+                while( a>OptA-pow(0.1,k-1) && a<OptA+pow(0.1,k-1) && a>BIT && a<1-BIT){
+                        
                         //loop over cut on class5
                         while(b<=1-a){
                                 
