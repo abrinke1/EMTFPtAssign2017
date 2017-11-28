@@ -89,6 +89,8 @@ void MultiClassifierROC()
         Long64_t RATE16=0;//reg pT cut 16 GeV rate
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
         double OptB=b;
+        double tmpOptA=a;
+        double tmpOptB=b;
         Int_t fill=1;//only fill 2 classes topology one time
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
@@ -170,8 +172,8 @@ void MultiClassifierROC()
                                         //keep note of rate 
                                         if(RATE < MinRATE){
                                                 MinRATE=RATE;
-                                                OptA=a;
-                                                OptB=b;
+                                                tmpOptA=a;
+                                                tmpOptB=b;
                                         }
                                         
                                         //fill rate vs cuts only for eff > ref_eff
@@ -189,6 +191,10 @@ void MultiClassifierROC()
                         a=a+pow(0.1,k);
                 }//end while a
                 
+                //update OptA and OptB
+                OptA=tmpOptA;
+                OptB=tmpOptB;
+                cout<<">>>Current precision: OptA="<<OptA<<" OptB="<<OptB<<" RATE="<<MinRATE<<endl;
         }//end iterate over cut precisions  
         
         //==========================================
