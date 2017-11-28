@@ -89,7 +89,7 @@ void MultiClassifierROC()
         Long64_t RATE16=0;//reg pT cut 16 GeV rate
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
         double OptB=b;
-        Int_t fill=0;//only fill 2 classes topology one time
+        Int_t fill=1;//only fill 2 classes topology one time
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts", Bins, 0, 1, Bins, 0, 1, 0, 1);
@@ -113,8 +113,9 @@ void MultiClassifierROC()
                 //loop over cut on class1
                 while( a>OptA-pow(0.1,k-1) && a<OptA+pow(0.1,k-1) && a>BIT && a<1-BIT){
                         
+                        Int_t flag=1;//mark to stop increase b after reach EFF_REF
                         //loop over cut on class5
-                        while(b<=1-a){
+                        while(b<=1-a && flag==1){
                                 
                                 Long64_t S1=0;
                                 Long64_t S2=0;
@@ -133,7 +134,7 @@ void MultiClassifierROC()
                                         Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
                                         Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();
                 
-                                        if(fill==0){
+                                        if(fill==1){
                                                 //sanity check off diagnoal triangle: class1+class5<=1;
                                                 Topology->Fill(BDTG_class1,BDTG_class5);
                                         }
@@ -144,7 +145,7 @@ void MultiClassifierROC()
                                         if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 < a || BDTG_class5 >= b) ){B1=B1+1;}
                                 }//end loop over events
                                 
-                                fill=1;
+                                fill=0;
                                 //Fill ROC curve
                                 TPR=1.0*S2/(S2+B2);
                                 FPR=1.0*S1/(S1+B1);
@@ -175,6 +176,7 @@ void MultiClassifierROC()
                                         
                                         //fill rate vs cuts only for eff > ref_eff
                                         RATEvsCUTs->Fill(a,b,RATE);
+                                        flag=0;
                                 }//end if TPR higher than reference
              
                                 cout<<"a:"<<a<<" b:"<<b<<" TPR:"<<TPR<<" FPR:"<<FPR<<" RATE:"<<RATE<<" S1:"<<S1<<" S2:"<<S2<<" B1:"<<B1<<" B2:"<<B2<<endl;
