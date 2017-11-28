@@ -81,7 +81,7 @@ void MultiClassifierROC()
         TBranch *BDTG_br = myTree->GetBranch("BDTG");
         TBranch *TRK_mode_RPC_br = myTree->GetBranch("TRK_mode_RPC");
         
-        Int_t Bins=0;//bins on class cut
+        Int_t Bins=pow(10,CutPrecision);//bins on class cut
         double a=1.0;
         double b=0.0;//b is initialize as b=1-a; since b<=1-a;
         double BIT=0.000001;//in case b become very small positive number
