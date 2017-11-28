@@ -239,7 +239,7 @@ void ClassifierROC()
         cout<<"OptA:"<<OptA<<" (OptB:"<<OptB<<") RATE:"<<MinRATE<<endl;
         
         //write to output file
-        TString outFile = Cluster + "EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + Form("%0.2lf", EFF_REF)+Form("%d", Bins)+".root";
+        TString outFile = Cluster + "EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + "_" + Form("%0.2lf", EFF_REF) + "_"+ Form("%d", Bins)+".root";
         TFile myPlot(outFile,"RECREATE");
         
         ROC->GetXaxis()->SetTitle("FPR");
