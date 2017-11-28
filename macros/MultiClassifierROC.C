@@ -172,12 +172,13 @@ void MultiClassifierROC()
                                                 OptA=a;
                                                 OptB=b;
                                         }
+                                        
+                                        //fill rate vs cuts only for eff > ref_eff
+                                        RATEvsCUTs->Fill(a,b,RATE);
                                 }//end if TPR higher than reference
              
                                 cout<<"a:"<<a<<" b:"<<b<<" TPR:"<<TPR<<" FPR:"<<FPR<<" RATE:"<<RATE<<" S1:"<<S1<<" S2:"<<S2<<" B1:"<<B1<<" B2:"<<B2<<endl;
-                  
-                                //fill rate vs cuts only for eff > ref_eff
-                                RATEvsCUTs->Fill(a,b,RATE);
+                     
                                 //update b
                                 b=b+pow(0.1,k);
                         }//end while b
