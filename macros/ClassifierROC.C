@@ -54,7 +54,7 @@ void ClassifierROC()
         //================================================================
         Int_t PT_CUT = 32;//the classifier trained on this cut
         Float_t EFF_REF = 0.95;//the eff beyond which classifier cut stops
-        Int_t Bins=10;//bins on class cut
+        Int_t Bins=100;//bins on class cut
         Int_t lxplus=1;//machine: lxplus(1) or bonner(0)?
         //================================================================
         TString Cluster="";
@@ -239,7 +239,7 @@ void ClassifierROC()
         cout<<"OptA:"<<OptA<<" (OptB:"<<OptB<<") RATE:"<<MinRATE<<endl;
         
         //write to output file
-        TString outFile = Cluster + "EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + ".root";
+        TString outFile = Cluster + "EMTFPtAssign2017/ClassifierROC_" + Form("%d", PT_CUT) + Form("%0.2lf", EFF_REF)+Form("%d", Bins)+".root";
         TFile myPlot(outFile,"RECREATE");
         
         ROC->GetXaxis()->SetTitle("FPR");
