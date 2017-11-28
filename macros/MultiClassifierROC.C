@@ -58,8 +58,7 @@ void MultiClassifierROC()
         //================================================================
         Int_t PT_CUT = 32;//the classifier trained on this cut
         Float_t EFF_REF = 0.95;//the eff beyond which classifier cut stops
-        Int_t CutPrecision = 4;//the cut precision is pow(0.1,CutPrecision)
-        Int_t Bins=10;//bins on class cut
+        Int_t CutPrecision = 4;// integer in 1-5,precision is pow(0.1,CutPrecision)
         Int_t lxplus=1;//machine: lxplus(1) or bonner(0)?
         //================================================================
         TString Cluster="";
@@ -82,6 +81,7 @@ void MultiClassifierROC()
         TBranch *BDTG_br = myTree->GetBranch("BDTG");
         TBranch *TRK_mode_RPC_br = myTree->GetBranch("TRK_mode_RPC");
         
+        Int_t Bins=0;//bins on class cut
         double a=1.0;
         double b=0.0;//b is initialize as b=1-a; since b<=1-a;
         double BIT=0.000001;//in case b become very small positive number
@@ -104,7 +104,11 @@ void MultiClassifierROC()
       
         //iterate over cut precision
         for(int k = 1; k <= CutPrecision; k++){
-        }
+                Bins=10*k;
+                while(a>OptA-pow(0.1,k) && a<OptA+pow(0.1,k)){
+                }//end while a
+                
+        }//end iterate over precision
         //loop over cut on class1
         for(int i = 1; i < Bins; i++){
           
