@@ -250,7 +250,7 @@ void MultiClassifierROC()
         }//end loop over events 
         
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
-        cout<<"Multi-class Classifier Settings: PT_CUT"<<PT_CUT<<" EFF_REF="<<EFF_REF<<" Bins:"<<Bins<<endl;
+        cout<<"Multi-class Classifier Settings: PT_CUT"<<PT_CUT<<" EFF_REF="<<EFF_REF<<" CutPrecision:"<<CutPrecision<<endl;
         cout<<"OptA:"<<OptA<<" OptB:"<<OptB<<" RATE:"<<MinRATE<<endl;
         
         //write to output file
