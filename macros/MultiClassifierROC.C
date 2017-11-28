@@ -110,12 +110,12 @@ void MultiClassifierROC()
                 cout<<"*** Entering precision "<<pow(0.1,k)<<" ***"<<endl;
                 
                 a=OptA-pow(0.1,k-1)+pow(0.1,k);//everytime increase a
-                b=pow(0.1,k);
-                
+
                 //loop over cut on class1
                 while( a>OptA-pow(0.1,k-1) && a<OptA+pow(0.1,k-1) && a>BIT && a<1-BIT){
                         
                         Int_t flag=1;//mark to stop increase b after reach EFF_REF
+                        b=pow(0.1,k);
                         //loop over cut on class5
                         while(b<=1-a && flag==1){
                                 
