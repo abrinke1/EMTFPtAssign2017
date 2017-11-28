@@ -102,7 +102,9 @@ void MultiClassifierROC()
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
         cout<<numEvents<<" events to process..."<<endl;
       
-        //for(int )
+        //iterate over cut precision
+        for(int k = 1; k <= CutPrecision; k++){
+        }
         //loop over cut on class1
         for(int i = 1; i < Bins; i++){
           
