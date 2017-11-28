@@ -264,7 +264,7 @@ void MultiClassifierROC()
         cout<<"OptA:"<<OptA<<" OptB:"<<OptB<<" RATE:"<<MinRATE<<endl;
         
         //write to output file
-        TString outFile = Cluster + "EMTFPtAssign2017/MultiClassifierROC_" + Form("%d", PT_CUT) + Form("%lf", EFF_REF)+Form("%d", CutPrecision)+ ".root";
+        TString outFile = Cluster + "EMTFPtAssign2017/MultiClassifierROC_" + Form("%d", PT_CUT) + Form("%0.2lf", EFF_REF)+Form("%d", CutPrecision)+ ".root";
         TFile myPlot(outFile,"RECREATE");
         
         ROC->GetXaxis()->SetTitle("FPR");
