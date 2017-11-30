@@ -79,11 +79,13 @@ void ClassifierROC()
         
         double a=1.0;
         double b=0.0;//b is defined but not used in the cut, b==1-a;
+        double BIT=0.000001;//in case b become very small positive number
         Long64_t MinRATE=9999;
         Long64_t RATE16=0;//reg pT cut 16 GeV rate
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
         double OptB=b;
         Int_t fill=0;//only fill 2 classes topology one time
+        Int_t flag=1;//mark to stop increase b after reach EFF_REF
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile("Efficiency","Signal Efficiency vs Cuts",Bins,0,1,0,1);
@@ -97,7 +99,7 @@ void ClassifierROC()
         cout<<numEvents<<" events to process..."<<endl;
       
         //loop over cut on class1
-        for(int i = 1; i < Bins; i++){
+        while(a>BIT && flag==1){
           
           a = (Bins-i)*1.0/Bins;//update cut on class1
           b = 1.0 - a;//store b, b is not used in cut
@@ -162,14 +164,16 @@ void ClassifierROC()
                 OptA=a;
                 OptB=1-OptA;
               }
+              
+              //fill rate vs cuts only for eff > ref_eff
+              RATEvsCUTs->Fill(a,RATE);
+              flag=0;
                     
             }//end if TPR higher than reference
              
             cout<<"a:"<<a<<" (b:"<<b<<") TPR:"<<TPR<<" FPR:"<<FPR<<" RATE:"<<RATE<<" S1:"<<S1<<" S2:"<<S2<<" B1:"<<B1<<" B2:"<<B2<<endl;
                   
-            //fill rate vs cuts only for eff > ref_eff
-            RATEvsCUTs->Fill(a,RATE);
-          
+            
         }//end loop over cut on class1     
         
         //==========================================
