@@ -58,7 +58,7 @@ void MultiClassifierROC()
         //================================================================
         Int_t PT_CUT = 32;//the classifier trained on this cut
         Float_t EFF_REF = 0.95;//the eff beyond which classifier cut stops
-        Int_t Bins=10;//bins on class cut
+        Int_t CutPrecision = 4;// integer in 1-5,precision is pow(0.1,CutPrecision)
         Int_t lxplus=1;//machine: lxplus(1) or bonner(0)?
         //================================================================
         TString Cluster="";
@@ -84,11 +84,14 @@ void MultiClassifierROC()
         double a=1.0;
         double b=0.0;//b is initialize as b=1-a; since b<=1-a;
         double BIT=0.000001;//in case b become very small positive number
+        Int_t Bins=pow(10,CutPrecision);//bins on class cut
         Long64_t MinRATE=9999;//minRate of the classifier
         Long64_t RATE16=0;//reg pT cut 16 GeV rate
         double OptA=a;//best cut with min rate while high efficiency(>reference eff)
         double OptB=b;
-        Int_t fill=0;//only fill 2 classes topology one time
+        double tmpOptA=a;
+        double tmpOptB=b;
+        Int_t fill=1;//only fill 2 classes topology one time
         
         auto ROC = new TProfile("ROC","ROC Curve",100,0,1,0,1);
         auto EFFvsCUTs = new TProfile2D("Efficiency","Signal Efficiency vs Cuts", Bins, 0, 1, Bins, 0, 1, 0, 1);
@@ -101,81 +104,98 @@ void MultiClassifierROC()
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
         cout<<numEvents<<" events to process..."<<endl;
       
-        //loop over cut on class1
-        for(int i = 1; i < Bins; i++){
-          
-          a = (Bins-i)*1.0/Bins;//update cut on class1
-          b = 1.0 - a;//store b, b is not used in cut
-          
-          //loop over cut on class5
-          while( b > BIT ){
-             
-                  Long64_t S1=0;
-                  Long64_t S2=0;
-                  Long64_t B1=0;
-                  Long64_t B2=0;
-                  double TPR=-1.0;
-                  double FPR=-1.0;
-                  Long64_t RATE=0;
-                  
-                  for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){ 
-                          myTree->GetEntry(iEntry);
-                    
-                          //access leaves under branch
-                          Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
-                          Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
-                          Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-                          Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();
+        //iterate over cut precision
+        for(int k = 1; k <= CutPrecision; k++){
                 
-                          if(fill==0){
-                                  Topology->Fill(BDTG_class1,BDTG_class5);//sanity check off diagnoal triangle: class1+class5<=1;
-                          }
+                cout<<"*** Entering precision "<<pow(0.1,k)<<" ***"<<endl;
+                
+                a=OptA-pow(0.1,k-1)+pow(0.1,k);//everytime increase a
+
+                //loop over cut on class1
+                while( a>OptA-pow(0.1,k-1) && a<OptA+pow(0.1,k-1) && a>BIT && a<1-BIT){
+                        
+                        Int_t flag=1;//mark to stop increase b after reach EFF_REF
+                        b=pow(0.1,k);
+                        //loop over cut on class5
+                        while(b<=1-a && flag==1){
+                                
+                                Long64_t S1=0;
+                                Long64_t S2=0;
+                                Long64_t B1=0;
+                                Long64_t B2=0;
+                                double TPR=-1.0;
+                                double FPR=-1.0;
+                                Long64_t RATE=0;
+                                
+                                for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){ 
+                                        myTree->GetEntry(iEntry);
                     
-                          if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class5 < b){S2=S2+1;}
-                          if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class5 < b){S1=S1+1;}
-                          if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class5 >= b) ){B2=B2+1;}
-                          if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 < a || BDTG_class5 >= b) ){B1=B1+1;}
-                  }//end loop over events
+                                        //access leaves under branch
+                                        Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();
+                                        Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
+                                        Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
+                                        Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();
+                
+                                        if(fill==1){
+                                                //sanity check off diagnoal triangle: class1+class5<=1;
+                                                Topology->Fill(BDTG_class1,BDTG_class5);
+                                        }
+                    
+                                        if(GEN_charge > -2 && GEN_pt >= PT_CUT && BDTG_class1 >= a && BDTG_class5 < b){S2=S2+1;}
+                                        if(GEN_charge > -2 && GEN_pt < PT_CUT && BDTG_class1 >= a && BDTG_class5 < b){S1=S1+1;}
+                                        if(GEN_charge > -2 && GEN_pt >= PT_CUT && (BDTG_class1 < a || BDTG_class5 >= b) ){B2=B2+1;}
+                                        if(GEN_charge > -2 && GEN_pt < PT_CUT && (BDTG_class1 < a || BDTG_class5 >= b) ){B1=B1+1;}
+                                }//end loop over events
+                                
+                                fill=0;
+                                //Fill ROC curve
+                                TPR=1.0*S2/(S2+B2);
+                                FPR=1.0*S1/(S1+B1);
+                                ROC->Fill(FPR,TPR);
                   
-                  fill=1;
-                  //Fill ROC curve
-                  TPR=1.0*S2/(S2+B2);
-                  FPR=1.0*S1/(S1+B1);
-                  ROC->Fill(FPR,TPR);
+                                //Fill Signal efficiency vs cut
+                                EFFvsCUTs->Fill(a,b,TPR);
+                                
+                                //calculate rate once signal eff higher than EFF_REF
+                                if(TPR >= EFF_REF){
+                                        for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
+                                                myTree->GetEntry(iEntry);
+                                                Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();//not used in rate counts
+                                                Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
+                                                Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
+                                                Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();
                   
-                  //Fill Signal efficiency vs cut
-                  EFFvsCUTs->Fill(a,b,TPR);
-                  
-                  //calculate rate once signal eff higher than EFF_REF
-                  if(TPR >= EFF_REF){
-                          for(Long64_t iEntry = 0; iEntry <numEvents; iEntry++){
-                                  myTree->GetEntry(iEntry);
-                                  Float_t GEN_pt = (GEN_pt_br->GetLeaf("GEN_pt"))->GetValue();//not used in rate counts
-                                  Float_t GEN_charge = (GEN_charge_br->GetLeaf("GEN_charge"))->GetValue();
-                                  Float_t BDTG_class1 = (BDTG_br->GetLeaf("class1"))->GetValue();
-                                  Float_t BDTG_class5 = (BDTG_br->GetLeaf("class5"))->GetValue();
-                  
-                                  //ZB events
-                                  if(GEN_charge < -2 && BDTG_class1 >= a && BDTG_class5 < b){RATE=RATE+1;}//after cut
-                          }//end loop over events for rate
+                                                //ZB events
+                                                if(GEN_charge < -2 && BDTG_class1 >= a && BDTG_class5 < b){RATE=RATE+1;}//after cut
+                                        }//end loop over events for rate
                           
-                          //keep note of rate 
-                          if(RATE < MinRATE){
-                                  MinRATE=RATE;
-                                  OptA=a;
-                                  OptB=b;
-                          }
-                  }//end if TPR higher than reference
+                                        //keep note of rate 
+                                        if(RATE < MinRATE){
+                                                MinRATE=RATE;
+                                                tmpOptA=a;
+                                                tmpOptB=b;
+                                        }
+                                        
+                                        //fill rate vs cuts only for eff > ref_eff
+                                        RATEvsCUTs->Fill(a,b,RATE);
+                                        flag=0;
+                                }//end if TPR higher than reference
              
-                  cout<<"a:"<<a<<" b:"<<b<<" TPR:"<<TPR<<" FPR:"<<FPR<<" RATE:"<<RATE<<" S1:"<<S1<<" S2:"<<S2<<" B1:"<<B1<<" B2:"<<B2<<endl;
-                  
-                  //fill rate vs cuts only for eff > ref_eff
-                  RATEvsCUTs->Fill(a,b,RATE);
-                  //update b
-                  b = b - 1.0/Bins;
-          }//end while loop for b
+                                cout<<"a:"<<a<<" b:"<<b<<" TPR:"<<TPR<<" FPR:"<<FPR<<" RATE:"<<RATE<<" S1:"<<S1<<" S2:"<<S2<<" B1:"<<B1<<" B2:"<<B2<<endl;
+                     
+                                //update b
+                                b=b+pow(0.1,k);
+                        }//end while b
+                        
+                        //update a
+                        a=a+pow(0.1,k);
+                }//end while a
                 
-        }//end loop over cut on class1     
+                //update OptA and OptB
+                OptA=tmpOptA;
+                OptB=tmpOptB;
+                cout<<">>>Current precision: OptA="<<OptA<<" OptB="<<OptB<<" RATE="<<MinRATE<<endl;
+        }//end iterate over cut precisions  
         
         //==========================================
         //compare eff b/t regression and classifier
@@ -240,11 +260,11 @@ void MultiClassifierROC()
         }//end loop over events 
         
         cout<<">>>>>>>>>>>>>>>>>>>>>"<<endl;
-        cout<<"Multi-class Classifier Settings: PT_CUT"<<PT_CUT<<" EFF_REF="<<EFF_REF<<" Bins:"<<Bins<<endl;
+        cout<<"Multi-class Classifier Settings: PT_CUT"<<PT_CUT<<" EFF_REF="<<EFF_REF<<" CutPrecision:"<<CutPrecision<<endl;
         cout<<"OptA:"<<OptA<<" OptB:"<<OptB<<" RATE:"<<MinRATE<<endl;
         
         //write to output file
-        TString outFile = Cluster + "EMTFPtAssign2017/MultiClassifierROC_" + Form("%d", PT_CUT) + ".root";
+        TString outFile = Cluster + "EMTFPtAssign2017/MultiClassifierROC_" + Form("%d", PT_CUT) + "_" + Form("%0.2lf", EFF_REF) + "_"+ Form("%d", CutPrecision)+ ".root";
         TFile myPlot(outFile,"RECREATE");
         
         ROC->GetXaxis()->SetTitle("FPR");
