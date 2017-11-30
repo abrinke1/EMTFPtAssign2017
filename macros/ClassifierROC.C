@@ -101,7 +101,7 @@ void ClassifierROC()
         //loop over cut on class1
         while(a>BIT && flag==1){
           
-          a = (Bins-i)*1.0/Bins;//update cut on class1
+          a = a - 1.0/Bins;//update cut on class1
           b = 1.0 - a;//store b, b is not used in cut
                 
           Long64_t S1=0;
